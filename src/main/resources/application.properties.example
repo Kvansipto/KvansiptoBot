@@ -1,0 +1,3 @@
+spring.application.name=KvansiptoBot
+bot.name=KvansiptoBot
+bot.token=tokenFromTelegramBotFather
