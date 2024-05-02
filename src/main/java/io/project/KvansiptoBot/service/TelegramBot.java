@@ -1,21 +1,32 @@
 package io.project.KvansiptoBot.service;
 
+import com.vdurmont.emoji.EmojiParser;
 import io.project.KvansiptoBot.config.BotConfig;
+import io.project.KvansiptoBot.model.User;
+import io.project.KvansiptoBot.model.UserRepository;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 @Component
 public class TelegramBot extends TelegramLongPollingBot {
 
   final BotConfig config;
+  @Autowired
+  private UserRepository userRepository;
+
   static final String HELP_TEXT = "This bot was made by Kvansipto\n\n"
       + "You can execute command from the main menu on the left or by typing a command:\n\n"
       + "Type /start to see welcome message\n\n"
@@ -51,6 +62,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
       switch (message) {
         case "/start":
+          registerUser(update.getMessage());
           startCommandReceived(chatId, update.getMessage().getChat().getFirstName());
           break;
         case "/help":
@@ -62,8 +74,23 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
   }
 
+  private void registerUser(Message message) {
+    if (!userRepository.existsById(message.getChatId())) {
+      var chatId = message.getChatId();
+      var chat = message.getChat();
+
+      User user = new User();
+      user.setChatId(chatId);
+      user.setUserName(chat.getUserName());
+      user.setFirstName(chat.getFirstName());
+      user.setLastName(chat.getLastName());
+      user.setRegisteredAt(new Timestamp(System.currentTimeMillis()));
+      userRepository.save(user);
+    }
+  }
+
   private void startCommandReceived(long chatId, String name) {
-    String answer = "Hi, " + name + "! Nice to meet you!";
+    String answer = EmojiParser.parseToUnicode("Hi, " + name + "! Nice to meet you!" + " :fire:");
     sendMessage(chatId, answer);
   }
 
@@ -71,12 +98,29 @@ public class TelegramBot extends TelegramLongPollingBot {
     SendMessage message = new SendMessage();
     message.setChatId(chatId);
     message.setText(messageToSend);
+    message.setReplyMarkup(getDefaultReplyKeyboardMarkup());
 
     try {
       execute(message);
     } catch (TelegramApiException e) {
       e.printStackTrace();
     }
+  }
+
+  private static ReplyKeyboardMarkup getDefaultReplyKeyboardMarkup() {
+    ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+    List<KeyboardRow> rows = new ArrayList<>();
+    KeyboardRow row = new KeyboardRow();
+    row.add("weather");
+    row.add("something");
+    rows.add(row);
+    row = new KeyboardRow();
+    row.add("secondRowButton");
+    row.add("secondRowButton2");
+    row.add("secondRowButton3");
+    rows.add(row);
+    replyKeyboardMarkup.setKeyboard(rows);
+    return replyKeyboardMarkup;
   }
 
   @Override
