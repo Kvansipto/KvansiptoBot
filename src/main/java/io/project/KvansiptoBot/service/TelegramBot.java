@@ -2,12 +2,15 @@ package io.project.KvansiptoBot.service;
 
 import com.vdurmont.emoji.EmojiParser;
 import io.project.KvansiptoBot.config.BotConfig;
+import io.project.KvansiptoBot.model.Ads;
+import io.project.KvansiptoBot.model.AdsRepository;
 import io.project.KvansiptoBot.model.User;
 import io.project.KvansiptoBot.model.UserRepository;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
@@ -30,6 +33,8 @@ public class TelegramBot extends TelegramLongPollingBot {
   final BotConfig config;
   @Autowired
   private UserRepository userRepository;
+  @Autowired
+  private AdsRepository adsRepository;
 
   public static final String YES_BUTTON = "YES_BUTTON";
   public static final String NO_BUTTON = "NO_BUTTON";
@@ -195,6 +200,17 @@ public class TelegramBot extends TelegramLongPollingBot {
     rows.add(row);
     replyKeyboardMarkup.setKeyboard(rows);
     return replyKeyboardMarkup;
+  }
+
+  @Scheduled(cron = "${cron.scheduler}")
+  private void sendAids(){
+    var ads = adsRepository.findAll();
+    var users = userRepository.findAll();
+    for (Ads ad : ads) {
+      for (User user : users) {
+        sendMessage(user.getChatId(), ad.getText());
+      }
+    }
   }
 
   @Override
