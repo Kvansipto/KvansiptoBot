@@ -57,18 +57,22 @@ public class TelegramBot extends TelegramLongPollingBot {
   private final Map<String, MuscleGroup> muscleGroupMap;
   private final Map<String, Exercise> exerciseMap = new HashMap<>();
 
+  static final String START_COMMAND_TEXT = "/start";
+  static final String EXERCISE_COMMAND_TEXT = "/exercises";
+  static final String HELP_COMMAND_TEXT = "/help";
+
   static final String HELP_TEXT = "This bot was made by Kvansipto\n\n"
       + "You can execute command from the main menu on the left or by typing a command:\n\n"
-      + "Type /start to see welcome message\n\n"
-      + "Type /mydata to see data stored about yourself\n\n"
-      + "Type /help to see this message again";
+      + "Type" + START_COMMAND_TEXT + " to see welcome message\n\n"
+      + "Type" + EXERCISE_COMMAND_TEXT + " to see exercises\n\n"
+      + "Type" + HELP_COMMAND_TEXT + " to see this message again";
 
   public TelegramBot(BotConfig config) {
     this.config = config;
     List<BotCommand> commandList = new ArrayList<>();
-    commandList.add(new BotCommand("/start", "get welcome message"));
-    commandList.add(new BotCommand("/exerciseinfo", "get exercise info"));
-    commandList.add(new BotCommand("/help", "how to use this bot"));
+    commandList.add(new BotCommand(START_COMMAND_TEXT, "get welcome message"));
+    commandList.add(new BotCommand(EXERCISE_COMMAND_TEXT, "get exercises info"));
+    commandList.add(new BotCommand(HELP_COMMAND_TEXT, "how to use this bot"));
     muscleGroupMap = Arrays.stream(MuscleGroup.values()).collect(Collectors.toMap(MuscleGroup::getName, m -> m));
     try {
       this.execute(new SetMyCommands(commandList, new BotCommandScopeDefault(), null));
@@ -80,9 +84,9 @@ public class TelegramBot extends TelegramLongPollingBot {
   @PostConstruct
   public void init() {
     exerciseRepository.findAll().forEach(exercise -> exerciseMap.put(exercise.getName(), exercise));
-    commands.put("/start", this::handleStartCommand);
-    commands.put("/exerciseinfo", this::handleExerciseInfo);
-    commands.put("/help", this::handleHelpCommand);
+    commands.put(START_COMMAND_TEXT, this::handleStartCommand);
+    commands.put(EXERCISE_COMMAND_TEXT, this::handleExerciseInfo);
+    commands.put(HELP_COMMAND_TEXT, this::handleHelpCommand);
     muscleGroupMap.forEach((k, v) -> commands.put(k, this::handleMuscleCommand));
     exerciseMap.forEach((k, v) -> commands.put(k, this::handleExerciseCommand));
   }
