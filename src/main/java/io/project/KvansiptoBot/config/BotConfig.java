@@ -2,6 +2,7 @@ package io.project.KvansiptoBot.config;
 
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -10,6 +11,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @Data
 @EnableScheduling
 @PropertySource("application.properties")
+@ComponentScan
 public class BotConfig {
 
   @Value("${bot.name}")
