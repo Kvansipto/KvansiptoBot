@@ -222,7 +222,7 @@ public class TelegramBot extends TelegramLongPollingBot {
   }
 
   private void startCommandReceived(long chatId, String name) {
-    String answer = EmojiParser.parseToUnicode("Hi, " + name + "! Nice to meet you!" + " :fire:");
+    String answer = EmojiParser.parseToUnicode("Hi, " + name + "\\! Nice to meet you\\!" + " :fire:");
     sendMessage(chatId, answer, getDefaultReplyKeyboardMarkup());
   }
 
