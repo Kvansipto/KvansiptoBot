@@ -1,4 +1,4 @@
-package io.project.KvansiptoBot.model;
+package io.project.kvansiptobot.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

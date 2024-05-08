@@ -1,4 +1,4 @@
-package io.project.KvansiptoBot.service;
+package io.project.kvansiptobot.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;

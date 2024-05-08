@@ -1,17 +1,17 @@
-package io.project.KvansiptoBot.service;
+package io.project.kvansiptobot.service;
 
 import com.vdurmont.emoji.EmojiParser;
-import io.project.KvansiptoBot.config.BotConfig;
-import io.project.KvansiptoBot.model.Ads;
-import io.project.KvansiptoBot.model.AdsRepository;
-import io.project.KvansiptoBot.model.Exercise;
-import io.project.KvansiptoBot.model.ExerciseRepository;
-import io.project.KvansiptoBot.model.ExerciseResult;
-import io.project.KvansiptoBot.model.ExerciseResultRepository;
-import io.project.KvansiptoBot.model.MuscleCommand;
-import io.project.KvansiptoBot.model.MuscleGroup;
-import io.project.KvansiptoBot.model.User;
-import io.project.KvansiptoBot.model.UserRepository;
+import io.project.kvansiptobot.config.BotConfig;
+import io.project.kvansiptobot.model.Ads;
+import io.project.kvansiptobot.model.AdsRepository;
+import io.project.kvansiptobot.model.Exercise;
+import io.project.kvansiptobot.model.ExerciseRepository;
+import io.project.kvansiptobot.model.ExerciseResult;
+import io.project.kvansiptobot.model.ExerciseResultRepository;
+import io.project.kvansiptobot.model.MuscleCommand;
+import io.project.kvansiptobot.model.MuscleGroup;
+import io.project.kvansiptobot.model.User;
+import io.project.kvansiptobot.model.UserRepository;
 import jakarta.annotation.PostConstruct;
 import java.sql.Timestamp;
 import java.time.LocalDate;
@@ -352,6 +352,6 @@ public class TelegramBot extends TelegramLongPollingBot {
 
   @Override
   public String getBotToken() {
-    return config.getToken();
+    return config.getBotToken();
   }
 }

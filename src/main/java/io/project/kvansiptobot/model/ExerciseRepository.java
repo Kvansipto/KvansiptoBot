@@ -1,4 +1,4 @@
-package io.project.KvansiptoBot.model;
+package io.project.kvansiptobot.model;
 
 import java.util.List;
 import org.springframework.data.repository.CrudRepository;

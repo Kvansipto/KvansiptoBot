@@ -1,6 +1,6 @@
-package io.project.KvansiptoBot.service;
+package io.project.kvansiptobot.service;
 
-import io.project.KvansiptoBot.model.Exercise;
+import io.project.kvansiptobot.model.Exercise;
 import lombok.Data;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
