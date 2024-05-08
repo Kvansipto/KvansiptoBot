@@ -33,6 +33,11 @@ public class ExerciseResult {
   @Column(name = "number_of_repetitions")
   private byte numberOfRepetitions;
 
+  //TODO Разобраться, почему не работает аннотация
   @PastOrPresent(message = "The date cannot be in the future")
   private LocalDate date;
+
+  @ManyToOne
+  @JoinColumn(name = "user_chat_id")
+  private User user;
 }
