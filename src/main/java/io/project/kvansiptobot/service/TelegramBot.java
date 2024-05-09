@@ -15,6 +15,7 @@ import io.project.kvansiptobot.model.UserRepository;
 import jakarta.annotation.PostConstruct;
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -57,6 +58,8 @@ public class TelegramBot extends TelegramLongPollingBot {
   private CommandFactory commandFactory;
   @Autowired
   private UserSessionFactory userSessionFactory;
+  @Autowired
+  private ExerciseResultRepository exerciseResultRepository;
 
   private Map<Long, UserSession> userStates = new HashMap<>();
   private final Map<String, Consumer<Update>> commands = new HashMap<>();
@@ -66,20 +69,21 @@ public class TelegramBot extends TelegramLongPollingBot {
   static final String START_COMMAND_TEXT = "/start";
   static final String EXERCISE_COMMAND_TEXT = "/exercises";
   static final String HELP_COMMAND_TEXT = "/help";
+  static final String ADD_DATE_EXERCISE_RESULT_TEXT = "ADD_DATE_EXERCISE_RESULT_";
+  static final String ADD_EXERCISE_RESULT_TEXT = "ADD_EXERCISE_RESULT_";
+  static final String WAITING_FOR_RESULT_STATE_TEXT = "WAITING_FOR_RESULT";
 
   static final String HELP_TEXT = "This bot was made by Kvansipto\n\n"
       + "You can execute command from the main menu on the left or by typing a command:\n\n"
       + "Type" + START_COMMAND_TEXT + " to see welcome message\n\n"
       + "Type" + EXERCISE_COMMAND_TEXT + " to see exercises and add results\n\n"
       + "Type" + HELP_COMMAND_TEXT + " to see this message again";
-  @Autowired
-  private ExerciseResultRepository exerciseResultRepository;
 
   public TelegramBot(BotConfig config) {
     this.config = config;
     List<BotCommand> commandList = new ArrayList<>();
     commandList.add(new BotCommand(START_COMMAND_TEXT, "get welcome message"));
-    commandList.add(new BotCommand(EXERCISE_COMMAND_TEXT, "get exercises info"));
+    commandList.add(new BotCommand(EXERCISE_COMMAND_TEXT, "get exercises info and add results"));
     commandList.add(new BotCommand(HELP_COMMAND_TEXT, "how to use this bot"));
     muscleGroupMap = Arrays.stream(MuscleGroup.values()).collect(Collectors.toMap(MuscleGroup::getName, m -> m));
     try {
@@ -95,17 +99,52 @@ public class TelegramBot extends TelegramLongPollingBot {
     commands.put(START_COMMAND_TEXT, this::handleStartCommand);
     commands.put(EXERCISE_COMMAND_TEXT, this::handleExerciseInfo);
     commands.put(HELP_COMMAND_TEXT, this::handleHelpCommand);
+    //TODO Пока упражнений мало, довольно удобно держать все команды в одной мапе. Если упражнений будет 100+?
     muscleGroupMap.forEach((k, v) -> commands.put(k, this::handleMuscleCommand));
     exerciseMap.forEach((k, v) -> commands.put(k, this::handleExerciseCommand));
   }
 
-  //TODO Ввод даты неудобный, попробовать сделать через кнопки
-  private void promptForExerciseResult(long chatId, String exerciseName) {
+  private void promptForExerciseResult(long chatId, String date) {
+    int days = Integer.parseInt(date.split("/")[0]);
+    int month = Integer.parseInt(date.split("/")[1]);
+    LocalDate localDate = LocalDate.of(LocalDate.now().getYear(), month, days);
+    Exercise exercise = userStates.get(chatId).getCurrentExercise();
+    setCurrentExerciseAndState(chatId, exercise, WAITING_FOR_RESULT_STATE_TEXT, localDate);
+    sendMessage(chatId, "Введите результат в формате:\n\\[\\(Вес в кг\\) \\(количество "
+        + "подходов\\) \\(количество повторений\\)\\]\n\n" + "Пример сообщения: 12\\.5 8 15");
+  }
+
+  private void promptForExerciseResultDate(long chatId, String exerciseName) {
     Exercise exercise = exerciseMap.get(exerciseName);
-    setCurrentExercise(chatId, exercise);
-    sendMessage(chatId, "Введите результат в формате:\n \\[День\\/Месяц вес\\(кг\\) количество "
-        + "подходов "
-        + "количество повторений\\]\n\n" + "Пример сообщения: 30\\/12 12\\.5 8 15");
+    setCurrentExerciseAndState(chatId, exercise, "CHOOSING DATE", null);
+
+    InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+    List<List<InlineKeyboardButton>> rows = new ArrayList<>();
+    List<InlineKeyboardButton> row = new ArrayList<>();
+    InlineKeyboardButton today = new InlineKeyboardButton();
+    InlineKeyboardButton yesterday = new InlineKeyboardButton();
+
+    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM");
+    LocalDate localDate = LocalDate.now();
+
+    today.setText("Сегодня");
+    today.setCallbackData(ADD_DATE_EXERCISE_RESULT_TEXT + localDate.format(dtf));
+    row.add(today);
+    yesterday.setText("Вчера");
+    yesterday.setCallbackData(ADD_DATE_EXERCISE_RESULT_TEXT + localDate.minusDays(1).format(dtf));
+    row.add(yesterday);
+    rows.add(row);
+    row = new ArrayList<>();
+    for (int i = 2; i <= 6; i++) {
+      InlineKeyboardButton dateButton = new InlineKeyboardButton();
+      String date = localDate.minusDays(i).format(dtf);
+      dateButton.setText(date);
+      dateButton.setCallbackData(ADD_DATE_EXERCISE_RESULT_TEXT + date);
+      row.add(dateButton);
+    }
+    rows.add(row);
+    inlineKeyboardMarkup.setKeyboard(rows);
+    sendMessage(chatId, "Выберите дату", inlineKeyboardMarkup);
   }
 
   @Override
@@ -114,7 +153,7 @@ public class TelegramBot extends TelegramLongPollingBot {
   }
 
   @EventListener
-  public void handleMuscleCommandEvent(MuscleCommandEvent muscleCommandEvent) {
+  private void handleMuscleCommandEvent(MuscleCommandEvent muscleCommandEvent) {
     System.out.println("Called handleCommandEvent");
     SendMessage message = new SendMessage();
     message.setChatId(muscleCommandEvent.getChatId());
@@ -127,21 +166,26 @@ public class TelegramBot extends TelegramLongPollingBot {
 
   @Override
   public void onUpdateReceived(Update update) {
-    Consumer<Update> command;
 
     if (update.hasMessage() && update.getMessage().hasText()) {
       handleUserInput(update);
     } else if (update.hasCallbackQuery()) {
-      command = commands.get(update.getCallbackQuery().getData());
-      if (command != null) {
-        command.accept(update);
-      } else if (update.getCallbackQuery().getData().startsWith("ADD_EXERCISE_RESULT_")) {
-        String exerciseName = update.getCallbackQuery().getData().split("_")[3];
-        promptForExerciseResult(update.getCallbackQuery().getMessage().getChatId(), exerciseName);
-      } else {
-        long chatId = update.getMessage().getChatId();
-        sendMessage(chatId, "Sorry, command wasn't recognized");
-      }
+      handleUserCallback(update);
+    }
+  }
+
+  private void handleUserCallback(Update update) {
+    var callbackQuery = update.getCallbackQuery().getData();
+    Long chatId = update.getCallbackQuery().getMessage().getChatId();
+    Consumer<Update> command = commands.get(callbackQuery);
+    if (command != null) {
+      command.accept(update);
+    } else if (callbackQuery.startsWith(ADD_EXERCISE_RESULT_TEXT)) {
+      String exerciseName = callbackQuery.split("_")[3];
+      promptForExerciseResultDate(chatId, exerciseName);
+    } else if (callbackQuery.startsWith(ADD_DATE_EXERCISE_RESULT_TEXT)) {
+      String exerciseResultDate = callbackQuery.split("_")[4];
+      promptForExerciseResult(chatId, exerciseResultDate);
     }
   }
 
@@ -149,48 +193,46 @@ public class TelegramBot extends TelegramLongPollingBot {
     Consumer<Update> command = commands.get(update.getMessage().getText());
     Long chatId = update.getMessage().getChatId();
     String message = update.getMessage().getText();
-    var userCurrentState = userStates.get(chatId);
-    if (userCurrentState != null && userCurrentState.getIsWaitingForResult()) {
-      processExerciseResult(chatId, message);
-      userStates.remove(chatId);
-    } else if (command != null) {
+    var userSession = userStates.get(chatId);
+    if (command != null) {
       command.accept(update);
+      userStates.remove(chatId);
+    } else if (userSession != null) {
+      if (WAITING_FOR_RESULT_STATE_TEXT.equals(userSession.getCurrentState())) {
+        processExerciseResult(chatId, message);
+      }
     } else {
       sendMessage(chatId, "Sorry, command wasn't recognized");
+      userStates.remove(chatId);
     }
   }
 
-  private void setCurrentExercise(Long chatId, Exercise exercise) {
+  private void setCurrentExerciseAndState(Long chatId, Exercise exercise, String state, LocalDate date) {
     UserSession session = userSessionFactory.createUserSession(chatId);
     session.setChatId(chatId);
     session.setCurrentExercise(exercise);
-    session.setIsWaitingForResult(true);
+    session.setCurrentState(state);
+    session.setExerciseResultDate(date == null ? LocalDate.now() : date);
     userStates.put(chatId, session);
   }
 
   private void processExerciseResult(Long chatId, String message) {
     try {
       String[] parts = message.split(" ");
-      String[] dateParts = parts[0].split("/");
-      LocalDate date = LocalDate.of(LocalDate.now().getYear(), Integer.parseInt(dateParts[1]),
-          Integer.parseInt(dateParts[0]));
-      double weight = Double.parseDouble(parts[1]);
-      byte sets = Byte.parseByte(parts[2]);
-      byte reps = Byte.parseByte(parts[3]);
+      double weight = Double.parseDouble(parts[0]);
+      byte sets = Byte.parseByte(parts[1]);
+      byte reps = Byte.parseByte(parts[2]);
       ExerciseResult exerciseResult = new ExerciseResult();
       exerciseResult.setWeight(weight);
       exerciseResult.setNumberOfSets(sets);
       exerciseResult.setNumberOfRepetitions(reps);
-      exerciseResult.setDate(date);
       exerciseResult.setUser(userRepository.findById(chatId).get());
-      if (userStates.get(chatId).getCurrentExercise() == null) {
-        System.out.println("Нет упражнения");
-      } else {
-        System.out.println("Текущее упражнение: " + userStates.get(chatId).getCurrentExercise().getName());
-      }
       exerciseResult.setExercise(userStates.get(chatId).getCurrentExercise());
+      exerciseResult.setDate(userStates.get(chatId).getExerciseResultDate());
       exerciseResultRepository.save(exerciseResult);
+
       sendMessage(chatId, "Результат успешно сохранен");
+      userStates.remove(chatId);
     } catch (Exception e) {
       sendMessage(chatId, "Неверный формат ввода\\. Пожалуйста, введите данные снова\\.");
     }
@@ -216,7 +258,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     List<List<InlineKeyboardButton>> rows = new ArrayList<>();
     List<InlineKeyboardButton> row = new ArrayList<>();
     InlineKeyboardButton button = new InlineKeyboardButton();
-    button.setCallbackData("ADD_EXERCISE_RESULT_" + exercise.getName());
+    button.setCallbackData(ADD_EXERCISE_RESULT_TEXT + exercise.getName());
     button.setText("Добавить результат выполнения упражнения");
     row.add(button);
     rows.add(row);
@@ -289,7 +331,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     sendMessage(chatId, answer, getDefaultReplyKeyboardMarkup());
   }
 
-  public void sendMessage(long chatId, String messageToSend, ReplyKeyboard keyboardMarkup) {
+  private void sendMessage(long chatId, String messageToSend, ReplyKeyboard keyboardMarkup) {
     SendMessage message = new SendMessage();
     message.setChatId(chatId);
     message.setText(messageToSend);
@@ -299,7 +341,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     executeMessage(message);
   }
 
-  public void sendMessage(long chatId, String messageToSend) {
+  private void sendMessage(long chatId, String messageToSend) {
     sendMessage(chatId, messageToSend, null);
   }
 
