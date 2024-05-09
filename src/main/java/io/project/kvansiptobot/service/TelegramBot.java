@@ -271,7 +271,9 @@ public class TelegramBot extends TelegramLongPollingBot {
   private void handleStartCommand(Update update) {
     var message = update.getMessage();
     registerUser(message);
-    startCommandReceived(message.getChatId(), update.getMessage().getChat().getFirstName());
+    String firstName = update.getMessage().getChat().getFirstName();
+    String answer = EmojiParser.parseToUnicode("Hi, " + firstName + "\\! Nice to meet you\\!" + " :fire:");
+    sendMessage(message.getChatId(), answer, getDefaultReplyKeyboardMarkup());
   }
 
   private void handleHelpCommand(Update update) {
@@ -279,10 +281,7 @@ public class TelegramBot extends TelegramLongPollingBot {
   }
 
   private void handleExerciseInfo(Update update) {
-    generateMuscleGroupButtons(update.getMessage().getChatId());
-  }
-
-  private void generateMuscleGroupButtons(long chatId) {
+    Long chatId = update.getMessage().getChatId();
     InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
     List<List<InlineKeyboardButton>> rows = new ArrayList<>();
     List<InlineKeyboardButton> row = new ArrayList<>();
@@ -324,11 +323,6 @@ public class TelegramBot extends TelegramLongPollingBot {
       user.setRegisteredAt(new Timestamp(System.currentTimeMillis()));
       userRepository.save(user);
     }
-  }
-
-  private void startCommandReceived(long chatId, String name) {
-    String answer = EmojiParser.parseToUnicode("Hi, " + name + "\\! Nice to meet you\\!" + " :fire:");
-    sendMessage(chatId, answer, getDefaultReplyKeyboardMarkup());
   }
 
   private void sendMessage(long chatId, String messageToSend, ReplyKeyboard keyboardMarkup) {
