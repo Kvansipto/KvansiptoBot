@@ -194,7 +194,8 @@ public class TelegramBot extends TelegramLongPollingBot {
 
   private void handleShowExerciseHistory(Long chatId, String exerciseName) {
     Exercise exercise = exerciseMap.get(exerciseName);
-    List<ExerciseResult> exerciseResults = exerciseResultRepository.findByExerciseOrderByDateDesc(exercise);
+    List<ExerciseResult> exerciseResults =
+        exerciseResultRepository.findByExerciseAndUserChatIdOrderByDateDesc(exercise, chatId);
     if (exerciseResults.isEmpty()) {
       sendMessage(chatId, "Результаты по упражнению " + exerciseName + " отсутствуют");
     } else {

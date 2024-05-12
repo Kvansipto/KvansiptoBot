@@ -7,10 +7,8 @@ import org.springframework.data.repository.query.Param;
 
 public interface ExerciseResultRepository extends CrudRepository<ExerciseResult, Long> {
 
-  List<ExerciseResult> findByExerciseOrderByDateDesc(Exercise exercise);
-
-//  @Query("select e from exercise_result e where exercise = : exercise and user = : user order by date desc")
-//  List<ExerciseResult> findByExerciseAndUserOrderByDateDesc(@Param("exercise") Exercise exercise, @Param(
-//      "user") User user);
-
+  @Query("SELECT er FROM exercise_result er WHERE er.exercise = :exercise AND er.user.chatId = :userChatId ORDER BY "
+      + "er.date DESC")
+  List<ExerciseResult> findByExerciseAndUserChatIdOrderByDateDesc(@Param("exercise") Exercise exercise,
+      @Param("userChatId") Long userChatId);
 }
