@@ -195,27 +195,31 @@ public class TelegramBot extends TelegramLongPollingBot {
   private void handleShowExerciseHistory(Long chatId, String exerciseName) {
     Exercise exercise = exerciseMap.get(exerciseName);
     List<ExerciseResult> exerciseResults = exerciseResultRepository.findByExerciseOrderByDateDesc(exercise);
-    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM");
+    if (exerciseResults.isEmpty()) {
+      sendMessage(chatId, "Результаты по упражнению " + exerciseName + " отсутствуют");
+    } else {
+      DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM");
 
-    String[] headers = {"Дата", "Вес", "Подходы", "Повторения"};
-    String[][] data = new String[exerciseResults.size()][headers.length];
+      String[] headers = {"Дата", "Вес (кг)", "Подходы", "Повторения"};
+      String[][] data = new String[exerciseResults.size()][headers.length];
 
-    for (int i = 0; i < exerciseResults.size(); i++) {
-      ExerciseResult exerciseResult = exerciseResults.get(i);
-      data[i] = new String[]{
-          exerciseResult.getDate().format(dtf),
-          String.valueOf(exerciseResult.getWeight()),
-          String.valueOf(exerciseResult.getNumberOfSets()),
-          String.valueOf(exerciseResult.getNumberOfRepetitions())
-      };
+      for (int i = 0; i < exerciseResults.size(); i++) {
+        ExerciseResult exerciseResult = exerciseResults.get(i);
+        data[i] = new String[]{
+            exerciseResult.getDate().format(dtf),
+            String.valueOf(exerciseResult.getWeight()),
+            String.valueOf(exerciseResult.getNumberOfSets()),
+            String.valueOf(exerciseResult.getNumberOfRepetitions())
+        };
+      }
+
+      sendMessage(chatId, "История результатов упражнения " + exerciseName);
+      SendPhoto tableImageToSend = new SendPhoto();
+      tableImageToSend.setChatId(chatId);
+      var input = new InputFile().setMedia(TableImage.drawTableImage(headers, data));
+      tableImageToSend.setPhoto(input);
+      executeTelegramAction(tableImageToSend);
     }
-
-    sendMessage(chatId, "История результатов упражнения " + exerciseName);
-    SendPhoto tableImageToSend = new SendPhoto();
-    tableImageToSend.setChatId(chatId);
-    var input = new InputFile().setMedia(TableImage.drawTableImage(headers, data));
-    tableImageToSend.setPhoto(input);
-    executeTelegramAction(tableImageToSend);
   }
 
   private void handleUserInput(Update update) {
