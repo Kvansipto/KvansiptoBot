@@ -1,7 +1,7 @@
-package io.project.KvansiptoBot.model;
+package io.project.kvansiptobot.model;
 
-import io.project.KvansiptoBot.service.MuscleCommandEvent;
-import io.project.KvansiptoBot.service.TelegramBot;
+import io.project.kvansiptobot.service.MuscleCommandEvent;
+import io.project.kvansiptobot.service.TelegramBot;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Setter;

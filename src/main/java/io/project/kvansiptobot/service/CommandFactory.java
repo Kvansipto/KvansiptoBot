@@ -1,7 +1,7 @@
-package io.project.KvansiptoBot.service;
+package io.project.kvansiptobot.service;
 
-import io.project.KvansiptoBot.model.MuscleCommand;
-import io.project.KvansiptoBot.model.MuscleGroup;
+import io.project.kvansiptobot.model.MuscleCommand;
+import io.project.kvansiptobot.model.MuscleGroup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;

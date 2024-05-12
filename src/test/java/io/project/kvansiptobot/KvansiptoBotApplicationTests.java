@@ -1,4 +1,4 @@
-package io.project.KvansiptoBot;
+package io.project.kvansiptobot;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

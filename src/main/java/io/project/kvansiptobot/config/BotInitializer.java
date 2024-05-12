@@ -1,6 +1,6 @@
-package io.project.KvansiptoBot.config;
+package io.project.kvansiptobot.config;
 
-import io.project.KvansiptoBot.service.TelegramBot;
+import io.project.kvansiptobot.service.TelegramBot;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;

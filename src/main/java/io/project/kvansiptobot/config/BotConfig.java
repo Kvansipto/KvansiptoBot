@@ -1,4 +1,4 @@
-package io.project.KvansiptoBot.config;
+package io.project.kvansiptobot.config;
 
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,7 +17,7 @@ public class BotConfig {
   @Value("${bot.name}")
   String botName;
   @Value("${bot.token}")
-  String token;
+  String botToken;
   @Value("${bot.owner}")
   Long ownerChatId;
 }

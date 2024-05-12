@@ -1,3 +1,14 @@
 spring.application.name=KvansiptoBot
 bot.name=KvansiptoBot
 bot.token=tokenFromTelegramBotFather
+bot.owner=your_chatId
+
+cron.scheduler=0 * * * * *
+
+#DB
+spring.jpa.hibernate.ddl-auto=update
+spring.datasource.url=jdbc:postgresql://localhost:5432/tgbot
+spring.datasource.username=username
+spring.datasource.password=password
+spring.datasource.driver-class-name=org.postgresql.Driver
+spring.jpa.show-sql=true

@@ -1,4 +1,4 @@
-package io.project.KvansiptoBot.model;
+package io.project.kvansiptobot.model;
 
 public enum MuscleGroup {
   CHEST("Грудные"),
