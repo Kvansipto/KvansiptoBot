@@ -31,7 +31,6 @@ import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -61,17 +60,18 @@ public class TelegramBot extends TelegramLongPollingBot {
   @Autowired
   private ExerciseResultRepository exerciseResultRepository;
 
-  private Map<Long, UserSession> userStates = new HashMap<>();
+  private final Map<Long, UserSession> userStates = new HashMap<>();
   private final Map<String, Consumer<Update>> commands = new HashMap<>();
   private final Map<String, MuscleGroup> muscleGroupMap;
   private final Map<String, Exercise> exerciseMap = new HashMap<>();
 
-  static final String START_COMMAND_TEXT = "/start";
-  static final String EXERCISE_COMMAND_TEXT = "/exercises";
-  static final String HELP_COMMAND_TEXT = "/help";
-  static final String ADD_DATE_EXERCISE_RESULT_TEXT = "ADD_DATE_EXERCISE_RESULT_";
-  static final String ADD_EXERCISE_RESULT_TEXT = "ADD_EXERCISE_RESULT_";
-  static final String WAITING_FOR_RESULT_STATE_TEXT = "WAITING_FOR_RESULT";
+  private static final String START_COMMAND_TEXT = "/start";
+  private static final String EXERCISE_COMMAND_TEXT = "/exercises";
+  private static final String HELP_COMMAND_TEXT = "/help";
+  private static final String ADD_DATE_EXERCISE_RESULT_TEXT = "ADD_DATE_EXERCISE_RESULT_";
+  private static final String ADD_EXERCISE_RESULT_TEXT = "ADD_EXERCISE_RESULT_";
+  private static final String WAITING_FOR_RESULT_STATE_TEXT = "WAITING_FOR_RESULT";
+  private static final String SHOW_EXERCISE_RESULT_HISTORY = "SHOW_EXERCISE_RESULT_HISTORY_";
 
   static final String HELP_TEXT = "This bot was made by Kvansipto\n\n"
       + "You can execute command from the main menu on the left or by typing a command:\n\n"
@@ -186,7 +186,36 @@ public class TelegramBot extends TelegramLongPollingBot {
     } else if (callbackQuery.startsWith(ADD_DATE_EXERCISE_RESULT_TEXT)) {
       String exerciseResultDate = callbackQuery.split("_")[4];
       promptForExerciseResult(chatId, exerciseResultDate);
+    } else if (callbackQuery.startsWith(SHOW_EXERCISE_RESULT_HISTORY)) {
+      String exerciseName = callbackQuery.split("_")[4];
+      handleShowExerciseHistory(chatId, exerciseName);
     }
+  }
+
+  private void handleShowExerciseHistory(Long chatId, String exerciseName) {
+    Exercise exercise = exerciseMap.get(exerciseName);
+    List<ExerciseResult> exerciseResults = exerciseResultRepository.findByExerciseOrderByDateDesc(exercise);
+    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM");
+
+    String[] headers = {"Дата", "Вес", "Подходы", "Повторения"};
+    String[][] data = new String[exerciseResults.size()][headers.length];
+
+    for (int i = 0; i < exerciseResults.size(); i++) {
+      ExerciseResult exerciseResult = exerciseResults.get(i);
+      data[i] = new String[]{
+          exerciseResult.getDate().format(dtf),
+          String.valueOf(exerciseResult.getWeight()),
+          String.valueOf(exerciseResult.getNumberOfSets()),
+          String.valueOf(exerciseResult.getNumberOfRepetitions())
+      };
+    }
+
+    sendMessage(chatId, "История результатов упражнения " + exerciseName);
+    SendPhoto tableImageToSend = new SendPhoto();
+    tableImageToSend.setChatId(chatId);
+    var input = new InputFile().setMedia(TableImage.drawTableImage(headers, data));
+    tableImageToSend.setPhoto(input);
+    executeTelegramAction(tableImageToSend);
   }
 
   private void handleUserInput(Update update) {
@@ -258,6 +287,12 @@ public class TelegramBot extends TelegramLongPollingBot {
     List<List<InlineKeyboardButton>> rows = new ArrayList<>();
     List<InlineKeyboardButton> row = new ArrayList<>();
     InlineKeyboardButton button = new InlineKeyboardButton();
+    button.setText("Отобразить историю результатов по упражнению");
+    button.setCallbackData(SHOW_EXERCISE_RESULT_HISTORY + exercise.getName());
+    row.add(button);
+    rows.add(row);
+    row = new ArrayList<>();
+    button = new InlineKeyboardButton();
     button.setCallbackData(ADD_EXERCISE_RESULT_TEXT + exercise.getName());
     button.setText("Добавить результат выполнения упражнения");
     row.add(button);
@@ -300,14 +335,6 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
     inlineKeyboardMarkup.setKeyboard(rows);
     sendMessage(chatId, "Выберите группу мышц", inlineKeyboardMarkup);
-  }
-
-  private void executeEditMessage(long chatId, String text, int messageId) {
-    EditMessageText editMessageText = new EditMessageText();
-    editMessageText.setChatId(chatId);
-    editMessageText.setText(text);
-    editMessageText.setMessageId(messageId);
-    executeTelegramAction(editMessageText);
   }
 
   private void registerUser(Message message) {
