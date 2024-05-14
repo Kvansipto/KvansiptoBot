@@ -1,4 +1,4 @@
-package io.project.kvansiptobot.service;
+package io.project.kvansiptobot.utils;
 
 import java.awt.Color;
 import java.awt.FontMetrics;

@@ -1,23 +1,22 @@
 package io.project.kvansiptobot.config;
 
-import lombok.Data;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.scheduling.annotation.EnableScheduling;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
-@Configuration
-@Data
-@EnableScheduling
-@PropertySource("application.properties")
-@ComponentScan
+@Component
+@Getter
+@Setter
+@Valid
+@ConfigurationProperties("telegram.bot")
 public class BotConfig {
-
-  @Value("${bot.name}")
+  @NotBlank
   String botName;
-  @Value("${bot.token}")
+  @NotBlank
   String botToken;
-  @Value("${bot.owner}")
+  @NotBlank
   Long ownerChatId;
 }

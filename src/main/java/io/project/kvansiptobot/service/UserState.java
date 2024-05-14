@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("prototype")
 @Data
-public class UserSession {
+public class UserState {
 
   private Long chatId;
   private Exercise currentExercise;
