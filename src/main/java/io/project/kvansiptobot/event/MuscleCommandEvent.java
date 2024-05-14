@@ -1,4 +1,4 @@
-package io.project.kvansiptobot.service;
+package io.project.kvansiptobot.event;
 
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;

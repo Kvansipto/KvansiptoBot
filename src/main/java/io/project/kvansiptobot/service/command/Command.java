@@ -1,4 +1,4 @@
-package io.project.kvansiptobot.model;
+package io.project.kvansiptobot.service.command;
 
 public interface Command {
 

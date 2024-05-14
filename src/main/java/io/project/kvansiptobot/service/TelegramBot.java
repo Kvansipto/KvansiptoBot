@@ -2,16 +2,19 @@ package io.project.kvansiptobot.service;
 
 import com.vdurmont.emoji.EmojiParser;
 import io.project.kvansiptobot.config.BotConfig;
+import io.project.kvansiptobot.event.MuscleCommandEvent;
 import io.project.kvansiptobot.model.Ads;
-import io.project.kvansiptobot.model.AdsRepository;
+import io.project.kvansiptobot.repository.AdsRepository;
 import io.project.kvansiptobot.model.Exercise;
-import io.project.kvansiptobot.model.ExerciseRepository;
+import io.project.kvansiptobot.repository.ExerciseRepository;
 import io.project.kvansiptobot.model.ExerciseResult;
-import io.project.kvansiptobot.model.ExerciseResultRepository;
-import io.project.kvansiptobot.model.MuscleCommand;
+import io.project.kvansiptobot.repository.ExerciseResultRepository;
+import io.project.kvansiptobot.service.command.CommandFactory;
+import io.project.kvansiptobot.service.command.MuscleCommand;
 import io.project.kvansiptobot.model.MuscleGroup;
 import io.project.kvansiptobot.model.User;
-import io.project.kvansiptobot.model.UserRepository;
+import io.project.kvansiptobot.repository.UserRepository;
+import io.project.kvansiptobot.utils.TableImage;
 import jakarta.annotation.PostConstruct;
 import java.sql.Timestamp;
 import java.time.LocalDate;
@@ -24,9 +27,11 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -42,6 +47,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
 @Component
 public class TelegramBot extends TelegramLongPollingBot {
@@ -55,6 +61,7 @@ public class TelegramBot extends TelegramLongPollingBot {
   private ExerciseRepository exerciseRepository;
   @Autowired
   private CommandFactory commandFactory;
+
   @Autowired
   private UserSessionFactory userSessionFactory;
   @Autowired
@@ -79,6 +86,7 @@ public class TelegramBot extends TelegramLongPollingBot {
       + "Type" + EXERCISE_COMMAND_TEXT + " to see exercises and add results\n\n"
       + "Type" + HELP_COMMAND_TEXT + " to see this message again";
 
+  //todo использовать другой конструктор
   public TelegramBot(BotConfig config) {
     this.config = config;
     List<BotCommand> commandList = new ArrayList<>();
@@ -94,7 +102,7 @@ public class TelegramBot extends TelegramLongPollingBot {
   }
 
   @PostConstruct
-  public void init() {
+  public void init() throws TelegramApiException {
     exerciseRepository.findAll().forEach(exercise -> exerciseMap.put(exercise.getName(), exercise));
     commands.put(START_COMMAND_TEXT, this::handleStartCommand);
     commands.put(EXERCISE_COMMAND_TEXT, this::handleExerciseInfo);
@@ -102,9 +110,16 @@ public class TelegramBot extends TelegramLongPollingBot {
     //TODO Пока упражнений мало, довольно удобно держать все команды в одной мапе. Если упражнений будет 100+?
     muscleGroupMap.forEach((k, v) -> commands.put(k, this::handleMuscleCommand));
     exerciseMap.forEach((k, v) -> commands.put(k, this::handleExerciseCommand));
+    TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
+    try {
+      telegramBotsApi.registerBot(this);
+    } catch (TelegramApiException e) {
+      e.printStackTrace();
+    }
   }
 
   private void promptForExerciseResult(long chatId, String date) {
+    muscleCommand;
     int days = Integer.parseInt(date.split("/")[0]);
     int month = Integer.parseInt(date.split("/")[1]);
     LocalDate localDate = LocalDate.of(LocalDate.now().getYear(), month, days);
@@ -152,7 +167,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     return config.getBotName();
   }
 
-  @EventListener
+  @EventListener(MuscleCommandEvent.class)
   private void handleMuscleCommandEvent(MuscleCommandEvent muscleCommandEvent) {
     System.out.println("Called handleCommandEvent");
     SendMessage message = new SendMessage();
@@ -256,6 +271,10 @@ public class TelegramBot extends TelegramLongPollingBot {
       double weight = Double.parseDouble(parts[0]);
       byte sets = Byte.parseByte(parts[1]);
       byte reps = Byte.parseByte(parts[2]);
+      ExerciseResult build = ExerciseResult.builder()
+//              .date()
+//              .weight()
+              .build();
       ExerciseResult exerciseResult = new ExerciseResult();
       exerciseResult.setWeight(weight);
       exerciseResult.setNumberOfSets(sets);

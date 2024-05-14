@@ -1,6 +1,9 @@
-package io.project.kvansiptobot.model;
+package io.project.kvansiptobot.repository;
 
 import java.util.List;
+
+import io.project.kvansiptobot.model.Exercise;
+import io.project.kvansiptobot.model.ExerciseResult;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;

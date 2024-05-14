@@ -7,20 +7,31 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PastOrPresent;
 import java.time.LocalDate;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
 @Entity(name = "exercise_result")
+@Valid
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class ExerciseResult {
 
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
   private long id;
 
+  @NotBlank
   @ManyToOne
   @JoinColumn(name = "exercise_id")
   private Exercise exercise;

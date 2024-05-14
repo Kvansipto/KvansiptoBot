@@ -1,4 +1,6 @@
-package io.project.kvansiptobot.service;
+package io.project.kvansiptobot.utils;
+
+import lombok.experimental.UtilityClass;
 
 import java.awt.Color;
 import java.awt.FontMetrics;
@@ -8,10 +10,8 @@ import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
 
+@UtilityClass
 public class TableImage {
-
-  private TableImage() {
-  }
 
   public static File drawTableImage(String[] headers, String[][] data) {
     int rowHeight = 30;
