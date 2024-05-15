@@ -72,10 +72,10 @@ public class AddDateForExerciseResultCommand extends Command {
     }
     rows.add(row);
     inlineKeyboardMarkup.setKeyboard(rows);
-    SendMessageWrapper sendMessageWrapper = new SendMessageWrapper();
-    sendMessageWrapper.setChatId(chatId);
-    sendMessageWrapper.setReplyMarkup(inlineKeyboardMarkup);
-    sendMessageWrapper.setText("Выберите дату");
-    return sendMessageWrapper;
+    return SendMessageWrapper.newBuilder()
+        .chatId(chatId)
+        .replyMarkup(inlineKeyboardMarkup)
+        .text("Выберите дату")
+        .build();
   }
 }

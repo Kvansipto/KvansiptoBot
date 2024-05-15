@@ -47,13 +47,13 @@ public class ExerciseCommand extends Command {
     rows.add(row);
     inlineKeyboardMarkup.setKeyboard(rows);
 
-    SendMessageWrapper sendMessage = new SendMessageWrapper();
-    sendMessage.setChatId(chatId);
-    sendMessage.setReplyMarkup(inlineKeyboardMarkup);
-    sendMessage.setText(String.format("Посмотрите видео с упражнением на YouTube: [Смотреть видео](%s)",
-        exercise.getVideoUrl()));
-    sendMessage.setParseMode("MarkdownV2");
-    sendMessage.setDisableWebPagePreview(false);
-    return sendMessage;
+    return SendMessageWrapper.newBuilder()
+        .chatId(chatId)
+        .replyMarkup(inlineKeyboardMarkup)
+        .text(String.format("Посмотрите видео с упражнением на YouTube: [Смотреть видео](%s)",
+            exercise.getVideoUrl()))
+        .parseMode("MarkdownV2")
+        .disableWebPagePreview(false)
+        .build();
   }
 }

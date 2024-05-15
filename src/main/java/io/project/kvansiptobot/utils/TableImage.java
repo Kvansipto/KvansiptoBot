@@ -7,13 +7,12 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
+import lombok.experimental.UtilityClass;
 
+@UtilityClass
 public class TableImage {
 
-  private TableImage() {
-  }
-
-  public static File drawTableImage(String[] headers, String[][] data) {
+  public File drawTableImage(String[] headers, String[][] data) {
     int rowHeight = 30;
     int colWidth = 100;
     int width = headers.length * colWidth;

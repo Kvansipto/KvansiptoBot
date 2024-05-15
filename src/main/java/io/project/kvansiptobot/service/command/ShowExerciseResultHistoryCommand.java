@@ -7,6 +7,7 @@ import io.project.kvansiptobot.repository.ExerciseResultRepository;
 import io.project.kvansiptobot.service.wrapper.BotApiMethodInterface;
 import io.project.kvansiptobot.service.wrapper.BotApiMethodWrapper;
 import io.project.kvansiptobot.service.wrapper.SendMessageWrapper;
+import io.project.kvansiptobot.service.wrapper.SendMessageWrapper.SendMessageWrapperBuilder;
 import io.project.kvansiptobot.service.wrapper.SendPhotoWrapper;
 import io.project.kvansiptobot.utils.TableImage;
 import java.time.format.DateTimeFormatter;
@@ -39,11 +40,11 @@ public class ShowExerciseResultHistoryCommand extends Command {
 
     List<ExerciseResult> exerciseResults = exerciseResultRepository.findByExerciseAndUserChatIdOrderByDateDesc(exercise,
         chatId);
-    SendMessageWrapper sendMessage = new SendMessageWrapper();
-    sendMessage.setChatId(chatId);
+    SendMessageWrapperBuilder sendMessageWrapperBuilder = SendMessageWrapper.newBuilder()
+        .chatId(chatId);
     if (exerciseResults.isEmpty()) {
-      sendMessage.setText("Результаты по упражнению " + exerciseName + " отсутствуют");
-      return sendMessage;
+      sendMessageWrapperBuilder.text("Результаты по упражнению " + exerciseName + " отсутствуют");
+      return sendMessageWrapperBuilder.build();
     } else {
       DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM");
 
@@ -56,15 +57,16 @@ public class ShowExerciseResultHistoryCommand extends Command {
             String.valueOf(exerciseResult.getNumberOfSets()), String.valueOf(exerciseResult.getNumberOfRepetitions())};
       }
 
-      sendMessage.setText("История результатов упражнения " + exerciseName);
+      sendMessageWrapperBuilder.text("История результатов упражнения " + exerciseName);
       BotApiMethodWrapper botApiMethodWrapper = new BotApiMethodWrapper();
-      botApiMethodWrapper.addAction(sendMessage);
+      botApiMethodWrapper.addAction(sendMessageWrapperBuilder.build());
 
-      SendPhotoWrapper tableImageToSend = new SendPhotoWrapper();
-      tableImageToSend.setChatId(chatId);
       var input = new InputFile().setMedia(TableImage.drawTableImage(headers, data));
-      tableImageToSend.setPhoto(input);
-      botApiMethodWrapper.addAction(tableImageToSend);
+      SendPhotoWrapper sendPhoto = SendPhotoWrapper.newBuilder()
+          .chatId(chatId)
+          .photo(input)
+          .build();
+      botApiMethodWrapper.addAction(sendPhoto);
       return botApiMethodWrapper;
     }
   }

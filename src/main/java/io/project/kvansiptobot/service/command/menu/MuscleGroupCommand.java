@@ -6,7 +6,6 @@ import io.project.kvansiptobot.service.wrapper.SendMessageWrapper;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
@@ -40,11 +39,11 @@ public class MuscleGroupCommand extends MainMenuCommand {
     }
     inlineKeyboardMarkup.setKeyboard(rows);
 
-    SendMessageWrapper sendMessage = new SendMessageWrapper();
-    sendMessage.setChatId(chatId);
-    sendMessage.setReplyMarkup(inlineKeyboardMarkup);
-    sendMessage.setText("Выберите группу мышц");
-    return sendMessage;
+    return SendMessageWrapper.newBuilder()
+        .chatId(chatId)
+        .replyMarkup(inlineKeyboardMarkup)
+        .text("Выберите группу мышц")
+        .build();
   }
 
   @Override

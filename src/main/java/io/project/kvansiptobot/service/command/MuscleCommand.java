@@ -47,10 +47,10 @@ public class MuscleCommand extends Command {
     }
     rows.add(row);
     inlineKeyboardMarkup.setKeyboard(rows);
-    SendMessageWrapper sendMessage = new SendMessageWrapper();
-    sendMessage.setChatId(chatId);
-    sendMessage.setText("Выберите упражнение");
-    sendMessage.setReplyMarkup(inlineKeyboardMarkup);
-    return sendMessage;
+    return SendMessageWrapper.newBuilder()
+        .chatId(chatId)
+        .replyMarkup(inlineKeyboardMarkup)
+        .text("Выберите упражнение")
+        .build();
   }
 }

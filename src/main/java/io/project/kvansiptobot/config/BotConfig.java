@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 @Valid
 @ConfigurationProperties("telegram.bot")
 public class BotConfig {
+
   @NotBlank
   String botName;
   @NotBlank

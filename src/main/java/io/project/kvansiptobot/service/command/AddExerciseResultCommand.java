@@ -44,11 +44,10 @@ public class AddExerciseResultCommand extends Command {
     userState.setExerciseResultDate(localDate);
     userState.setCurrentState(WAITING_FOR_RESULT_STATE_TEXT);
     userStateService.setCurrentState(chatId, userState);
-
-    SendMessageWrapper sendMessageWrapper = new SendMessageWrapper();
-    sendMessageWrapper.setChatId(chatId);
-    sendMessageWrapper.setText("Введите результат в формате:\n\\[\\(Вес в кг\\) \\(количество "
-        + "подходов\\) \\(количество повторений\\)\\]\n\n" + "Пример сообщения: 12\\.5 8 15");
-    return sendMessageWrapper;
+    return SendMessageWrapper.newBuilder()
+        .chatId(chatId)
+        .text("Введите результат в формате:\n[(Вес в кг) (количество "
+            + "подходов) (количество повторений)]\n\n" + "Пример сообщения: 12.5 8 15")
+        .build();
   }
 }

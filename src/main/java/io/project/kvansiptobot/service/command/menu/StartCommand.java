@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
@@ -34,12 +33,12 @@ public class StartCommand extends MainMenuCommand {
     var message = update.getMessage();
     registerUser(message);
     String firstName = update.getMessage().getChat().getFirstName();
-    String answer = EmojiParser.parseToUnicode("Hi, " + firstName + "\\! Nice to meet you\\!" + " :fire:");
-    SendMessageWrapper sendMessage = new SendMessageWrapper();
-    sendMessage.setChatId(message.getChatId());
-    sendMessage.setText(answer);
-    sendMessage.setReplyMarkup(getDefaultReplyKeyboardMarkup());
-    return sendMessage;
+    String answer = EmojiParser.parseToUnicode("Hi, " + firstName + "! Nice to meet you!" + " :fire:");
+    return SendMessageWrapper.newBuilder()
+        .chatId(message.getChatId())
+        .text(answer)
+        .replyMarkup(getDefaultReplyKeyboardMarkup())
+        .build();
   }
 
   @Override

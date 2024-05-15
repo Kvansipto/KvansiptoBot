@@ -8,6 +8,7 @@ import io.project.kvansiptobot.service.UserStateFactory;
 import io.project.kvansiptobot.service.UserStateService;
 import io.project.kvansiptobot.service.wrapper.BotApiMethodInterface;
 import io.project.kvansiptobot.service.wrapper.SendMessageWrapper;
+import io.project.kvansiptobot.service.wrapper.SendMessageWrapper.SendMessageWrapperBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -35,31 +36,30 @@ public class AddResultForExerciseResultCommand extends Command {
 
   @Override
   public BotApiMethodInterface process(Update update) {
-
     var message = update.getMessage().getText();
     var chatId = update.getMessage().getChatId();
-    String[] parts = message.split(" ");
-    double weight = Double.parseDouble(parts[0]);
-    byte sets = Byte.parseByte(parts[1]);
-    byte reps = Byte.parseByte(parts[2]);
-    ExerciseResult exerciseResult = ExerciseResult.builder()
-        .weight(weight)
-        .numberOfSets(sets)
-        .numberOfRepetitions(reps)
-        .user(userRepository.findById(chatId).get())
-        .exercise(userStateService.getCurrentState(chatId).getCurrentExercise())
-        .date(userStateService.getCurrentState(chatId).getExerciseResultDate())
-        .build();
-
-    SendMessageWrapper sendMessageWrapper = new SendMessageWrapper();
-    sendMessageWrapper.setChatId(chatId);
+    SendMessageWrapperBuilder sendMessageWrapperBuilder = SendMessageWrapper.newBuilder()
+        .chatId(chatId);
     try {
+      String[] parts = message.split(" ");
+      double weight = Double.parseDouble(parts[0]);
+      byte sets = Byte.parseByte(parts[1]);
+      byte reps = Byte.parseByte(parts[2]);
+      ExerciseResult exerciseResult = ExerciseResult.builder()
+          .weight(weight)
+          .numberOfSets(sets)
+          .numberOfRepetitions(reps)
+          .user(userRepository.findById(chatId).get())
+          .exercise(userStateService.getCurrentState(chatId).getCurrentExercise())
+          .date(userStateService.getCurrentState(chatId).getExerciseResultDate())
+          .build();
+
       exerciseResultRepository.save(exerciseResult);
-      sendMessageWrapper.setText("Результат успешно сохранен");
+      sendMessageWrapperBuilder.text("Результат успешно сохранен");
       userStateService.removeUserState(chatId);
     } catch (Exception e) {
-      sendMessageWrapper.setText("Неверный формат ввода\\. Пожалуйста, введите данные снова\\.");
+      sendMessageWrapperBuilder.text("Неверный формат ввода. Пожалуйста, введите данные снова.");
     }
-    return sendMessageWrapper;
+    return sendMessageWrapperBuilder.build();
   }
 }
