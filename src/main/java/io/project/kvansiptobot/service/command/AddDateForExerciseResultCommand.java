@@ -27,6 +27,9 @@ public class AddDateForExerciseResultCommand extends Command {
   @Autowired
   private UserStateFactory userStateFactory;
 
+  public static final String ADD_DATE_FOR_EXERCISE_RESULT_TEXT = "Выберите дату";
+  public static final String TODAY_TEXT = "Сегодня";
+  public static final String YESTERDAY_TEXT = "Вчера";
   public static final String ADD_DATE_EXERCISE_RESULT_TEXT = "ADD_DATE_EXERCISE_RESULT_";
 
   @Override
@@ -53,9 +56,9 @@ public class AddDateForExerciseResultCommand extends Command {
     for (int i = 0; i < DayOfWeek.values().length; i++) {
       String date = LocalDate.now().minusDays(i).format(dtf);
       if (i == 0) {
-        dataToInlineKeyboardMarkup.put("Сегодня", ADD_DATE_EXERCISE_RESULT_TEXT + date);
+        dataToInlineKeyboardMarkup.put(TODAY_TEXT, ADD_DATE_EXERCISE_RESULT_TEXT + date);
       } else if (i == 1) {
-        dataToInlineKeyboardMarkup.put("Вчера", ADD_DATE_EXERCISE_RESULT_TEXT + date);
+        dataToInlineKeyboardMarkup.put(YESTERDAY_TEXT, ADD_DATE_EXERCISE_RESULT_TEXT + date);
       } else {
         dataToInlineKeyboardMarkup.put(date, ADD_DATE_EXERCISE_RESULT_TEXT + date);
       }
@@ -63,7 +66,7 @@ public class AddDateForExerciseResultCommand extends Command {
     return SendMessageWrapper.newBuilder()
         .chatId(chatId)
         .replyMarkup(KeyboardMarkupUtil.generateInlineKeyboardMarkup(dataToInlineKeyboardMarkup,2))
-        .text("Выберите дату")
+        .text(ADD_DATE_FOR_EXERCISE_RESULT_TEXT)
         .build();
   }
 }

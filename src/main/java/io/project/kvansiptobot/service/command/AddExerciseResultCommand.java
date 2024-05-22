@@ -16,10 +16,11 @@ public class AddExerciseResultCommand extends Command {
 
   @Autowired
   UserStateService userStateService;
-
   @Autowired
   UserStateFactory userStateFactory;
 
+  public static final String ADD_EXERCISE_RESULT_TEXT = "Введите результат в формате:\n[(Вес в кг) (количество "
+      + "подходов) (количество повторений)]\n\n" + "Пример сообщения: 12.5 8 15";
   public static final String WAITING_FOR_RESULT_STATE_TEXT = "WAITING_FOR_RESULT";
 
   @Override
@@ -46,8 +47,7 @@ public class AddExerciseResultCommand extends Command {
     userStateService.setCurrentState(chatId, userState);
     return SendMessageWrapper.newBuilder()
         .chatId(chatId)
-        .text("Введите результат в формате:\n[(Вес в кг) (количество "
-            + "подходов) (количество повторений)]\n\n" + "Пример сообщения: 12.5 8 15")
+        .text(ADD_EXERCISE_RESULT_TEXT)
         .build();
   }
 }

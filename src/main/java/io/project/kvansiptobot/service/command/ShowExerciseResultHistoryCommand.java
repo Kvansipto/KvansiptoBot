@@ -20,6 +20,9 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 @Component
 public class ShowExerciseResultHistoryCommand extends Command {
 
+  public static final String EMPTY_LIST_EXERCISE_RESULT_TEXT = "Результаты по упражнению %s отсутствуют";
+  public static final String EXERCISE_RESULT_HISTORY_LIST_TEXT = "История результатов упражнения %s";
+  public static final String[] HEADERS = {"Дата", "Вес (кг)", "Подходы", "Повторения"};
   @Autowired
   ExerciseRepository exerciseRepository;
 
@@ -43,13 +46,12 @@ public class ShowExerciseResultHistoryCommand extends Command {
     SendMessageWrapperBuilder sendMessageWrapperBuilder = SendMessageWrapper.newBuilder()
         .chatId(chatId);
     if (exerciseResults.isEmpty()) {
-      sendMessageWrapperBuilder.text("Результаты по упражнению " + exerciseName + " отсутствуют");
+      sendMessageWrapperBuilder.text(EMPTY_LIST_EXERCISE_RESULT_TEXT.formatted(exerciseName));
       return sendMessageWrapperBuilder.build();
     } else {
       DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM");
 
-      String[] headers = {"Дата", "Вес (кг)", "Подходы", "Повторения"};
-      String[][] data = new String[exerciseResults.size()][headers.length];
+      String[][] data = new String[exerciseResults.size()][HEADERS.length];
 
       for (int i = 0; i < exerciseResults.size(); i++) {
         ExerciseResult exerciseResult = exerciseResults.get(i);
@@ -57,11 +59,11 @@ public class ShowExerciseResultHistoryCommand extends Command {
             String.valueOf(exerciseResult.getNumberOfSets()), String.valueOf(exerciseResult.getNumberOfRepetitions())};
       }
 
-      sendMessageWrapperBuilder.text("История результатов упражнения " + exerciseName);
+      sendMessageWrapperBuilder.text(EXERCISE_RESULT_HISTORY_LIST_TEXT.formatted(exerciseName));
       BotApiMethodWrapper botApiMethodWrapper = new BotApiMethodWrapper();
       botApiMethodWrapper.addAction(sendMessageWrapperBuilder.build());
 
-      var input = new InputFile().setMedia(TableImage.drawTableImage(headers, data));
+      var input = new InputFile().setMedia(TableImage.drawTableImage(HEADERS, data));
       SendPhotoWrapper sendPhoto = SendPhotoWrapper.newBuilder()
           .chatId(chatId)
           .photo(input)

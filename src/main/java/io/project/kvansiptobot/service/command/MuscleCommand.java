@@ -14,6 +14,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 @Component
 public class MuscleCommand extends Command {
 
+  public static final String MUSCLE_COMMAND_TEXT = "Выберите упражнение";
   @Autowired
   ExerciseRepository exerciseRepository;
 
@@ -38,7 +39,7 @@ public class MuscleCommand extends Command {
     return SendMessageWrapper.newBuilder()
         .chatId(chatId)
         .replyMarkup(KeyboardMarkupUtil.generateInlineKeyboardMarkup(dataToInlineKeyboardMarkup))
-        .text("Выберите упражнение")
+        .text(MUSCLE_COMMAND_TEXT)
         .build();
   }
 }

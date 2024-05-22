@@ -27,6 +27,9 @@ public class AddResultForExerciseResultCommand extends Command {
   @Autowired
   UserStateService userStateService;
 
+  public static final String SAVE_RESULT_SUCCESS_TEXT = "Результат успешно сохранен";
+  public static final String SAVE_RESULT_FAIL_TEXT = "Неверный формат ввода. Пожалуйста, введите данные снова.";
+
   @Override
   public boolean supports(Update update) {
     return update.hasMessage() && userStateService.getCurrentState(update.getMessage().getChatId()) != null
@@ -55,10 +58,10 @@ public class AddResultForExerciseResultCommand extends Command {
           .build();
 
       exerciseResultRepository.save(exerciseResult);
-      sendMessageWrapperBuilder.text("Результат успешно сохранен");
+      sendMessageWrapperBuilder.text(SAVE_RESULT_SUCCESS_TEXT);
       userStateService.removeUserState(chatId);
     } catch (Exception e) {
-      sendMessageWrapperBuilder.text("Неверный формат ввода. Пожалуйста, введите данные снова.");
+      sendMessageWrapperBuilder.text(SAVE_RESULT_FAIL_TEXT);
     }
     return sendMessageWrapperBuilder.build();
   }
