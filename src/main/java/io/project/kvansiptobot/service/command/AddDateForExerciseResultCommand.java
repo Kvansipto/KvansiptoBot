@@ -7,15 +7,15 @@ import io.project.kvansiptobot.service.UserStateFactory;
 import io.project.kvansiptobot.service.UserStateService;
 import io.project.kvansiptobot.service.wrapper.BotApiMethodInterface;
 import io.project.kvansiptobot.service.wrapper.SendMessageWrapper;
+import io.project.kvansiptobot.utils.KeyboardMarkupUtil;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
 @Component
 public class AddDateForExerciseResultCommand extends Command {
@@ -46,35 +46,23 @@ public class AddDateForExerciseResultCommand extends Command {
     userState.setCurrentState("CHOOSING DATE");
     userStateService.setCurrentState(chatId, userState);
 
-    InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
-    List<List<InlineKeyboardButton>> rows = new ArrayList<>();
-    List<InlineKeyboardButton> row = new ArrayList<>();
-    InlineKeyboardButton today = new InlineKeyboardButton();
-    InlineKeyboardButton yesterday = new InlineKeyboardButton();
-
     DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM");
-    LocalDate localDate = LocalDate.now();
 
-    today.setText("Сегодня");
-    today.setCallbackData(ADD_DATE_EXERCISE_RESULT_TEXT + localDate.format(dtf));
-    row.add(today);
-    yesterday.setText("Вчера");
-    yesterday.setCallbackData(ADD_DATE_EXERCISE_RESULT_TEXT + localDate.minusDays(1).format(dtf));
-    row.add(yesterday);
-    rows.add(row);
-    row = new ArrayList<>();
-    for (int i = 2; i <= 6; i++) {
-      InlineKeyboardButton dateButton = new InlineKeyboardButton();
-      String date = localDate.minusDays(i).format(dtf);
-      dateButton.setText(date);
-      dateButton.setCallbackData(ADD_DATE_EXERCISE_RESULT_TEXT + date);
-      row.add(dateButton);
+    Map<String, String> dataToInlineKeyboardMarkup = new HashMap<>();
+
+    for (int i = 0; i < DayOfWeek.values().length; i++) {
+      String date = LocalDate.now().minusDays(i).format(dtf);
+      if (i == 0) {
+        dataToInlineKeyboardMarkup.put("Сегодня", ADD_DATE_EXERCISE_RESULT_TEXT + date);
+      } else if (i == 1) {
+        dataToInlineKeyboardMarkup.put("Вчера", ADD_DATE_EXERCISE_RESULT_TEXT + date);
+      } else {
+        dataToInlineKeyboardMarkup.put(date, ADD_DATE_EXERCISE_RESULT_TEXT + date);
+      }
     }
-    rows.add(row);
-    inlineKeyboardMarkup.setKeyboard(rows);
     return SendMessageWrapper.newBuilder()
         .chatId(chatId)
-        .replyMarkup(inlineKeyboardMarkup)
+        .replyMarkup(KeyboardMarkupUtil.generateInlineKeyboardMarkup(dataToInlineKeyboardMarkup,2))
         .text("Выберите дату")
         .build();
   }

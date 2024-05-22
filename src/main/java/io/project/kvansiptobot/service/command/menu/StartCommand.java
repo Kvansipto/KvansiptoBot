@@ -6,14 +6,10 @@ import io.project.kvansiptobot.repository.UserRepository;
 import io.project.kvansiptobot.service.wrapper.BotApiMethodInterface;
 import io.project.kvansiptobot.service.wrapper.SendMessageWrapper;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
 @Component("/start")
 public class StartCommand extends MainMenuCommand {
@@ -37,7 +33,6 @@ public class StartCommand extends MainMenuCommand {
     return SendMessageWrapper.newBuilder()
         .chatId(message.getChatId())
         .text(answer)
-        .replyMarkup(getDefaultReplyKeyboardMarkup())
         .build();
   }
 
@@ -61,19 +56,19 @@ public class StartCommand extends MainMenuCommand {
     }
   }
 
-  private ReplyKeyboardMarkup getDefaultReplyKeyboardMarkup() {
-    ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
-    List<KeyboardRow> rows = new ArrayList<>();
-    KeyboardRow row = new KeyboardRow();
-    row.add("weather");
-    row.add("something");
-    rows.add(row);
-    row = new KeyboardRow();
-    row.add("secondRowButton");
-    row.add("secondRowButton2");
-    row.add("secondRowButton3");
-    rows.add(row);
-    replyKeyboardMarkup.setKeyboard(rows);
-    return replyKeyboardMarkup;
-  }
+//  private ReplyKeyboardMarkup getDefaultReplyKeyboardMarkup() {
+//    ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+//    List<KeyboardRow> rows = new ArrayList<>();
+//    KeyboardRow row = new KeyboardRow();
+//    row.add("weather");
+//    row.add("something");
+//    rows.add(row);
+//    row = new KeyboardRow();
+//    row.add("secondRowButton");
+//    row.add("secondRowButton2");
+//    row.add("secondRowButton3");
+//    rows.add(row);
+//    replyKeyboardMarkup.setKeyboard(rows);
+//    return replyKeyboardMarkup;
+//  }
 }
