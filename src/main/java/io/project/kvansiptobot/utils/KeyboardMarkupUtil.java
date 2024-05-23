@@ -11,6 +11,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 @UtilityClass
 public class KeyboardMarkupUtil {
 
+  //TODO Это все переделается при переходе на AnswerData + AnswerDto
   public InlineKeyboardMarkup generateInlineKeyboardMarkup(Iterable<String> data) {
     return generateInlineKeyboardMarkup(data, 1);
   }
