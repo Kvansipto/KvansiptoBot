@@ -1,5 +1,8 @@
 package io.project.kvansiptobot.model;
 
+import lombok.Getter;
+
+@Getter
 public enum MuscleGroup {
   CHEST("Грудные"),
   BACK("Спина"),
@@ -12,9 +15,5 @@ public enum MuscleGroup {
 
   MuscleGroup(String name) {
     this.name = name;
-  }
-
-  public String getName() {
-    return name;
   }
 }

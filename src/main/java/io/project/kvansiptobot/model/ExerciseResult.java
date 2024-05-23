@@ -7,14 +7,22 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.PastOrPresent;
 import java.time.LocalDate;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
 @Entity(name = "exercise_result")
+@Valid
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ExerciseResult {
 
   @Id
@@ -33,7 +41,6 @@ public class ExerciseResult {
   @Column(name = "number_of_repetitions")
   private byte numberOfRepetitions;
 
-  //TODO Разобраться, почему не работает аннотация
   @PastOrPresent(message = "The date cannot be in the future")
   private LocalDate date;
 
