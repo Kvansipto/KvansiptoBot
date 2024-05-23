@@ -8,64 +8,38 @@
     <version>3.2.5</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
-  <groupId>io.project</groupId>
-  <artifactId>KvansiptoBot</artifactId>
+
+  <artifactId>kvansipto-bot-parent-pom</artifactId>
+  <groupId>kvansipto.bot</groupId>
   <version>0.0.1-SNAPSHOT</version>
-  <name>KvansiptoBot</name>
+  <packaging>pom</packaging>
   <description>Demo project for Spring Boot</description>
+
+  <modules>
+    <module>telegram</module>
+    <module>exercises</module>
+    <module>exercises/exercise-microservice</module>
+    <module>exercises/exercise-api</module>
+  </modules>
+
   <properties>
     <java.version>17</java.version>
     <telegram.version>6.9.7.1</telegram.version>
+    <spring.boot.version>2.3.12.RELEASE</spring.boot.version>
   </properties>
-  <dependencies>
-    <dependency>
-      <groupId>org.telegram</groupId>
-      <artifactId>telegrambots</artifactId>
-      <version>${telegram.version}</version>
-    </dependency>
 
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-test</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.projectlombok</groupId>
-      <artifactId>lombok</artifactId>
-      <version>1.18.32</version>
-      <scope>provided</scope>
-    </dependency>
-
-    <!-- DB -->
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-data-jpa</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.postgresql</groupId>
-      <artifactId>postgresql</artifactId>
-      <version>42.7.3</version>
-    </dependency>
-
-    <!-- https://github.com/FasterXML/jackson-modules-base/discussions/239-->
-    <dependency>
-      <groupId>javax.xml.bind</groupId>
-      <artifactId>jaxb-api</artifactId>
-      <version>2.3.0</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.vdurmont</groupId>
-      <artifactId>emoji-java</artifactId>
-      <version>5.1.1</version>
-    </dependency>
-  </dependencies>
+  <dependencyManagement>
+    <dependencies>
+      <!-- external -->
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-dependencies</artifactId>
+        <version>${spring.boot.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <build>
     <plugins>
@@ -75,5 +49,4 @@
       </plugin>
     </plugins>
   </build>
-
 </project>
