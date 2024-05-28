@@ -1,31 +1,32 @@
-package io.project.kvansiptobot.service.command;
+package kvansipto.telegram.microservice.services.command;
 
-import io.project.kvansiptobot.model.Exercise;
-import io.project.kvansiptobot.repository.ExerciseRepository;
-import io.project.kvansiptobot.service.UserState;
-import io.project.kvansiptobot.service.UserStateFactory;
-import io.project.kvansiptobot.service.UserStateService;
-import io.project.kvansiptobot.service.wrapper.BotApiMethodInterface;
-import io.project.kvansiptobot.service.wrapper.SendMessageWrapper;
-import io.project.kvansiptobot.utils.KeyboardMarkupUtil;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
+import kvansipto.exercise.dto.ExerciseDto;
+import kvansipto.telegram.microservice.services.RestToExercises;
+import kvansipto.telegram.microservice.services.UserState;
+import kvansipto.telegram.microservice.services.UserStateFactory;
+import kvansipto.telegram.microservice.services.UserStateService;
+import kvansipto.telegram.microservice.services.wrapper.BotApiMethodInterface;
+import kvansipto.telegram.microservice.services.wrapper.SendMessageWrapper;
+import kvansipto.telegram.microservice.utils.KeyboardMarkupUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 @Component
 public class AddDateForExerciseResultCommand extends Command {
 
   @Autowired
-  ExerciseRepository exerciseRepository;
-  @Autowired
   UserStateService userStateService;
   @Autowired
   private UserStateFactory userStateFactory;
+  @Autowired
+  private RestToExercises restToExercises;
 
   public static final String ADD_DATE_FOR_EXERCISE_RESULT_TEXT = "Выберите дату";
   public static final String TODAY_TEXT = "Сегодня";
@@ -41,8 +42,9 @@ public class AddDateForExerciseResultCommand extends Command {
   @Override
   public BotApiMethodInterface process(Update update) {
     String exerciseName = update.getCallbackQuery().getData().split("_")[3];
-    Long chatId = update.getCallbackQuery().getMessage().getChatId();
-    Exercise exercise = exerciseRepository.findByName(exerciseName);
+    String chatId = update.getCallbackQuery().getMessage().getChatId().toString();
+//    ExerciseDto exercise = exerciseRepository.findByName(exerciseName);
+    ExerciseDto exercise = restToExercises.getExerciseByName(exerciseName);
 
     UserState userState = userStateFactory.createUserSession(chatId);
     userState.setCurrentExercise(exercise);

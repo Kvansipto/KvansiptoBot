@@ -23,11 +23,7 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ExerciseResult {
-
-  @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
-  private long id;
+public class ExerciseResult extends BaseEntity {
 
   @ManyToOne
   @JoinColumn(name = "exercise_id")

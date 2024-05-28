@@ -1,12 +1,12 @@
-package io.project.kvansiptobot.service.command;
+package kvansipto.telegram.microservice.services.command;
 
-import io.project.kvansiptobot.model.Exercise;
-import io.project.kvansiptobot.repository.ExerciseRepository;
-import io.project.kvansiptobot.service.wrapper.BotApiMethodInterface;
-import io.project.kvansiptobot.service.wrapper.SendMessageWrapper;
-import io.project.kvansiptobot.utils.KeyboardMarkupUtil;
 import java.util.HashMap;
 import java.util.Map;
+import kvansipto.exercise.dto.ExerciseDto;
+import kvansipto.telegram.microservice.services.RestToExercises;
+import kvansipto.telegram.microservice.services.wrapper.BotApiMethodInterface;
+import kvansipto.telegram.microservice.services.wrapper.SendMessageWrapper;
+import kvansipto.telegram.microservice.utils.KeyboardMarkupUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -15,7 +15,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 public class ExerciseCommand extends Command {
 
   @Autowired
-  ExerciseRepository exerciseRepository;
+  RestToExercises restToExercises;
 
   public static final String SHOW_EXERCISE_RESULT_HISTORY_BUTTON_TEXT = "Отобразить историю результатов по упражнению";
   public static final String ADD_EXERCISE_RESULT_BUTTON_TEXT = "Добавить результат выполнения упражнения";
@@ -25,13 +25,15 @@ public class ExerciseCommand extends Command {
 
   @Override
   public boolean supports(Update update) {
-    return update.hasCallbackQuery() && exerciseRepository.existsByName(update.getCallbackQuery().getData());
+    return update.hasCallbackQuery() && restToExercises.getExerciseByName(update.getCallbackQuery().getData()) != null;
+//        exerciseRepository.existsByName(update.getCallbackQuery().getData());
   }
 
   @Override
   public BotApiMethodInterface process(Update update) {
-    long chatId = update.getCallbackQuery().getMessage().getChatId();
-    Exercise exercise = exerciseRepository.findByName(update.getCallbackQuery().getData());
+    String chatId = update.getCallbackQuery().getMessage().getChatId().toString();
+    ExerciseDto exercise = restToExercises.getExerciseByName(update.getCallbackQuery().getData());
+//        exerciseRepository.findByName(update.getCallbackQuery().getData());
 
     Map<String, String> dataToInlineKeyboardMarkup = new HashMap<>();
     dataToInlineKeyboardMarkup.put(SHOW_EXERCISE_RESULT_HISTORY_BUTTON_TEXT,

@@ -21,11 +21,6 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.projectlombok</groupId>
-      <artifactId>lombok</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-context</artifactId>
     </dependency>
@@ -37,10 +32,6 @@
       <groupId>org.telegram</groupId>
       <artifactId>telegrambots</artifactId>
       <version>${telegram.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>javax.validation</groupId>
-      <artifactId>validation-api</artifactId>
     </dependency>
     <dependency>
       <groupId>com.vdurmont</groupId>

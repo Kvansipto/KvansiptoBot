@@ -1,14 +1,12 @@
-package io.project.kvansiptobot.service.command;
+package kvansipto.telegram.microservice.services.command;
 
-import io.project.kvansiptobot.model.ExerciseResult;
-import io.project.kvansiptobot.repository.ExerciseRepository;
-import io.project.kvansiptobot.repository.ExerciseResultRepository;
-import io.project.kvansiptobot.repository.UserRepository;
-import io.project.kvansiptobot.service.UserStateFactory;
-import io.project.kvansiptobot.service.UserStateService;
-import io.project.kvansiptobot.service.wrapper.BotApiMethodInterface;
-import io.project.kvansiptobot.service.wrapper.SendMessageWrapper;
-import io.project.kvansiptobot.service.wrapper.SendMessageWrapper.SendMessageWrapperBuilder;
+import kvansipto.exercise.dto.ExerciseResultDto;
+import kvansipto.telegram.microservice.services.RestToExercises;
+import kvansipto.telegram.microservice.services.UserStateService;
+import kvansipto.telegram.microservice.services.UserStateFactory;
+import kvansipto.telegram.microservice.services.wrapper.BotApiMethodInterface;
+import kvansipto.telegram.microservice.services.wrapper.SendMessageWrapper;
+import kvansipto.telegram.microservice.services.wrapper.SendMessageWrapper.SendMessageWrapperBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -17,11 +15,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 public class AddResultForExerciseResultCommand extends Command {
 
   @Autowired
-  ExerciseRepository exerciseRepository;
-  @Autowired
-  ExerciseResultRepository exerciseResultRepository;
-  @Autowired
-  UserRepository userRepository;
+  RestToExercises restToExercises;
   @Autowired
   UserStateFactory userStateFactory;
   @Autowired
@@ -32,15 +26,15 @@ public class AddResultForExerciseResultCommand extends Command {
 
   @Override
   public boolean supports(Update update) {
-    return update.hasMessage() && userStateService.getCurrentState(update.getMessage().getChatId()) != null
-        && userStateService.getCurrentState(update.getMessage().getChatId()).getCurrentState()
+    return update.hasMessage() && userStateService.getCurrentState(update.getMessage().getChatId().toString()) != null
+        && userStateService.getCurrentState(update.getMessage().getChatId().toString()).getCurrentState()
         .equals(AddExerciseResultCommand.WAITING_FOR_RESULT_STATE_TEXT);
   }
 
   @Override
   public BotApiMethodInterface process(Update update) {
     var message = update.getMessage().getText();
-    var chatId = update.getMessage().getChatId();
+    var chatId = update.getMessage().getChatId().toString();
     SendMessageWrapperBuilder sendMessageWrapperBuilder = SendMessageWrapper.newBuilder()
         .chatId(chatId);
     try {
@@ -48,16 +42,16 @@ public class AddResultForExerciseResultCommand extends Command {
       double weight = Double.parseDouble(parts[0]);
       byte sets = Byte.parseByte(parts[1]);
       byte reps = Byte.parseByte(parts[2]);
-      ExerciseResult exerciseResult = ExerciseResult.builder()
+      ExerciseResultDto exerciseResult = ExerciseResultDto.builder()
           .weight(weight)
           .numberOfSets(sets)
           .numberOfRepetitions(reps)
-          .user(userRepository.findById(chatId).get())
+          .user(restToExercises.getUser(chatId))
           .exercise(userStateService.getCurrentState(chatId).getCurrentExercise())
           .date(userStateService.getCurrentState(chatId).getExerciseResultDate())
           .build();
-
-      exerciseResultRepository.save(exerciseResult);
+      restToExercises.saveExerciseResult(exerciseResult);
+//      exerciseResultRepository.save(exerciseResult);
       sendMessageWrapperBuilder.text(SAVE_RESULT_SUCCESS_TEXT);
       userStateService.removeUserState(chatId);
     } catch (Exception e) {

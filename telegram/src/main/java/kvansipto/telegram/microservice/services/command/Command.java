@@ -1,6 +1,6 @@
-package io.project.kvansiptobot.service.command;
+package kvansipto.telegram.microservice.services.command;
 
-import io.project.kvansiptobot.service.wrapper.BotApiMethodInterface;
+import kvansipto.telegram.microservice.services.wrapper.BotApiMethodInterface;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 

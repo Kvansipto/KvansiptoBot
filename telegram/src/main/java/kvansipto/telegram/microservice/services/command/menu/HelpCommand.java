@@ -1,19 +1,15 @@
-package io.project.kvansiptobot.service.command.menu;
+package kvansipto.telegram.microservice.services.command.menu;
 
-import static io.project.kvansiptobot.service.TelegramBot.HELP_TEXT;
+import static kvansipto.telegram.microservice.services.TelegramBot.HELP_TEXT;
 
-import io.project.kvansiptobot.repository.UserRepository;
-import io.project.kvansiptobot.service.wrapper.BotApiMethodInterface;
-import io.project.kvansiptobot.service.wrapper.SendMessageWrapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import kvansipto.exercise.resources.ExerciseApi;
+import kvansipto.telegram.microservice.services.wrapper.SendMessageWrapper;
+import kvansipto.telegram.microservice.services.wrapper.BotApiMethodInterface;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 @Component("/help")
 public class HelpCommand extends MainMenuCommand {
-
-  @Autowired
-  UserRepository userRepository;
 
   public static final String HELP_COMMAND_TEXT = "/help";
 
@@ -25,7 +21,7 @@ public class HelpCommand extends MainMenuCommand {
   @Override
   public BotApiMethodInterface process(Update update) {
     return SendMessageWrapper.newBuilder()
-        .chatId(update.getMessage().getChatId())
+        .chatId(update.getMessage().getChatId().toString())
         .text(HELP_TEXT)
         .build();
   }

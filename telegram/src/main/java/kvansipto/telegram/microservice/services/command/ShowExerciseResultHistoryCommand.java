@@ -1,17 +1,16 @@
-package io.project.kvansiptobot.service.command;
+package kvansipto.telegram.microservice.services.command;
 
-import io.project.kvansiptobot.model.Exercise;
-import io.project.kvansiptobot.model.ExerciseResult;
-import io.project.kvansiptobot.repository.ExerciseRepository;
-import io.project.kvansiptobot.repository.ExerciseResultRepository;
-import io.project.kvansiptobot.service.wrapper.BotApiMethodInterface;
-import io.project.kvansiptobot.service.wrapper.BotApiMethodWrapper;
-import io.project.kvansiptobot.service.wrapper.SendMessageWrapper;
-import io.project.kvansiptobot.service.wrapper.SendMessageWrapper.SendMessageWrapperBuilder;
-import io.project.kvansiptobot.service.wrapper.SendPhotoWrapper;
-import io.project.kvansiptobot.utils.TableImage;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import kvansipto.exercise.dto.ExerciseDto;
+import kvansipto.exercise.dto.ExerciseResultDto;
+import kvansipto.telegram.microservice.services.RestToExercises;
+import kvansipto.telegram.microservice.services.wrapper.BotApiMethodInterface;
+import kvansipto.telegram.microservice.services.wrapper.BotApiMethodWrapper;
+import kvansipto.telegram.microservice.services.wrapper.SendMessageWrapper;
+import kvansipto.telegram.microservice.services.wrapper.SendMessageWrapper.SendMessageWrapperBuilder;
+import kvansipto.telegram.microservice.services.wrapper.SendPhotoWrapper;
+import kvansipto.telegram.microservice.utils.TableImage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
@@ -23,11 +22,9 @@ public class ShowExerciseResultHistoryCommand extends Command {
   public static final String EMPTY_LIST_EXERCISE_RESULT_TEXT = "Результаты по упражнению %s отсутствуют";
   public static final String EXERCISE_RESULT_HISTORY_LIST_TEXT = "История результатов упражнения %s";
   public static final String[] HEADERS = {"Дата", "Вес (кг)", "Подходы", "Повторения"};
-  @Autowired
-  ExerciseRepository exerciseRepository;
 
   @Autowired
-  ExerciseResultRepository exerciseResultRepository;
+  RestToExercises restToExercises;
 
   @Override
   public boolean supports(Update update) {
@@ -38,11 +35,12 @@ public class ShowExerciseResultHistoryCommand extends Command {
   @Override
   public BotApiMethodInterface process(Update update) {
     String exerciseName = update.getCallbackQuery().getData().split("_")[4];
-    Exercise exercise = exerciseRepository.findByName(exerciseName);
-    Long chatId = update.getCallbackQuery().getMessage().getChatId();
+    ExerciseDto exercise = restToExercises.getExerciseByName(exerciseName);
+//    Exercise exercise = exerciseRepository.findByName(exerciseName);
+    String chatId = update.getCallbackQuery().getMessage().getChatId().toString();
 
-    List<ExerciseResult> exerciseResults = exerciseResultRepository.findByExerciseAndUserChatIdOrderByDateDesc(exercise,
-        chatId);
+    List<ExerciseResultDto> exerciseResults = restToExercises.getExerciseResults(exercise, chatId);
+//        exerciseResultRepository.findByExerciseAndUserChatIdOrderByDateDesc(exercise, chatId);
     SendMessageWrapperBuilder sendMessageWrapperBuilder = SendMessageWrapper.newBuilder()
         .chatId(chatId);
     if (exerciseResults.isEmpty()) {
@@ -54,7 +52,7 @@ public class ShowExerciseResultHistoryCommand extends Command {
       String[][] data = new String[exerciseResults.size()][HEADERS.length];
 
       for (int i = 0; i < exerciseResults.size(); i++) {
-        ExerciseResult exerciseResult = exerciseResults.get(i);
+        ExerciseResultDto exerciseResult = exerciseResults.get(i);
         data[i] = new String[]{exerciseResult.getDate().format(dtf), String.valueOf(exerciseResult.getWeight()),
             String.valueOf(exerciseResult.getNumberOfSets()), String.valueOf(exerciseResult.getNumberOfRepetitions())};
       }

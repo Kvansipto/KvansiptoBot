@@ -1,12 +1,12 @@
-package io.project.kvansiptobot.service.command;
+package kvansipto.telegram.microservice.services.command;
 
-import io.project.kvansiptobot.model.Exercise;
-import io.project.kvansiptobot.model.MuscleGroup;
-import io.project.kvansiptobot.repository.ExerciseRepository;
-import io.project.kvansiptobot.service.wrapper.BotApiMethodInterface;
-import io.project.kvansiptobot.service.wrapper.SendMessageWrapper;
-import io.project.kvansiptobot.utils.KeyboardMarkupUtil;
 import java.util.Arrays;
+import kvansipto.exercise.dto.ExerciseDto;
+import kvansipto.exercise.dto.MuscleGroupDto;
+import kvansipto.telegram.microservice.services.RestToExercises;
+import kvansipto.telegram.microservice.services.wrapper.BotApiMethodInterface;
+import kvansipto.telegram.microservice.services.wrapper.SendMessageWrapper;
+import kvansipto.telegram.microservice.utils.KeyboardMarkupUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -16,24 +16,24 @@ public class MuscleCommand extends Command {
 
   public static final String MUSCLE_COMMAND_TEXT = "Выберите упражнение";
   @Autowired
-  ExerciseRepository exerciseRepository;
+  RestToExercises restToExercises;
 
   @Override
   public boolean supports(Update update) {
-    return update.hasCallbackQuery() && Arrays.stream(MuscleGroup.values())
-        .map(MuscleGroup::getName)
+    return update.hasCallbackQuery() && restToExercises.getMuscleGroups().stream()
+        .map(MuscleGroupDto::getName)
         .anyMatch(m -> m.equals(update.getCallbackQuery().getData()));
   }
 
   @Override
   public BotApiMethodInterface process(Update update) {
-    long chatId = update.getCallbackQuery().getMessage().getChatId();
+    String chatId = update.getCallbackQuery().getMessage().getChatId().toString();
 
-    MuscleGroup muscleGroup = Arrays.stream(MuscleGroup.values())
+    MuscleGroupDto muscleGroup = restToExercises.getMuscleGroups().stream()
         .filter(m -> m.getName().equals(update.getCallbackQuery().getData()))
         .findFirst().get();
-    var dataToInlineKeyboardMarkup = exerciseRepository.findByMuscleGroup(muscleGroup).stream()
-        .map(Exercise::getName)
+    var dataToInlineKeyboardMarkup = restToExercises.getExercisesByMuscleGroup(muscleGroup).stream()
+        .map(ExerciseDto::getName)
         .toList();
     //TODO Попробуй через EditMessage, чтобы уменьшить длину чата и сделать более похоже на приложение.
     return SendMessageWrapper.newBuilder()

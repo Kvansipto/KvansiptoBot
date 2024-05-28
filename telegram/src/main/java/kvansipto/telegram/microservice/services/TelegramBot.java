@@ -1,13 +1,13 @@
-package io.project.kvansiptobot.service;
+package kvansipto.telegram.microservice.services;
 
-import io.project.kvansiptobot.config.BotConfig;
-import io.project.kvansiptobot.service.command.Command;
-import io.project.kvansiptobot.service.command.menu.HelpCommand;
-import io.project.kvansiptobot.service.command.menu.MainMenuCommand;
-import io.project.kvansiptobot.service.wrapper.BotApiMethodInterface;
 import jakarta.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
+import kvansipto.telegram.microservice.config.BotConfig;
+import kvansipto.telegram.microservice.services.command.Command;
+import kvansipto.telegram.microservice.services.command.menu.HelpCommand;
+import kvansipto.telegram.microservice.services.command.menu.MainMenuCommand;
+import kvansipto.telegram.microservice.services.wrapper.BotApiMethodInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;

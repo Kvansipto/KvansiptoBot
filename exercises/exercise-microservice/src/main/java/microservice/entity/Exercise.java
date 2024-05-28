@@ -13,11 +13,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity(name = "exercise")
-public class Exercise {
-
-  @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
-  private long id;
+public class Exercise extends BaseEntity {
 
   @Column(nullable = false, unique = true)
   private String name;

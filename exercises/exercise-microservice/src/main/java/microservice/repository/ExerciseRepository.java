@@ -1,15 +1,13 @@
 package microservice.repository;
 
-import io.project.kvansiptobot.model.Exercise;
-import io.project.kvansiptobot.model.MuscleGroup;
 import java.util.List;
+import microservice.entity.Exercise;
+import microservice.entity.MuscleGroup;
 import org.springframework.data.repository.CrudRepository;
 
-public interface ExerciseRepository extends CrudRepository<Exercise, Long> {
+public interface ExerciseRepository extends CrudRepository<Exercise, String> {
 
   List<Exercise> findByMuscleGroup(MuscleGroup muscleGroup);
 
   Exercise findByName(String name);
-
-  boolean existsByName(String name);
 }

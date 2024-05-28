@@ -4,20 +4,22 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 @Component
-@Getter
-@Setter
-@Valid
-@ConfigurationProperties("telegram.bot")
 public class BotConfig {
 
-  @NotBlank
-  String botName;
-  @NotBlank
-  String botToken;
-  @NotBlank
-  Long ownerChatId;
+  @Autowired
+  private Environment env;
+
+  public String getBotToken() {
+    return env.getProperty("telegram.bot.botToken");
+  }
+
+  public String getBotName() {
+    return env.getProperty("telegram.bot.botName");
+  }
 }

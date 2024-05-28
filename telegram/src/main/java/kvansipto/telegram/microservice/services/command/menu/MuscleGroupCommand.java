@@ -1,15 +1,21 @@
-package io.project.kvansiptobot.service.command.menu;
+package kvansipto.telegram.microservice.services.command.menu;
 
-import io.project.kvansiptobot.model.MuscleGroup;
-import io.project.kvansiptobot.service.wrapper.BotApiMethodInterface;
-import io.project.kvansiptobot.service.wrapper.SendMessageWrapper;
-import io.project.kvansiptobot.utils.KeyboardMarkupUtil;
 import java.util.Arrays;
+import kvansipto.exercise.dto.ExerciseDto;
+import kvansipto.exercise.dto.MuscleGroupDto;
+import kvansipto.telegram.microservice.services.RestToExercises;
+import kvansipto.telegram.microservice.services.wrapper.BotApiMethodInterface;
+import kvansipto.telegram.microservice.services.wrapper.SendMessageWrapper;
+import kvansipto.telegram.microservice.utils.KeyboardMarkupUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 @Component("/exercise_info")
 public class MuscleGroupCommand extends MainMenuCommand {
+
+  @Autowired
+  RestToExercises restToExercises;
 
   @Override
   public boolean supports(Update update) {
@@ -19,11 +25,12 @@ public class MuscleGroupCommand extends MainMenuCommand {
   @Override
   public BotApiMethodInterface process(Update update) {
     Long chatId = update.getMessage().getChatId();
-    var dataToInlineKeyboardMarkup = Arrays.stream(MuscleGroup.values())
-        .map(MuscleGroup::getName)
+
+    var dataToInlineKeyboardMarkup = restToExercises.getMuscleGroups().stream()
+        .map(MuscleGroupDto::getName)
         .toList();
     return SendMessageWrapper.newBuilder()
-        .chatId(chatId)
+        .chatId(chatId.toString())
         .replyMarkup(KeyboardMarkupUtil.generateInlineKeyboardMarkup(dataToInlineKeyboardMarkup, 2))
         .text("Выберите группу мышц")
         .build();

@@ -5,11 +5,7 @@ import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class ExerciseDto extends BaseDto {
+public class MuscleGroupDto extends BaseDto {
 
   String name;
-  String description;
-  String videoUrl;
-  String imageUrl;
-  MuscleGroupDto muscleGroup;
 }

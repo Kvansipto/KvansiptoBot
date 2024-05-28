@@ -1,8 +1,8 @@
-package io.project.kvansiptobot.service.wrapper;
+package kvansipto.telegram.microservice.services.wrapper;
 
-import io.project.kvansiptobot.service.TelegramBot;
 import java.util.ArrayList;
 import java.util.List;
+import kvansipto.telegram.microservice.services.TelegramBot;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 public class BotApiMethodWrapper implements BotApiMethodInterface {

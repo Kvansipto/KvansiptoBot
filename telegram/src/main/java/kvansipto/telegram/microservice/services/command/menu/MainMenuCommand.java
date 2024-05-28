@@ -1,6 +1,6 @@
-package io.project.kvansiptobot.service.command.menu;
+package kvansipto.telegram.microservice.services.command.menu;
 
-import io.project.kvansiptobot.service.command.Command;
+import kvansipto.telegram.microservice.services.command.Command;
 import org.springframework.stereotype.Component;
 
 @Component

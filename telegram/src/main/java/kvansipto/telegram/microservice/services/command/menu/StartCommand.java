@@ -1,11 +1,11 @@
-package io.project.kvansiptobot.service.command.menu;
+package kvansipto.telegram.microservice.services.command.menu;
 
 import com.vdurmont.emoji.EmojiParser;
-import io.project.kvansiptobot.model.User;
-import io.project.kvansiptobot.repository.UserRepository;
-import io.project.kvansiptobot.service.wrapper.BotApiMethodInterface;
-import io.project.kvansiptobot.service.wrapper.SendMessageWrapper;
 import java.sql.Timestamp;
+import kvansipto.exercise.dto.UserDto;
+import kvansipto.telegram.microservice.services.RestToExercises;
+import kvansipto.telegram.microservice.services.wrapper.BotApiMethodInterface;
+import kvansipto.telegram.microservice.services.wrapper.SendMessageWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -15,7 +15,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 public class StartCommand extends MainMenuCommand {
 
   @Autowired
-  UserRepository userRepository;
+  private RestToExercises restToExercises;
 
   public static final String START_COMMAND_TEXT = "/start";
 
@@ -31,7 +31,7 @@ public class StartCommand extends MainMenuCommand {
     String firstName = update.getMessage().getChat().getFirstName();
     String answer = EmojiParser.parseToUnicode("Hi, " + firstName + "! Nice to meet you!" + " :fire:");
     return SendMessageWrapper.newBuilder()
-        .chatId(message.getChatId())
+        .chatId(message.getChatId().toString())
         .text(answer)
         .build();
   }
@@ -42,17 +42,17 @@ public class StartCommand extends MainMenuCommand {
   }
 
   private void registerUser(Message message) {
-    if (!userRepository.existsById(message.getChatId())) {
+    if (!restToExercises.userExists(message.getChatId().toString())) {
       var chatId = message.getChatId();
       var chat = message.getChat();
 
-      User user = new User();
+      UserDto user = new UserDto();
       user.setChatId(chatId);
       user.setUserName(chat.getUserName());
       user.setFirstName(chat.getFirstName());
       user.setLastName(chat.getLastName());
       user.setRegisteredAt(new Timestamp(System.currentTimeMillis()));
-      userRepository.save(user);
+      restToExercises.saveUser(user);
     }
   }
 
