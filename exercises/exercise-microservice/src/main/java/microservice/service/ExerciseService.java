@@ -2,10 +2,9 @@ package microservice.service;
 
 import java.util.List;
 import kvansipto.exercise.dto.ExerciseDto;
-import kvansipto.exercise.dto.MuscleGroupDto;
 import microservice.entity.Exercise;
+import microservice.entity.MuscleGroup;
 import microservice.mapper.ExerciseMapper;
-import microservice.mapper.MuscleGroupMapper;
 import microservice.repository.ExerciseRepository;
 import org.springframework.stereotype.Service;
 
@@ -13,14 +12,14 @@ import org.springframework.stereotype.Service;
 public class ExerciseService extends
     BaseMappedService<Exercise, ExerciseDto, String, ExerciseRepository, ExerciseMapper> {
 
-  MuscleGroupMapper muscleGroupMapper;
-
-  protected ExerciseService(ExerciseRepository repository, ExerciseMapper mapper) {
-    super(repository, mapper);
+  protected ExerciseService(ExerciseRepository repository, ExerciseMapper exerciseMapper) {
+    super(repository, exerciseMapper);
   }
 
-  public List<ExerciseDto> getExercisesByMuscleGroup(MuscleGroupDto muscleGroup) {
-    return repository.findByMuscleGroup(muscleGroupMapper.toEntity(muscleGroup)).stream()
+  public List<ExerciseDto> getExercisesByMuscleGroup(String muscleGroup) {
+
+    MuscleGroup existedMuscleGroup = MuscleGroup.fromName(muscleGroup);
+    return repository.findByMuscleGroup(existedMuscleGroup).stream()
         .map(mapper::toDto)
         .toList();
   }

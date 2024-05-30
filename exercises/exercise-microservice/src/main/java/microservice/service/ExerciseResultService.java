@@ -13,10 +13,12 @@ import org.springframework.stereotype.Service;
 public class ExerciseResultService extends
     BaseMappedService<ExerciseResult, ExerciseResultDto, String, ExerciseResultRepository, ExerciseResultMapper> {
 
-  ExerciseMapper exerciseMapper;
+  private final ExerciseMapper exerciseMapper;
 
-  protected ExerciseResultService(ExerciseResultRepository repository, ExerciseResultMapper mapper) {
+  protected ExerciseResultService(ExerciseResultRepository repository, ExerciseResultMapper mapper,
+      ExerciseMapper exerciseMapper) {
     super(repository, mapper);
+    this.exerciseMapper = exerciseMapper;
   }
 
   public List<ExerciseResultDto> getExerciseResults(ExerciseDto exercise, String chatId) {

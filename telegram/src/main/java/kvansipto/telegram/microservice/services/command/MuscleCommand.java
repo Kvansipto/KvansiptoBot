@@ -1,11 +1,11 @@
 package kvansipto.telegram.microservice.services.command;
 
-import java.util.Arrays;
-import kvansipto.exercise.dto.ExerciseDto;
-import kvansipto.exercise.dto.MuscleGroupDto;
+import java.util.List;
 import kvansipto.telegram.microservice.services.RestToExercises;
+import kvansipto.telegram.microservice.services.dto.AnswerData;
+import kvansipto.telegram.microservice.services.dto.AnswerDto;
 import kvansipto.telegram.microservice.services.wrapper.BotApiMethodInterface;
-import kvansipto.telegram.microservice.services.wrapper.SendMessageWrapper;
+import kvansipto.telegram.microservice.services.wrapper.EditMessageWrapper;
 import kvansipto.telegram.microservice.utils.KeyboardMarkupUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,25 +20,26 @@ public class MuscleCommand extends Command {
 
   @Override
   public boolean supports(Update update) {
-    return update.hasCallbackQuery() && restToExercises.getMuscleGroups().stream()
-        .map(MuscleGroupDto::getName)
-        .anyMatch(m -> m.equals(update.getCallbackQuery().getData()));
+    return update.hasCallbackQuery() &&
+        AnswerData.deserialize(update.getCallbackQuery().getData()).getButtonCode().equals("muscle_group");
   }
 
   @Override
   public BotApiMethodInterface process(Update update) {
     String chatId = update.getCallbackQuery().getMessage().getChatId().toString();
+    String muscleGroup = AnswerData.deserialize(update.getCallbackQuery().getData()).getButtonText();
+    System.out.println("Группа мышц " + muscleGroup);
 
-    MuscleGroupDto muscleGroup = restToExercises.getMuscleGroups().stream()
-        .filter(m -> m.getName().equals(update.getCallbackQuery().getData()))
-        .findFirst().get();
-    var dataToInlineKeyboardMarkup = restToExercises.getExercisesByMuscleGroup(muscleGroup).stream()
-        .map(ExerciseDto::getName)
+    List<AnswerDto> answerDtoList = restToExercises.getExercisesByMuscleGroup(muscleGroup).stream()
+        .map(e -> new AnswerDto(e.getName(), "exercise"))
         .toList();
-    //TODO Попробуй через EditMessage, чтобы уменьшить длину чата и сделать более похоже на приложение.
-    return SendMessageWrapper.newBuilder()
+
+    System.out.println("Упражнения для группы мышц " + muscleGroup + ": " + answerDtoList);
+
+    return EditMessageWrapper.newBuilder()
         .chatId(chatId)
-        .replyMarkup(KeyboardMarkupUtil.generateInlineKeyboardMarkup(dataToInlineKeyboardMarkup))
+        .messageId(update.getCallbackQuery().getMessage().getMessageId())
+        .replyMarkup(KeyboardMarkupUtil.createRows(answerDtoList, 1))
         .text(MUSCLE_COMMAND_TEXT)
         .build();
   }

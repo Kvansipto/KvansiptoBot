@@ -2,12 +2,10 @@ package kvansipto.exercise.dto;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.PastOrPresent;
-import java.io.Serializable;
 import java.time.LocalDate;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Value;
 
 @EqualsAndHashCode(callSuper = true)
 @Data

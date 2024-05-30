@@ -2,9 +2,8 @@ package kvansipto.telegram.microservice.services.command.menu;
 
 import static kvansipto.telegram.microservice.services.TelegramBot.HELP_TEXT;
 
-import kvansipto.exercise.resources.ExerciseApi;
-import kvansipto.telegram.microservice.services.wrapper.SendMessageWrapper;
 import kvansipto.telegram.microservice.services.wrapper.BotApiMethodInterface;
+import kvansipto.telegram.microservice.services.wrapper.SendMessageWrapper;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 

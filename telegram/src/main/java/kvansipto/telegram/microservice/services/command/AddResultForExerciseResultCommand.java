@@ -1,10 +1,14 @@
 package kvansipto.telegram.microservice.services.command;
 
+import java.util.ArrayList;
+import java.util.List;
 import kvansipto.exercise.dto.ExerciseResultDto;
 import kvansipto.telegram.microservice.services.RestToExercises;
-import kvansipto.telegram.microservice.services.UserStateService;
 import kvansipto.telegram.microservice.services.UserStateFactory;
+import kvansipto.telegram.microservice.services.UserStateService;
 import kvansipto.telegram.microservice.services.wrapper.BotApiMethodInterface;
+import kvansipto.telegram.microservice.services.wrapper.BotApiMethodWrapper;
+import kvansipto.telegram.microservice.services.wrapper.DeleteMessagesWrapper;
 import kvansipto.telegram.microservice.services.wrapper.SendMessageWrapper;
 import kvansipto.telegram.microservice.services.wrapper.SendMessageWrapper.SendMessageWrapperBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +28,8 @@ public class AddResultForExerciseResultCommand extends Command {
   public static final String SAVE_RESULT_SUCCESS_TEXT = "Результат успешно сохранен";
   public static final String SAVE_RESULT_FAIL_TEXT = "Неверный формат ввода. Пожалуйста, введите данные снова.";
 
+  private final List<Integer> wrongAttempts = new ArrayList<>();
+
   @Override
   public boolean supports(Update update) {
     return update.hasMessage() && userStateService.getCurrentState(update.getMessage().getChatId().toString()) != null
@@ -35,6 +41,8 @@ public class AddResultForExerciseResultCommand extends Command {
   public BotApiMethodInterface process(Update update) {
     var message = update.getMessage().getText();
     var chatId = update.getMessage().getChatId().toString();
+
+    BotApiMethodWrapper botApiMethodWrapper = new BotApiMethodWrapper();
     SendMessageWrapperBuilder sendMessageWrapperBuilder = SendMessageWrapper.newBuilder()
         .chatId(chatId);
     try {
@@ -51,12 +59,20 @@ public class AddResultForExerciseResultCommand extends Command {
           .date(userStateService.getCurrentState(chatId).getExerciseResultDate())
           .build();
       restToExercises.saveExerciseResult(exerciseResult);
-//      exerciseResultRepository.save(exerciseResult);
       sendMessageWrapperBuilder.text(SAVE_RESULT_SUCCESS_TEXT);
       userStateService.removeUserState(chatId);
+
+      if (!wrongAttempts.isEmpty()) {
+        DeleteMessagesWrapper deleteMessagesWrapper = new DeleteMessagesWrapper(chatId, new ArrayList<>(wrongAttempts));
+        botApiMethodWrapper.addAction(deleteMessagesWrapper);
+        wrongAttempts.clear();
+      }
     } catch (Exception e) {
+      wrongAttempts.add(update.getMessage().getMessageId());
+      wrongAttempts.add(update.getMessage().getMessageId() + 1);
       sendMessageWrapperBuilder.text(SAVE_RESULT_FAIL_TEXT);
     }
-    return sendMessageWrapperBuilder.build();
+    botApiMethodWrapper.addAction(sendMessageWrapperBuilder.build());
+    return botApiMethodWrapper;
   }
 }

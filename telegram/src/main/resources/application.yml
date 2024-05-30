@@ -1,22 +1,13 @@
 server:
   port: 8081
 
+spring:
+  application:
+    name: telegram-microservice
+  jmx:
+    enabled: false
+
 telegram:
   bot:
-    botName: 'KvansiptoBot'
-    botToken: '7194734783:AAGi08ikFs3Ptizo86oKMOCyOzXglttUsO0'
-
-#spring.application.name=KvansiptoBot
-#telegram.bot.botName=KvansiptoBot
-#telegram.bot.botToken=
-#telegram.bot.ownerChatId=
-#
-#cron.scheduler=0 * * * * *
-#
-##DB
-#spring.jpa.hibernate.ddl-auto=update
-#spring.datasource.url=jdbc:postgresql://localhost:5432/tgbot
-#spring.datasource.username=postgres
-#spring.datasource.password=postgres
-#spring.datasource.driver-class-name=org.postgresql.Driver
-#spring.jpa.show-sql=true
+    botName:
+    botToken:

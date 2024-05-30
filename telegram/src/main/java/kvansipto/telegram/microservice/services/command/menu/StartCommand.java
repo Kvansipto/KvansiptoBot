@@ -43,11 +43,11 @@ public class StartCommand extends MainMenuCommand {
 
   private void registerUser(Message message) {
     if (!restToExercises.userExists(message.getChatId().toString())) {
-      var chatId = message.getChatId();
+      var chatId = message.getChatId().toString();
       var chat = message.getChat();
 
       UserDto user = new UserDto();
-      user.setChatId(chatId);
+      user.setId(chatId);
       user.setUserName(chat.getUserName());
       user.setFirstName(chat.getFirstName());
       user.setLastName(chat.getLastName());
@@ -55,20 +55,4 @@ public class StartCommand extends MainMenuCommand {
       restToExercises.saveUser(user);
     }
   }
-
-//  private ReplyKeyboardMarkup getDefaultReplyKeyboardMarkup() {
-//    ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
-//    List<KeyboardRow> rows = new ArrayList<>();
-//    KeyboardRow row = new KeyboardRow();
-//    row.add("weather");
-//    row.add("something");
-//    rows.add(row);
-//    row = new KeyboardRow();
-//    row.add("secondRowButton");
-//    row.add("secondRowButton2");
-//    row.add("secondRowButton3");
-//    rows.add(row);
-//    replyKeyboardMarkup.setKeyboard(rows);
-//    return replyKeyboardMarkup;
-//  }
 }

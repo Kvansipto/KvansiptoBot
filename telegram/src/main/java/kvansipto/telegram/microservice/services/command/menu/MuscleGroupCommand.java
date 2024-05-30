@@ -1,9 +1,8 @@
 package kvansipto.telegram.microservice.services.command.menu;
 
-import java.util.Arrays;
-import kvansipto.exercise.dto.ExerciseDto;
-import kvansipto.exercise.dto.MuscleGroupDto;
+import java.util.List;
 import kvansipto.telegram.microservice.services.RestToExercises;
+import kvansipto.telegram.microservice.services.dto.AnswerDto;
 import kvansipto.telegram.microservice.services.wrapper.BotApiMethodInterface;
 import kvansipto.telegram.microservice.services.wrapper.SendMessageWrapper;
 import kvansipto.telegram.microservice.utils.KeyboardMarkupUtil;
@@ -26,12 +25,13 @@ public class MuscleGroupCommand extends MainMenuCommand {
   public BotApiMethodInterface process(Update update) {
     Long chatId = update.getMessage().getChatId();
 
-    var dataToInlineKeyboardMarkup = restToExercises.getMuscleGroups().stream()
-        .map(MuscleGroupDto::getName)
+    List<AnswerDto> answerDtoList = restToExercises.getMuscleGroups().stream()
+        .map(m -> new AnswerDto(m, "muscle_group"))
         .toList();
+
     return SendMessageWrapper.newBuilder()
         .chatId(chatId.toString())
-        .replyMarkup(KeyboardMarkupUtil.generateInlineKeyboardMarkup(dataToInlineKeyboardMarkup, 2))
+        .replyMarkup(KeyboardMarkupUtil.createRows(answerDtoList, 2))
         .text("Выберите группу мышц")
         .build();
   }

@@ -73,10 +73,6 @@ public class TelegramBot extends TelegramLongPollingBot {
 
   @Override
   public void onUpdateReceived(Update update) {
-
-    //TODO Видимо все-таки придется резделить реалзиации сообщения и callback.
-    // Так будет легче парсить + хочется сделать редактирование сообщения при callBack, чтобы было больше похоже на
-    // приложение
     if (update.hasMessage() && update.getMessage().hasText() || update.hasCallbackQuery()) {
 
       BotApiMethodInterface sendMessage = commandList.stream()

@@ -1,15 +1,13 @@
 package kvansipto.telegram.microservice.services;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import kvansipto.exercise.dto.ExerciseDto;
 import kvansipto.exercise.dto.ExerciseResultDto;
-import kvansipto.exercise.dto.MuscleGroupDto;
 import kvansipto.exercise.dto.UserDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.util.Pair;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -22,8 +20,6 @@ import org.springframework.web.client.RestTemplate;
 public class RestToExercises {
 
   private final RestTemplate restTemplate;
-
-  // Users
 
   public boolean userExists(String chatId) {
     return Boolean.TRUE.equals(
@@ -46,21 +42,19 @@ public class RestToExercises {
     return response.getBody();
   }
 
-  // Exercises
-
-  public List<ExerciseDto> getExercisesByMuscleGroup(MuscleGroupDto muscleGroup) {
-    ResponseEntity<ExerciseDto[]> response = restTemplate.getForEntity(
-        "http://localhost:8080/exercises?muscle-group=" + muscleGroup, ExerciseDto[].class);
-    return Arrays.asList(Objects.requireNonNull(response.getBody()));
-  }
+public List<ExerciseDto> getExercisesByMuscleGroup(String muscleGroup) {
+  ResponseEntity<ExerciseDto[]> response = restTemplate.getForEntity(
+      "http://localhost:8080/exercises?muscleGroup=" + muscleGroup, ExerciseDto[].class);
+  List<ExerciseDto> exercises = Arrays.asList(Objects.requireNonNull(response.getBody()));
+  System.out.println("Упражнения, полученные для группы мышц " + muscleGroup + ": " + exercises);
+  return exercises;
+}
 
   public ExerciseDto getExerciseByName(String exerciseName) {
     ResponseEntity<ExerciseDto> response = restTemplate.getForEntity(
-        "http://localhost:8080/exercises?name=" + exerciseName, ExerciseDto.class);
+        "http://localhost:8080/exercise?name=" + exerciseName, ExerciseDto.class);
     return response.getBody();
   }
-
-  // ExerciseResults
 
   public boolean saveExerciseResult(ExerciseResultDto exerciseResultDto) {
     HttpHeaders headers = new HttpHeaders();
@@ -75,20 +69,17 @@ public class RestToExercises {
   public List<ExerciseResultDto> getExerciseResults(ExerciseDto exercise, String chatId) {
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
-    Map<String, ExerciseDto> body = new HashMap<>();
-    body.put(chatId, exercise);
-    HttpEntity<Map<String, ExerciseDto>> requestEntity = new HttpEntity<>(body, headers);
+    Pair<ExerciseDto, String> body = Pair.of(exercise, chatId);
+    HttpEntity<Pair<ExerciseDto, String>> requestEntity = new HttpEntity<>(body, headers);
     ResponseEntity<ExerciseResultDto[]> response = restTemplate.postForEntity("http://localhost:8080/exercise-results/",
         requestEntity,
         ExerciseResultDto[].class);
     return Arrays.asList(Objects.requireNonNull(response.getBody()));
   }
 
-  //MuscleGroups
-
-  public List<MuscleGroupDto> getMuscleGroups() {
-    ResponseEntity<MuscleGroupDto[]> response = restTemplate.getForEntity("http://localhost:8080/muscle-groups",
-        MuscleGroupDto[].class);
+  public List<String> getMuscleGroups() {
+    ResponseEntity<String[]> response = restTemplate.getForEntity("http://localhost:8080/muscle-groups",
+        String[].class);
     return Arrays.asList(Objects.requireNonNull(response.getBody()));
   }
 }

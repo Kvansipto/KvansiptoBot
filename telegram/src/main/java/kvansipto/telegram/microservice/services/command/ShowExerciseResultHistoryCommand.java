@@ -5,10 +5,11 @@ import java.util.List;
 import kvansipto.exercise.dto.ExerciseDto;
 import kvansipto.exercise.dto.ExerciseResultDto;
 import kvansipto.telegram.microservice.services.RestToExercises;
+import kvansipto.telegram.microservice.services.dto.AnswerData;
 import kvansipto.telegram.microservice.services.wrapper.BotApiMethodInterface;
 import kvansipto.telegram.microservice.services.wrapper.BotApiMethodWrapper;
-import kvansipto.telegram.microservice.services.wrapper.SendMessageWrapper;
-import kvansipto.telegram.microservice.services.wrapper.SendMessageWrapper.SendMessageWrapperBuilder;
+import kvansipto.telegram.microservice.services.wrapper.EditMessageWrapper;
+import kvansipto.telegram.microservice.services.wrapper.EditMessageWrapper.EditMessageWrapperBuilder;
 import kvansipto.telegram.microservice.services.wrapper.SendPhotoWrapper;
 import kvansipto.telegram.microservice.utils.TableImage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,24 +29,23 @@ public class ShowExerciseResultHistoryCommand extends Command {
 
   @Override
   public boolean supports(Update update) {
-    return update.hasCallbackQuery() && update.getCallbackQuery().getData()
-        .startsWith(ExerciseCommand.SHOW_EXERCISE_RESULT_HISTORY);
+    return update.hasCallbackQuery() && AnswerData.deserialize(update.getCallbackQuery().getData()).getButtonCode()
+        .equals(ExerciseCommand.SHOW_EXERCISE_RESULT_HISTORY);
   }
 
   @Override
   public BotApiMethodInterface process(Update update) {
-    String exerciseName = update.getCallbackQuery().getData().split("_")[4];
+    String exerciseName = AnswerData.deserialize(update.getCallbackQuery().getData()).getHiddenText();
     ExerciseDto exercise = restToExercises.getExerciseByName(exerciseName);
-//    Exercise exercise = exerciseRepository.findByName(exerciseName);
     String chatId = update.getCallbackQuery().getMessage().getChatId().toString();
 
     List<ExerciseResultDto> exerciseResults = restToExercises.getExerciseResults(exercise, chatId);
-//        exerciseResultRepository.findByExerciseAndUserChatIdOrderByDateDesc(exercise, chatId);
-    SendMessageWrapperBuilder sendMessageWrapperBuilder = SendMessageWrapper.newBuilder()
-        .chatId(chatId);
+    EditMessageWrapperBuilder editMessageWrapperBuilder = EditMessageWrapper.newBuilder()
+        .chatId(chatId)
+        .messageId(update.getCallbackQuery().getMessage().getMessageId());
     if (exerciseResults.isEmpty()) {
-      sendMessageWrapperBuilder.text(EMPTY_LIST_EXERCISE_RESULT_TEXT.formatted(exerciseName));
-      return sendMessageWrapperBuilder.build();
+      editMessageWrapperBuilder.text(EMPTY_LIST_EXERCISE_RESULT_TEXT.formatted(exerciseName));
+      return editMessageWrapperBuilder.build();
     } else {
       DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM");
 
@@ -57,9 +57,9 @@ public class ShowExerciseResultHistoryCommand extends Command {
             String.valueOf(exerciseResult.getNumberOfSets()), String.valueOf(exerciseResult.getNumberOfRepetitions())};
       }
 
-      sendMessageWrapperBuilder.text(EXERCISE_RESULT_HISTORY_LIST_TEXT.formatted(exerciseName));
+      editMessageWrapperBuilder.text(EXERCISE_RESULT_HISTORY_LIST_TEXT.formatted(exerciseName));
       BotApiMethodWrapper botApiMethodWrapper = new BotApiMethodWrapper();
-      botApiMethodWrapper.addAction(sendMessageWrapperBuilder.build());
+      botApiMethodWrapper.addAction(editMessageWrapperBuilder.build());
 
       var input = new InputFile().setMedia(TableImage.drawTableImage(HEADERS, data));
       SendPhotoWrapper sendPhoto = SendPhotoWrapper.newBuilder()

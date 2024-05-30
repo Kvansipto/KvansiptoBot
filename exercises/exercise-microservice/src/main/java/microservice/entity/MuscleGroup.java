@@ -16,4 +16,13 @@ public enum MuscleGroup {
   MuscleGroup(String name) {
     this.name = name;
   }
+
+  public static MuscleGroup fromName(String name) {
+    for (MuscleGroup muscleGroup : values()) {
+      if (muscleGroup.getName().equalsIgnoreCase(name)) {
+        return muscleGroup;
+      }
+    }
+    throw new IllegalArgumentException("No enum constant with name " + name);
+  }
 }

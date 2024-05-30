@@ -11,5 +11,5 @@ public class ExerciseDto extends BaseDto {
   String description;
   String videoUrl;
   String imageUrl;
-  MuscleGroupDto muscleGroup;
+  String muscleGroup;
 }

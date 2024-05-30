@@ -14,5 +14,9 @@ public class UserService extends
     super(repository, mapper);
   }
 
-
+  @Override
+  public UserDto create(UserDto userDto) {
+    User user = mapper.toEntity(userDto);
+    return mapper.toDto(repository.save(user));
+  }
 }

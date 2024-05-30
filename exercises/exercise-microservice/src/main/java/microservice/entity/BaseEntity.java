@@ -6,9 +6,7 @@ import java.io.Serializable;
 import java.util.Objects;
 import java.util.UUID;
 import lombok.Builder;
-import lombok.Data;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
@@ -28,6 +26,10 @@ public abstract class BaseEntity implements Serializable {
   @Id
   @Builder.Default
   private String id = UUID.randomUUID().toString();
+
+  protected BaseEntity(String id) {
+    this.id = id;
+  }
 
   @Override
   public final boolean equals(Object o) {
