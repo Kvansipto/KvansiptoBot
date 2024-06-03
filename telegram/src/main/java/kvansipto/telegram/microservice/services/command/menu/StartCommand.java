@@ -21,7 +21,7 @@ public class StartCommand extends MainMenuCommand {
 
   @Override
   public boolean supports(Update update) {
-    return update.getMessage().getText().equals(START_COMMAND_TEXT);
+    return update.hasMessage() && update.getMessage().getText().equals(START_COMMAND_TEXT);
   }
 
   @Override

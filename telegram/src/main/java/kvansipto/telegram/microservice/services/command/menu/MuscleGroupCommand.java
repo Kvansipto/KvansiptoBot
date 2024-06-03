@@ -18,7 +18,7 @@ public class MuscleGroupCommand extends MainMenuCommand {
 
   @Override
   public boolean supports(Update update) {
-    return update.getMessage().getText().equals("/exercise_info");
+    return update.hasMessage() && update.getMessage().getText().equals("/exercise_info");
   }
 
   @Override

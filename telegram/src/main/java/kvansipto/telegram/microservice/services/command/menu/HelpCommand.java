@@ -14,7 +14,7 @@ public class HelpCommand extends MainMenuCommand {
 
   @Override
   public boolean supports(Update update) {
-    return update.getMessage().getText().equals(HELP_COMMAND_TEXT);
+    return update.hasMessage() && update.getMessage().getText().equals(HELP_COMMAND_TEXT);
   }
 
   @Override

@@ -11,34 +11,18 @@
 
   <!--todo Почему в дочерних packaging = jar, а в родителях pom?-->
   <packaging>pom</packaging>
-
   <artifactId>exercises</artifactId>
+
   <modules>
     <module>exercise-api</module>
     <module>exercise-microservice</module>
   </modules>
 
-  <properties>
-    <maven.compiler.source>18</maven.compiler.source>
-    <maven.compiler.target>18</maven.compiler.target>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
-
-<!--  <dependencies>-->
-<!--    <dependency>-->
-<!--      <groupId>kvansipto.bot</groupId>-->
-<!--      <artifactId>exercise-api</artifactId>-->
-<!--      <version>0.0.1-SNAPSHOT</version>-->
-<!--    </dependency>-->
-<!--  </dependencies>-->
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-maven-plugin</artifactId>
-      </plugin>
-    </plugins>
-  </build>
-
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework.data</groupId>
+      <artifactId>spring-data-commons</artifactId>
+      <version>3.2.2</version>
+    </dependency>
+  </dependencies>
 </project>

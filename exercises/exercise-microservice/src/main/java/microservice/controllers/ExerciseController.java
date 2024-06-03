@@ -34,7 +34,6 @@ public class ExerciseController implements ExerciseApi {
   @GetMapping("/muscle-groups")
   public List<String> getMuscleGroups() {
     System.out.println("Получение списка групп мышц");
-
     return Arrays.stream(MuscleGroup.values()).map(MuscleGroup::getName).toList();
   }
 }

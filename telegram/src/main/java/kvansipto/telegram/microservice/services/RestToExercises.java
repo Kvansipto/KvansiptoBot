@@ -23,7 +23,7 @@ public class RestToExercises {
 
   public boolean userExists(String chatId) {
     return Boolean.TRUE.equals(
-        restTemplate.getForEntity(String.format("http://localhost:8080/users/%s/exists", chatId), Boolean.class)
+        restTemplate.getForEntity(String.format("http://exercises:8080/users/%s/exists", chatId), Boolean.class)
             .getBody());
   }
 
@@ -31,20 +31,20 @@ public class RestToExercises {
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
     HttpEntity<UserDto> requestEntity = new HttpEntity<>(user, headers);
-    ResponseEntity<UserDto> response = restTemplate.postForEntity("http://localhost:8080/users", requestEntity,
+    ResponseEntity<UserDto> response = restTemplate.postForEntity("http://exercises:8080/users", requestEntity,
         UserDto.class);
     return response.getBody();
   }
 
   public UserDto getUser(String chatId) {
     ResponseEntity<UserDto> response = restTemplate.getForEntity(
-        "http://localhost:8080/users/" + chatId, UserDto.class);
+        "http://exercises:8080/users/" + chatId, UserDto.class);
     return response.getBody();
   }
 
 public List<ExerciseDto> getExercisesByMuscleGroup(String muscleGroup) {
   ResponseEntity<ExerciseDto[]> response = restTemplate.getForEntity(
-      "http://localhost:8080/exercises?muscleGroup=" + muscleGroup, ExerciseDto[].class);
+      "http://exercises:8080/exercises?muscleGroup=" + muscleGroup, ExerciseDto[].class);
   List<ExerciseDto> exercises = Arrays.asList(Objects.requireNonNull(response.getBody()));
   System.out.println("Упражнения, полученные для группы мышц " + muscleGroup + ": " + exercises);
   return exercises;
@@ -52,7 +52,7 @@ public List<ExerciseDto> getExercisesByMuscleGroup(String muscleGroup) {
 
   public ExerciseDto getExerciseByName(String exerciseName) {
     ResponseEntity<ExerciseDto> response = restTemplate.getForEntity(
-        "http://localhost:8080/exercise?name=" + exerciseName, ExerciseDto.class);
+        "http://exercises:8080/exercise?name=" + exerciseName, ExerciseDto.class);
     return response.getBody();
   }
 
@@ -60,7 +60,7 @@ public List<ExerciseDto> getExercisesByMuscleGroup(String muscleGroup) {
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
     HttpEntity<ExerciseResultDto> requestEntity = new HttpEntity<>(exerciseResultDto, headers);
-    ResponseEntity<ExerciseResultDto> response = restTemplate.postForEntity("http://localhost:8080/exercise-results",
+    ResponseEntity<ExerciseResultDto> response = restTemplate.postForEntity("http://exercises:8080/exercise-results",
         requestEntity,
         ExerciseResultDto.class);
     return response.getStatusCode().is2xxSuccessful();
@@ -71,14 +71,14 @@ public List<ExerciseDto> getExercisesByMuscleGroup(String muscleGroup) {
     headers.setContentType(MediaType.APPLICATION_JSON);
     Pair<ExerciseDto, String> body = Pair.of(exercise, chatId);
     HttpEntity<Pair<ExerciseDto, String>> requestEntity = new HttpEntity<>(body, headers);
-    ResponseEntity<ExerciseResultDto[]> response = restTemplate.postForEntity("http://localhost:8080/exercise-results/",
+    ResponseEntity<ExerciseResultDto[]> response = restTemplate.postForEntity("http://exercises:8080/exercise-results/",
         requestEntity,
         ExerciseResultDto[].class);
     return Arrays.asList(Objects.requireNonNull(response.getBody()));
   }
 
   public List<String> getMuscleGroups() {
-    ResponseEntity<String[]> response = restTemplate.getForEntity("http://localhost:8080/muscle-groups",
+    ResponseEntity<String[]> response = restTemplate.getForEntity("http://exercises:8080/muscle-groups",
         String[].class);
     return Arrays.asList(Objects.requireNonNull(response.getBody()));
   }
