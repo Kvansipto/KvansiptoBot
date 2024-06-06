@@ -42,13 +42,13 @@ public class RestToExercises {
     return response.getBody();
   }
 
-public List<ExerciseDto> getExercisesByMuscleGroup(String muscleGroup) {
-  ResponseEntity<ExerciseDto[]> response = restTemplate.getForEntity(
-      "http://exercises:8080/exercises?muscleGroup=" + muscleGroup, ExerciseDto[].class);
-  List<ExerciseDto> exercises = Arrays.asList(Objects.requireNonNull(response.getBody()));
-  System.out.println("Упражнения, полученные для группы мышц " + muscleGroup + ": " + exercises);
-  return exercises;
-}
+  public List<ExerciseDto> getExercisesByMuscleGroup(String muscleGroup) {
+    ResponseEntity<ExerciseDto[]> response = restTemplate.getForEntity(
+        "http://exercises:8080/exercises?muscleGroup=" + muscleGroup, ExerciseDto[].class);
+    List<ExerciseDto> exercises = Arrays.asList(Objects.requireNonNull(response.getBody()));
+    System.out.println("Упражнения, полученные для группы мышц " + muscleGroup + ": " + exercises);
+    return exercises;
+  }
 
   public ExerciseDto getExerciseByName(String exerciseName) {
     ResponseEntity<ExerciseDto> response = restTemplate.getForEntity(

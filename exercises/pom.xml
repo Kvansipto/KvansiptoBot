@@ -9,9 +9,9 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
 
-  <!--todo Почему в дочерних packaging = jar, а в родителях pom?-->
   <packaging>pom</packaging>
   <artifactId>exercises</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
 
   <modules>
     <module>exercise-api</module>

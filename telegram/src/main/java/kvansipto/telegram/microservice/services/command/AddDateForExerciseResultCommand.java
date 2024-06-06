@@ -52,18 +52,13 @@ public class AddDateForExerciseResultCommand extends Command {
     userStateService.setCurrentState(chatId, userState);
 
     DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM");
-
     List<AnswerDto> answers = new ArrayList<>();
 
+    String[] dayTexts = {TODAY_TEXT, YESTERDAY_TEXT};
     for (int i = 0; i < DayOfWeek.values().length; i++) {
       String date = LocalDate.now().minusDays(i).format(dtf);
-      if (i == 0) {
-        answers.add(new AnswerDto(TODAY_TEXT, ADD_DATE_EXERCISE_RESULT_TEXT, date));
-      } else if (i == 1) {
-        answers.add(new AnswerDto(YESTERDAY_TEXT, ADD_DATE_EXERCISE_RESULT_TEXT, date));
-      } else {
-        answers.add(new AnswerDto(date, ADD_DATE_EXERCISE_RESULT_TEXT, date));
-      }
+      String text = i < dayTexts.length ? dayTexts[i] : date;
+      answers.add(new AnswerDto(text, ADD_DATE_EXERCISE_RESULT_TEXT, date));
     }
     return EditMessageWrapper.newBuilder()
         .chatId(chatId)

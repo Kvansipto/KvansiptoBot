@@ -51,7 +51,9 @@ public class TableImage {
     g2d.dispose();
 
     try {
-      File file = new File("table.png");
+      String filePath = "resources/table.png";
+      File file = new File(filePath);
+      file.getParentFile().mkdirs();
       ImageIO.write(image, "PNG", file);
       System.out.println("Изображение таблицы сохранено.");
       return file;

@@ -12,6 +12,7 @@ public class TelegramApplication {
     SpringApplication.run(TelegramApplication.class, args);
   }
 
+  //TODO
   @Bean
   public RestTemplate getRestTemplate() {
     return new RestTemplate();

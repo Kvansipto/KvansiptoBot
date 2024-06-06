@@ -8,6 +8,7 @@ import lombok.experimental.UtilityClass;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
+//TODO AOP?
 @UtilityClass
 public class KeyboardMarkupUtil {
 

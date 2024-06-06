@@ -22,7 +22,7 @@ public class ExerciseResultService extends
   }
 
   public List<ExerciseResultDto> getExerciseResults(ExerciseDto exercise, String chatId) {
-    return repository.findByExerciseAndUserChatIdOrderByDateDesc(exerciseMapper.toEntity(exercise), chatId)
+    return repository.findAllByExerciseAndUserIdOrderByDateDesc(exerciseMapper.toEntity(exercise), chatId)
         .stream()
         .map(mapper::toDto)
         .toList();
