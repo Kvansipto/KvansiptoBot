@@ -8,62 +8,66 @@
     <version>3.2.5</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
-  <groupId>io.project</groupId>
-  <artifactId>KvansiptoBot</artifactId>
+
+  <artifactId>kvansipto-bot-parent-pom</artifactId>
+  <groupId>kvansipto.bot</groupId>
   <version>0.0.1-SNAPSHOT</version>
-  <name>KvansiptoBot</name>
+  <packaging>pom</packaging>
   <description>Demo project for Spring Boot</description>
+
+  <modules>
+    <module>telegram</module>
+    <module>exercises</module>
+  </modules>
+
   <properties>
     <java.version>17</java.version>
     <telegram.version>6.9.7.1</telegram.version>
+    <spring.boot.version>3.2.5</spring.boot.version>
+    <lombok.version>1.18.32</lombok.version>
+    <org.mapstruct.version>1.5.5.Final</org.mapstruct.version>
   </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok</artifactId>
+        <version>${lombok.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <!-- external -->
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-dependencies</artifactId>
+        <version>${spring.boot.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
   <dependencies>
     <dependency>
-      <groupId>org.telegram</groupId>
-      <artifactId>telegrambots</artifactId>
-      <version>${telegram.version}</version>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
     </dependency>
-
+    <dependency>
+      <groupId>jakarta.validation</groupId>
+      <artifactId>jakarta.validation-api</artifactId>
+      <version>3.0.2</version>
+    </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter</artifactId>
     </dependency>
-
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-test</artifactId>
-      <scope>test</scope>
+      <artifactId>spring-boot-starter-web</artifactId>
     </dependency>
-
-    <dependency>
-      <groupId>org.projectlombok</groupId>
-      <artifactId>lombok</artifactId>
-      <version>1.18.32</version>
-      <scope>provided</scope>
-    </dependency>
-
-    <!-- DB -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-data-jpa</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.postgresql</groupId>
-      <artifactId>postgresql</artifactId>
-      <version>42.7.3</version>
-    </dependency>
-
-    <!-- https://github.com/FasterXML/jackson-modules-base/discussions/239-->
-    <dependency>
-      <groupId>javax.xml.bind</groupId>
-      <artifactId>jaxb-api</artifactId>
-      <version>2.3.0</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.vdurmont</groupId>
-      <artifactId>emoji-java</artifactId>
-      <version>5.1.1</version>
+      <artifactId>spring-boot-starter-validation</artifactId>
     </dependency>
   </dependencies>
 
@@ -75,5 +79,4 @@
       </plugin>
     </plugins>
   </build>
-
 </project>
