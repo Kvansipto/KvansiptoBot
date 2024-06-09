@@ -3,8 +3,10 @@ package kvansipto.telegram.microservice.services.wrapper;
 import java.util.ArrayList;
 import java.util.List;
 import kvansipto.telegram.microservice.services.TelegramBot;
+import lombok.Getter;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+@Getter
 public class BotApiMethodWrapper implements BotApiMethodInterface {
 
   private final List<BotApiMethodInterface> actions;
