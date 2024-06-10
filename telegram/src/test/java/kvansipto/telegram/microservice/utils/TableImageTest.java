@@ -22,7 +22,7 @@ class TableImageTest {
   @BeforeEach
   void setUp() {
     // Ensure the resources directory exists
-    assert new File("resources").mkdirs();
+    new File("resources").mkdirs();
   }
 
   @AfterEach
