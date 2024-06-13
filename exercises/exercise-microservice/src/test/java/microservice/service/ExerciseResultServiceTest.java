@@ -1,7 +1,7 @@
 package microservice.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import jakarta.persistence.EntityNotFoundException;
 import java.sql.Timestamp;
@@ -14,6 +14,7 @@ import java.util.UUID;
 import kvansipto.exercise.dto.ExerciseDto;
 import kvansipto.exercise.dto.ExerciseResultDto;
 import kvansipto.exercise.dto.UserDto;
+import kvansipto.exercise.filter.ExerciseResultFilter;
 import microservice.entity.Exercise;
 import microservice.entity.ExerciseResult;
 import microservice.entity.MuscleGroup;
@@ -25,6 +26,10 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 class ExerciseResultServiceTest {
@@ -329,7 +334,12 @@ class ExerciseResultServiceTest {
       exerciseResultService.create(exerciseResult);
       idsToDelete.add(exerciseResult.getId());
     });
-    List<ExerciseResultDto> actual = exerciseResultService.getExerciseResults(exerciseDto, userDto.getId());
-    assertThat(actual).containsAll(expected);
+    Page<ExerciseResultDto> expectedPage = new PageImpl<>(expected);
+    ExerciseResultFilter filter = ExerciseResultFilter.builder()
+        .exerciseDto(exerciseDto)
+        .userChatId(userDto.getId())
+        .build();
+    Page<ExerciseResultDto> actual = exerciseResultService.getExerciseResults(filter, PageRequest.of(0, 10));
+    assertThat(actual).containsAll(expectedPage);
   }
 }
