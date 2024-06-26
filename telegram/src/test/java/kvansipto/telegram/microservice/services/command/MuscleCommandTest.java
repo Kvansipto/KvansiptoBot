@@ -21,6 +21,7 @@ import kvansipto.telegram.microservice.services.wrapper.BotApiMethodInterface;
 import kvansipto.telegram.microservice.services.wrapper.EditMessageWrapper;
 import kvansipto.telegram.microservice.utils.KeyboardMarkupUtil;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,6 +32,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
+import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -41,29 +43,31 @@ class MuscleCommandTest {
 
   @InjectMocks
   MuscleCommand muscleCommand;
-
   @Mock
   RestToExercises restToExercises;
-  @Mock
-  Update update;
-  @Mock
-  Message message;
-  @Mock
-  CallbackQuery callbackQuery;
-  @Mock
-  AnswerDto answerDto;
 
-  MockedStatic<AnswerData> mockedStaticAnswerData;
+  private static Update update;
+  private static AnswerDto answerDto;
+  private MockedStatic<AnswerData> mockedStaticAnswerData;
+
+  @BeforeAll
+  static void setUp() {
+    Chat chat = new Chat();
+    chat.setId(123456L);
+    Message message = new Message();
+    message.setChat(chat);
+    CallbackQuery callbackQuery = new CallbackQuery();
+    callbackQuery.setData("mockData");
+    callbackQuery.setMessage(message);
+    update = new Update();
+    update.setCallbackQuery(callbackQuery);
+    answerDto = new AnswerDto();
+    answerDto.setButtonCode("muscle_group");
+    answerDto.setButtonText("core");
+  }
 
   @BeforeEach
-  void setUp() {
-    when(update.hasCallbackQuery()).thenReturn(true);
-    when(update.getCallbackQuery()).thenReturn(callbackQuery);
-    when(callbackQuery.getMessage()).thenReturn(message);
-    when(callbackQuery.getData()).thenReturn("mockData");
-    when(message.getChatId()).thenReturn(123456L);
-    when(answerDto.getButtonText()).thenReturn("core");
-    when(answerDto.getButtonCode()).thenReturn("muscle_group");
+  void setUpMocks() {
     mockedStaticAnswerData = mockStatic(AnswerData.class);
     mockedStaticAnswerData.when(() -> AnswerData.deserialize("mockData")).thenReturn(answerDto);
   }

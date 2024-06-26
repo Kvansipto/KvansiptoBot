@@ -26,8 +26,8 @@ import kvansipto.telegram.microservice.services.dto.AnswerDto;
 import kvansipto.telegram.microservice.services.wrapper.BotApiMethodInterface;
 import kvansipto.telegram.microservice.services.wrapper.EditMessageWrapper;
 import kvansipto.telegram.microservice.utils.KeyboardMarkupUtil;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -37,6 +37,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
+import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -49,16 +50,6 @@ class AddDateForExerciseResultCommandTest {
   private AddDateForExerciseResultCommand addDateForExerciseResultCommand;
 
   @Mock
-  Update update;
-  @Mock
-  CallbackQuery callbackQuery;
-  @Mock
-  Message message;
-  @Mock
-  AnswerDto answerDto;
-  @Mock
-  ExerciseDto exercise;
-  @Mock
   InlineKeyboardMarkup inlineKeyboardMarkup;
   @Mock
   RestToExercises restToExercises;
@@ -69,23 +60,30 @@ class AddDateForExerciseResultCommandTest {
   @Mock
   UserStateFactory userStateFactory;
 
-  MockedStatic<AnswerData> mockedStaticAnswerData;
+  static MockedStatic<AnswerData> mockedStaticAnswerData;
+  private static Update update;
 
-  @BeforeEach
-  void setUp() {
-    when(update.hasCallbackQuery()).thenReturn(true);
-    when(update.getCallbackQuery()).thenReturn(callbackQuery);
-    when(callbackQuery.getMessage()).thenReturn(message);
-    when(callbackQuery.getData()).thenReturn("mockData");
-    when(message.getChatId()).thenReturn(123456L);
-    when(answerDto.getButtonCode()).thenReturn(ExerciseCommand.ADD_EXERCISE_RESULT_TEXT);
-    when(answerDto.getHiddenText()).thenReturn("exerciseName");
+  @BeforeAll
+  static void setUp() {
+    Chat chat = new Chat();
+    chat.setId(123456L);
+    Message message = new Message();
+    message.setChat(chat);
+    CallbackQuery callbackQuery = new CallbackQuery();
+    callbackQuery.setMessage(message);
+    callbackQuery.setData("mockData");
+    update = new Update();
+    update.setCallbackQuery(callbackQuery);
+    update.setMessage(message);
+    AnswerDto answerDto = new AnswerDto();
+    answerDto.setButtonCode(ExerciseCommand.ADD_EXERCISE_RESULT_TEXT);
+    answerDto.setHiddenText("exerciseName");
     mockedStaticAnswerData = mockStatic(AnswerData.class);
     mockedStaticAnswerData.when(() -> AnswerData.deserialize("mockData")).thenReturn(answerDto);
   }
 
-  @AfterEach
-  void tearDown() {
+  @AfterAll
+  static void tearDown() {
     mockedStaticAnswerData.close();
   }
 
@@ -99,6 +97,7 @@ class AddDateForExerciseResultCommandTest {
   void process_shouldReturnEditMessageWrapper() {
     // Arrange
     when(userStateFactory.createUserSession(anyString())).thenReturn(userState);
+    ExerciseDto exercise = ExerciseDto.builder().build();
     when(restToExercises.getExerciseByName("exerciseName")).thenReturn(exercise);
 
     DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM");

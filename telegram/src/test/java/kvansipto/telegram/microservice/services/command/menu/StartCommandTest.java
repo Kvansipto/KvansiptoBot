@@ -17,6 +17,7 @@ import kvansipto.exercise.dto.UserDto;
 import kvansipto.telegram.microservice.services.RestToExercises;
 import kvansipto.telegram.microservice.services.wrapper.BotApiMethodInterface;
 import kvansipto.telegram.microservice.services.wrapper.SendMessageWrapper;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,34 +38,34 @@ class StartCommandTest {
   private StartCommand startCommand;
   @Mock
   private RestToExercises restToExercises;
-  @Mock
-  private Message message;
-  @Mock
-  private Update update;
-  @Mock
-  private Chat chat;
 
-  @BeforeEach
-  void setUp() {
-    when(update.getMessage()).thenReturn(message);
-    when(message.getChat()).thenReturn(chat);
-    when(message.getChatId()).thenReturn(123456L);
-    when(chat.getFirstName()).thenReturn("John");
-    when(chat.getUserName()).thenReturn("johndoe");
-    when(chat.getLastName()).thenReturn("Doe");
+  private static Update update;
+  private static Message message;
+
+  @BeforeAll
+  static void setUp() {
+    Chat chat = new Chat();
+    chat.setId(123456L);
+    chat.setFirstName("John");
+    chat.setLastName("Doe");
+    chat.setUserName("johndoe");
+    message = new Message();
+    message.setChat(chat);
+    message.setText(StartCommand.START_COMMAND_TEXT);
+    update = new Update();
+    update.setMessage(message);
   }
 
   @Test
   void supports_shouldReturnTrue_whenUpdateHasMessageWithStartCommandText() {
-    when(update.hasMessage()).thenReturn(true);
-    when(message.getText()).thenReturn(StartCommand.START_COMMAND_TEXT);
     boolean result = startCommand.supports(update);
     assertTrue(result);
   }
 
   @Test
   void supports_shouldReturnFalse_whenUpdateHasMessageWithDifferentCommandText() {
-    when(message.getText()).thenReturn("/differentCommand");
+    message.setText("/differentCommand");
+    update.setMessage(message);
     boolean result = startCommand.supports(update);
     assertFalse(result);
   }

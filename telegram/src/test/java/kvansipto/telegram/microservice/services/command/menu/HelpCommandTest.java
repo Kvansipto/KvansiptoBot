@@ -1,20 +1,20 @@
 package kvansipto.telegram.microservice.services.command.menu;
 
 import static kvansipto.telegram.microservice.services.TelegramBot.HELP_TEXT;
+import static kvansipto.telegram.microservice.services.command.menu.HelpCommand.HELP_COMMAND_TEXT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.when;
 
-import kvansipto.telegram.microservice.services.TelegramBot;
 import kvansipto.telegram.microservice.services.wrapper.BotApiMethodInterface;
 import kvansipto.telegram.microservice.services.wrapper.SendMessageWrapper;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
@@ -24,18 +24,21 @@ class HelpCommandTest {
   @InjectMocks
   HelpCommand helpCommand;
 
-  @Mock
-  Update update;
-  @Mock
-  Message message;
-  @Mock
-  TelegramBot bot;
+  private static Update update;
+
+  @BeforeAll
+  static void setUp() {
+    Chat chat = new Chat();
+    chat.setId(123456L);
+    Message message = new Message();
+    message.setText(HELP_COMMAND_TEXT);
+    message.setChat(chat);
+    update = new Update();
+    update.setMessage(message);
+  }
 
   @Test
   void supports_shouldReturnTrue_whenUpdateHasMessageWithHelpCommandText() {
-    when(update.getMessage()).thenReturn(message);
-    when(update.hasMessage()).thenReturn(true);
-    when(message.getText()).thenReturn(HelpCommand.HELP_COMMAND_TEXT);
     boolean result = helpCommand.supports(update);
     assertTrue(result);
   }
@@ -43,8 +46,6 @@ class HelpCommandTest {
   @Test
   void process_shouldReturnHelpText() {
     // Arrange
-    when(update.getMessage()).thenReturn(message);
-    when(message.getChatId()).thenReturn(123456L);
     HELP_TEXT = "help command text";
 
     // Act

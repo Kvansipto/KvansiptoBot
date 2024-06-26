@@ -22,6 +22,7 @@ import kvansipto.telegram.microservice.services.wrapper.EditMessageWrapper;
 import kvansipto.telegram.microservice.services.wrapper.SendPhotoWrapper;
 import kvansipto.telegram.microservice.utils.TableImage;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,6 +33,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
+import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -46,31 +48,38 @@ class ShowExerciseResultHistoryCommandTest {
   @Mock
   private RestToExercises restToExercises;
   @Mock
-  private Update update;
-  @Mock
-  private CallbackQuery callbackQuery;
-  @Mock
-  private Message message;
-  @Mock
-  private ExerciseDto exercise;
-  @Mock
-  private AnswerDto answerDto;
-  @Mock
   private File file;
 
   private MockedStatic<AnswerData> mockedStaticAnswerData;
   private MockedStatic<TableImage> mockedStaticTableImage;
+  private static Update update;
+  private static AnswerDto answerDto;
+  private static ExerciseDto exercise;
+
+  @BeforeAll
+  static void setUp() {
+    Chat chat = new Chat();
+    chat.setId(123456L);
+    Message message = new Message();
+    message.setChat(chat);
+    CallbackQuery callbackQuery = new CallbackQuery();
+    callbackQuery.setData("mockData");
+    callbackQuery.setMessage(message);
+    update = new Update();
+    update.setCallbackQuery(callbackQuery);
+    answerDto = new AnswerDto();
+    answerDto.setButtonCode(ExerciseCommand.SHOW_EXERCISE_RESULT_HISTORY);
+    answerDto.setHiddenText("exerciseName");
+    exercise = ExerciseDto.builder()
+        .name("exerciseName")
+        .description("exerciseDescription")
+        .videoUrl("exerciseVideoUrl")
+        .build();
+  }
 
   @BeforeEach
-  void setUp() {
-    when(update.hasCallbackQuery()).thenReturn(true);
-    when(update.getCallbackQuery()).thenReturn(callbackQuery);
-    when(callbackQuery.getMessage()).thenReturn(message);
-    when(callbackQuery.getData()).thenReturn("mockData");
-    when(message.getChatId()).thenReturn(123456L);
+  void setUpMocks() {
     when(restToExercises.getExerciseByName(anyString())).thenReturn(exercise);
-    when(answerDto.getButtonCode()).thenReturn(ExerciseCommand.SHOW_EXERCISE_RESULT_HISTORY);
-    when(answerDto.getHiddenText()).thenReturn("exerciseName");
     mockedStaticAnswerData = mockStatic(AnswerData.class);
     mockedStaticAnswerData.when(() -> AnswerData.deserialize("mockData")).thenReturn(answerDto);
     mockedStaticTableImage = mockStatic(TableImage.class);

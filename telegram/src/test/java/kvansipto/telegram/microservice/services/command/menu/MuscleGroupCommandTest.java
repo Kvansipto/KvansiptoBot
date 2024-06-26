@@ -17,12 +17,14 @@ import kvansipto.telegram.microservice.services.dto.AnswerDto;
 import kvansipto.telegram.microservice.services.wrapper.BotApiMethodInterface;
 import kvansipto.telegram.microservice.services.wrapper.SendMessageWrapper;
 import kvansipto.telegram.microservice.utils.KeyboardMarkupUtil;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -34,17 +36,23 @@ class MuscleGroupCommandTest {
   private MuscleGroupCommand muscleGroupCommand;
 
   @Mock
-  private Update update;
-  @Mock
-  private Message message;
-  @Mock
   private RestToExercises restToExercises;
+
+  private static Update update;
+
+  @BeforeAll
+  static void setUp() {
+    Chat chat = new Chat();
+    chat.setId(123456L);
+    Message message = new Message();
+    message.setText("/exercise_info");
+    message.setChat(chat);
+    update = new Update();
+    update.setMessage(message);
+  }
 
   @Test
   void supports_shouldReturnTrue_whenUpdateHasMessageWithRightCommandText() {
-    when(update.getMessage()).thenReturn(message);
-    when(update.hasMessage()).thenReturn(true);
-    when(message.getText()).thenReturn("/exercise_info");
     boolean result = muscleGroupCommand.supports(update);
     assertTrue(result);
   }
@@ -52,8 +60,6 @@ class MuscleGroupCommandTest {
   @Test
   void process_shouldCallGetMuscleGroupsAndCreateRows() {
     // Arrange
-    when(update.getMessage()).thenReturn(message);
-    when(message.getChatId()).thenReturn(123456L);
 
     List<String> muscleGroups = List.of("Chest", "Back", "Legs", "Core");
     List<AnswerDto> answerDtoList = muscleGroups.stream()
