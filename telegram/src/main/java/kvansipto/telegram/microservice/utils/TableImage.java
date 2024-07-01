@@ -6,6 +6,7 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import javax.imageio.ImageIO;
 import lombok.experimental.UtilityClass;
 
@@ -51,7 +52,7 @@ public class TableImage {
     g2d.dispose();
 
     try {
-      String filePath = "resources/table.png";
+      String filePath = "resources/" + LocalDateTime.now() + ".png";
       File file = new File(filePath);
       file.getParentFile().mkdirs();
       ImageIO.write(image, "PNG", file);

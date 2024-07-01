@@ -1,11 +1,9 @@
 package microservice.repository;
 
-import java.util.List;
-import microservice.entity.Exercise;
 import microservice.entity.ExerciseResult;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.CrudRepository;
 
-public interface ExerciseResultRepository extends CrudRepository<ExerciseResult, String> {
-
-  List<ExerciseResult> findAllByExerciseAndUserIdOrderByDateDesc(Exercise exercise, String userId);
+public interface ExerciseResultRepository extends CrudRepository<ExerciseResult, String>,
+    QuerydslPredicateExecutor<ExerciseResult> {
 }

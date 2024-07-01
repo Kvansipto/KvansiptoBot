@@ -1,12 +1,13 @@
 package microservice.controllers;
 
-import java.util.List;
-import kvansipto.exercise.dto.ExerciseDto;
 import kvansipto.exercise.dto.ExerciseResultDto;
+import kvansipto.exercise.filter.ExerciseResultFilter;
 import kvansipto.exercise.resources.ExerciseResultApi;
 import microservice.service.ExerciseResultService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.util.Pair;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,8 +20,9 @@ public class ExerciseResultController implements ExerciseResultApi {
 
   @Override
   @PostMapping("/exercise-results/")
-  public List<ExerciseResultDto> getExerciseResults(@RequestBody Pair<ExerciseDto, String> pair) {
-    return service.getExerciseResults(pair.getFirst(), pair.getSecond());
+  public Page<ExerciseResultDto> getExerciseResults(@RequestBody ExerciseResultFilter filter,
+      @PageableDefault(size = 20) Pageable pageable) {
+    return service.getExerciseResults(filter, pageable);
   }
 
   @Override

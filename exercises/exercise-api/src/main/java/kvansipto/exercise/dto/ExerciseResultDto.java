@@ -3,14 +3,14 @@ package kvansipto.exercise.dto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.PastOrPresent;
 import java.time.LocalDate;
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.experimental.SuperBuilder;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Valid
-@Builder
+@SuperBuilder
 public class ExerciseResultDto extends BaseDto {
 
   ExerciseDto exercise;

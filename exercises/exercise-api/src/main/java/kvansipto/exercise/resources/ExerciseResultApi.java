@@ -1,13 +1,13 @@
 package kvansipto.exercise.resources;
 
-import java.util.List;
-import kvansipto.exercise.dto.ExerciseDto;
 import kvansipto.exercise.dto.ExerciseResultDto;
-import org.springframework.data.util.Pair;
+import kvansipto.exercise.filter.ExerciseResultFilter;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface ExerciseResultApi {
 
-  List<ExerciseResultDto> getExerciseResults(Pair<ExerciseDto, String> pair);
+  Page<ExerciseResultDto> getExerciseResults(ExerciseResultFilter filter, Pageable pageable);
 
   ExerciseResultDto saveExerciseResult(ExerciseResultDto exerciseResultDto);
 }
