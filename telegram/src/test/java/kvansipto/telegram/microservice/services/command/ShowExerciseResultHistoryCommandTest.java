@@ -8,6 +8,8 @@ import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -92,8 +94,11 @@ class ShowExerciseResultHistoryCommandTest {
   }
 
   @Test
-  void supports_shouldReturnTrue_whenUpdateHasCallbackQueryWithShowExerciseResultHistoryButtonCode() {
-    boolean result = showExerciseResultHistoryCommand.supports(update);
+  void supports_shouldReturnTrue_whenUpdateHasCallbackQueryWithShowExerciseResultHistoryButtonCode()
+      throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    Method method = ShowExerciseResultHistoryCommand.class.getDeclaredMethod("supports", Update.class);
+    method.setAccessible(true);
+    boolean result = (boolean) method.invoke(showExerciseResultHistoryCommand, update);
     assertTrue(result);
   }
 
