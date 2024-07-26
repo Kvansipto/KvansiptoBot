@@ -9,7 +9,7 @@
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
 
-  <artifactId>kvansipto-bot-parent-pom</artifactId>
+  <artifactId>kv-bot</artifactId>
   <groupId>kvansipto.bot</groupId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>

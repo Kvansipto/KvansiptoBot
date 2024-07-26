@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>kvansipto.bot</groupId>
-    <artifactId>kvansipto-bot-parent-pom</artifactId>
+    <artifactId>kv-bot</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
 

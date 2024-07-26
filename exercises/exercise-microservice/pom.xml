@@ -95,6 +95,19 @@
         <artifactId>spring-boot-maven-plugin</artifactId>
       </plugin>
       <plugin>
+        <groupId>org.flywaydb</groupId>
+        <artifactId>flyway-maven-plugin</artifactId>
+        <version>9.22.3</version>
+        <configuration>
+          <url>jdbc:postgresql://localhost:5432/kvbot</url>
+          <user>postgres</user>
+          <password>postgres</password>
+          <schemas>
+            <schema>public</schema>
+          </schemas>
+        </configuration>
+      </plugin>
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.8.1</version>
