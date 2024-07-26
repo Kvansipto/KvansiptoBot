@@ -13,12 +13,6 @@ public class ExerciseResultPredicateBuilder {
 
   private final QExerciseResult root = QExerciseResult.exerciseResult;
 
-  private final ExerciseMapper exerciseMapper;
-
-  public ExerciseResultPredicateBuilder(ExerciseMapper exerciseMapper) {
-    this.exerciseMapper = exerciseMapper;
-  }
-
   public Predicate apply(ExerciseResultFilter search) {
     BooleanBuilder builder = new BooleanBuilder();
 
@@ -33,7 +27,7 @@ public class ExerciseResultPredicateBuilder {
         builder.and(root.exercise.id.eq(search.getExerciseDto().getId()));
       }
       if (search.getExerciseDto().getMuscleGroup() != null) {
-        builder.and(root.exercise.muscleGroup.eq(MuscleGroup.valueOf(search.getExerciseDto().getMuscleGroup())));
+        builder.and(root.exercise.muscleGroup.eq(MuscleGroup.valueOf(search.getExerciseDto().getMuscleGroup().toUpperCase())));
       }
     }
     if (search.getDate() != null) {

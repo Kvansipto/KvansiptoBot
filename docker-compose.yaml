@@ -10,6 +10,7 @@ services:
       spring.datasource.url: jdbc:postgresql://db:5432/tgbot
       spring.datasource.username: ${POSTGRES_USER}
       spring.datasource.password: ${POSTGRES_PASSWORD}
+      SPRING_PROFILES_ACTIVE: docker
     depends_on:
       - db
 
@@ -23,6 +24,7 @@ services:
     environment:
       telegram.bot.botName: ${TELEGRAM_BOT_NAME}
       telegram.bot.botToken: ${TELEGRAM_BOT_TOKEN}
+      SPRING_PROFILES_ACTIVE: docker
     container_name: telegram
     depends_on:
       - exercises
@@ -37,7 +39,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       # имя БД
-      POSTGRES_DB: tgbot
+      POSTGRES_DB: kvbot
       POSTGRES_SCHEMA: public
       STOP_ON_MIGRATION_FAILURE: "false"
     volumes:
