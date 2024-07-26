@@ -8,16 +8,16 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.PastOrPresent;
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 @Getter
 @Setter
 @Entity(name = "exercise_result")
 @Valid
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ExerciseResult extends BaseEntity {

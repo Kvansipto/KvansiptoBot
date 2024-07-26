@@ -1,19 +1,20 @@
 package kvansipto.telegram.microservice.services;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
 import kvansipto.exercise.dto.ExerciseDto;
 import kvansipto.exercise.dto.ExerciseResultDto;
 import kvansipto.exercise.dto.UserDto;
+import kvansipto.exercise.filter.ExerciseResultFilter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.util.Pair;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -69,8 +70,11 @@ public class RestToExercises {
   public List<ExerciseResultDto> getExerciseResults(ExerciseDto exercise, String chatId) {
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
-    Pair<ExerciseDto, String> body = Pair.of(exercise, chatId);
-    HttpEntity<Pair<ExerciseDto, String>> requestEntity = new HttpEntity<>(body, headers);
+    ExerciseResultFilter body = ExerciseResultFilter.builder()
+        .exerciseDto(exercise)
+        .userChatId(chatId)
+        .build();
+    HttpEntity<ExerciseResultFilter> requestEntity = new HttpEntity<>(body, headers);
     ResponseEntity<ExerciseResultDto[]> response = restTemplate.postForEntity("http://exercises:8080/exercise-results/",
         requestEntity,
         ExerciseResultDto[].class);

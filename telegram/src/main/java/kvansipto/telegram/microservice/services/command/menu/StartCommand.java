@@ -46,12 +46,13 @@ public class StartCommand extends MainMenuCommand {
       var chatId = message.getChatId().toString();
       var chat = message.getChat();
 
-      UserDto user = new UserDto();
-      user.setId(chatId);
-      user.setUserName(chat.getUserName());
-      user.setFirstName(chat.getFirstName());
-      user.setLastName(chat.getLastName());
-      user.setRegisteredAt(new Timestamp(System.currentTimeMillis()));
+      UserDto user = UserDto.builder()
+          .id(chatId)
+          .userName(chat.getUserName())
+          .firstName(chat.getFirstName())
+          .lastName(chat.getLastName())
+          .registeredAt(new Timestamp(System.currentTimeMillis()))
+          .build();
       restToExercises.saveUser(user);
     }
   }

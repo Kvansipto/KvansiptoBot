@@ -13,10 +13,10 @@
   <artifactId>exercise-microservice</artifactId>
 
   <properties>
-    <maven.compiler.source>18</maven.compiler.source>
-    <maven.compiler.target>18</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <queryDsl.version>5.0.0</queryDsl.version>
   </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.mapstruct</groupId>
@@ -38,12 +38,36 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-data-jpa</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>javax.persistence</groupId>
+          <artifactId>javax.persistence-api</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
     </dependency>
-      <!-- DB.Migration -->
+    <dependency>
+      <groupId>com.querydsl</groupId>
+      <artifactId>querydsl-core</artifactId>
+      <version>${queryDsl.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.querydsl</groupId>
+      <artifactId>querydsl-jpa</artifactId>
+      <classifier>jakarta</classifier>
+      <version>${querydsl.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.querydsl</groupId>
+      <artifactId>querydsl-apt</artifactId>
+      <version>${querydsl.version}</version>
+      <classifier>jakarta</classifier>
+      <scope>provided</scope>
+    </dependency>
+    <!-- DB.Migration -->
     <dependency>
       <groupId>org.flywaydb</groupId>
       <artifactId>flyway-core</artifactId>
@@ -55,6 +79,13 @@
       <artifactId>exercise-api</artifactId>
       <version>0.0.1-SNAPSHOT</version>
     </dependency>
+    <!-- test -->
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>postgresql</artifactId>
+      <version>1.16.3</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
@@ -64,11 +95,24 @@
         <artifactId>spring-boot-maven-plugin</artifactId>
       </plugin>
       <plugin>
+        <groupId>org.flywaydb</groupId>
+        <artifactId>flyway-maven-plugin</artifactId>
+        <version>9.22.3</version>
+        <configuration>
+          <url>jdbc:postgresql://localhost:5432/kvbot</url>
+          <user>postgres</user>
+          <password>postgres</password>
+          <schemas>
+            <schema>public</schema>
+          </schemas>
+        </configuration>
+      </plugin>
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.8.1</version>
         <configuration>
-          <release>${java.version}</release>
+          <source>${java.version}</source>
           <target>${java.version}</target>
           <annotationProcessorPaths>
             <path>
@@ -87,16 +131,67 @@
               <version>${org.mapstruct.version}</version>
             </path>
             <path>
+              <groupId>com.querydsl</groupId>
+              <artifactId>querydsl-apt</artifactId>
+              <version>5.0.0</version>
+            </path>
+            <path>
+              <groupId>jakarta.persistence</groupId>
+              <artifactId>jakarta.persistence-api</artifactId>
+              <version>3.1.0</version>
+            </path>
+            <path>
               <groupId>org.springframework.boot</groupId>
               <artifactId>spring-boot-configuration-processor</artifactId>
               <version>${spring.boot.version}</version>
             </path>
           </annotationProcessorPaths>
-          <compilerArgs>
-            <compilerArg>
-              -Amapstruct.defaultComponentModel=spring
-            </compilerArg>
-          </compilerArgs>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>com.mysema.maven</groupId>
+        <artifactId>apt-maven-plugin</artifactId>
+        <version>1.1.3</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>process</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>target/generated-sources/java</outputDirectory>
+              <processor>com.querydsl.apt.jpa.JPAAnnotationProcessor</processor>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>0.8.8</version>
+        <executions>
+          <execution>
+            <id>prepare-agent</id>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>report</id>
+            <phase>test</phase>
+            <goals>
+              <goal>report</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <excludes>
+            <exclude>**/*Dto*</exclude>
+            <exclude>**/controllers/**</exclude>
+            <exclude>**/entity/**</exclude>
+            <exclude>**/mapper/**</exclude>
+            <exclude>**/repository/**</exclude>
+            <exclude>**/ExerciseApplication*</exclude>
+          </excludes>
         </configuration>
       </plugin>
     </plugins>

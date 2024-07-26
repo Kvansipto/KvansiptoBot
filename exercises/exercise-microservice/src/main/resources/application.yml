@@ -6,7 +6,7 @@ logging.level:
 spring:
   application.name: exercises
   datasource:
-    url: jdbc:postgresql://localhost:5432/tgbot
+    url: jdbc:postgresql://localhost:5432/kvbot
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver
