@@ -5,9 +5,10 @@ import jakarta.persistence.MappedSuperclass;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.UUID;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.FieldNameConstants;
@@ -17,19 +18,16 @@ import org.hibernate.proxy.HibernateProxy;
 @Getter
 @Setter
 @ToString
-@RequiredArgsConstructor
 @SuperBuilder
 @MappedSuperclass
+@AllArgsConstructor
+@NoArgsConstructor
 @FieldNameConstants
 public abstract class BaseEntity implements Serializable {
 
   @Id
   @Builder.Default
   private String id = UUID.randomUUID().toString();
-
-  protected BaseEntity(String id) {
-    this.id = id;
-  }
 
   @Override
   public final boolean equals(Object o) {

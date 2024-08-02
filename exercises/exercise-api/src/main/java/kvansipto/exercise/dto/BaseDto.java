@@ -1,5 +1,6 @@
 package kvansipto.exercise.dto;
 
+import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,7 +10,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-public abstract class BaseDto {
+public abstract class BaseDto implements Serializable {
 
   private String id;
 }
