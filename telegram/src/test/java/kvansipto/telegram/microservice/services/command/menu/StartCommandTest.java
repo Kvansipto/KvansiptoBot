@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -78,7 +79,7 @@ class StartCommandTest {
   @ParameterizedTest
   @MethodSource("provideParametersForUserExistTest")
   void process_shouldSaveUserAndReturnCorrectMessage_whenUserNotExists(boolean userExists, int saveUserTimes) {
-    when(restToExercises.userExists(anyString())).thenReturn(userExists);
+    when(restToExercises.userExists(anyLong())).thenReturn(userExists);
     BotApiMethodInterface result = startCommand.process(update);
 
     assertNotNull(result);
@@ -87,7 +88,7 @@ class StartCommandTest {
     assertEquals("123456", sendMessageWrapper.getChatId());
     assertEquals(EmojiParser.parseToUnicode("Hi, John! Nice to meet you! :fire:"), sendMessageWrapper.getText());
 
-    verify(restToExercises, times(1)).userExists("123456");
+    verify(restToExercises, times(1)).userExists(123456L);
     verify(restToExercises, times(saveUserTimes)).saveUser(any(UserDto.class));
   }
 

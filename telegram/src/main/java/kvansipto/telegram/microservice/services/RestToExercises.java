@@ -31,7 +31,7 @@ public class RestToExercises {
   @Value("${exercises.url}")
   private String exercisesUrl;
 
-  public boolean userExists(String chatId) {
+  public boolean userExists(Long chatId) {
     return Boolean.TRUE.equals(
             restTemplate.getForEntity(String.format("%s/users/%s/exists", exercisesUrl, chatId), Boolean.class)
                     .getBody());
@@ -46,7 +46,7 @@ public class RestToExercises {
     return response.getBody();
   }
 
-  public UserDto getUser(String chatId) {
+  public UserDto getUser(Long chatId) {
     ResponseEntity<UserDto> response = restTemplate.getForEntity(
             String.format("%s/users/%s", exercisesUrl, chatId), UserDto.class);
     return response.getBody();
@@ -77,7 +77,7 @@ public class RestToExercises {
   }
 
   @SneakyThrows
-  public List<ExerciseResultDto> getExerciseResults(ExerciseDto exercise, String chatId){
+  public List<ExerciseResultDto> getExerciseResults(ExerciseDto exercise, Long chatId){
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
     ExerciseResultFilter body = ExerciseResultFilter.builder()

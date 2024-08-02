@@ -7,17 +7,17 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserStateService {
 
-  private final Map<String, UserState> userStateHashMap = new HashMap<>();
+  private final Map<Long, UserState> userStateHashMap = new HashMap<>();
 
-  public UserState getCurrentState(String chatId) {
+  public UserState getCurrentState(Long chatId) {
     return userStateHashMap.get(chatId);
   }
 
-  public void setCurrentState(String chatId, UserState userState) {
+  public void setCurrentState(Long chatId, UserState userState) {
     userStateHashMap.put(chatId, userState);
   }
 
-  public void removeUserState(String chatId) {
+  public void removeUserState(Long chatId) {
     userStateHashMap.remove(chatId);
   }
 }

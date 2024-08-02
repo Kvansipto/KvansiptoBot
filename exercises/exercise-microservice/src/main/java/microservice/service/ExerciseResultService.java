@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ExerciseResultService extends
-    BaseMappedService<ExerciseResult, ExerciseResultDto, String, ExerciseResultRepository, ExerciseResultMapper> {
+    BaseMappedService<ExerciseResult, ExerciseResultDto, Long, ExerciseResultRepository, ExerciseResultMapper> {
 
   private final ExerciseMapper exerciseMapper;
 

@@ -9,7 +9,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 public class SendPhotoWrapper extends SendPhoto implements BotApiMethodInterface {
 
   @Builder(builderClassName = "SendPhotoWrapperBuilder", builderMethodName = "newBuilder")
-  public static SendPhotoWrapper create(String chatId, InputFile photo, String caption) {
+  public static SendPhotoWrapper create(Long chatId, InputFile photo, String caption) {
     SendPhotoWrapper sendPhotoWrapper = new SendPhotoWrapper();
     sendPhotoWrapper.setChatId(chatId);
     sendPhotoWrapper.setPhoto(photo);

@@ -2,6 +2,7 @@ package kvansipto.telegram.microservice.services.command;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
@@ -85,9 +86,9 @@ class AddExerciseResultCommandTest {
   @Test
   void process_shouldReturnEditMessageWrapper() {
     // Arrange
-    when(userStateService.getCurrentState(anyString())).thenReturn(userState);
+    when(userStateService.getCurrentState(anyLong())).thenReturn(userState);
     when(userState.getCurrentExercise()).thenReturn(exercise);
-    when(userStateFactory.createUserSession(anyString())).thenReturn(userState);
+    when(userStateFactory.createUserSession(anyLong())).thenReturn(userState);
 
     // Act
     BotApiMethodInterface result = addExerciseResultCommand.process(update);
@@ -99,8 +100,8 @@ class AddExerciseResultCommandTest {
     assertThat(editMessageWrapper.getText()).isEqualTo(AddExerciseResultCommand.ADD_EXERCISE_RESULT_TEXT);
 
     // Verify
-    verify(userStateService, times(1)).getCurrentState(anyString());
-    verify(userStateFactory, times(1)).createUserSession(anyString());
-    verify(userStateService, times(1)).setCurrentState("123456", userState);
+    verify(userStateService, times(1)).getCurrentState(anyLong());
+    verify(userStateFactory, times(1)).createUserSession(anyLong());
+    verify(userStateService, times(1)).setCurrentState(123456L, userState);
   }
 }

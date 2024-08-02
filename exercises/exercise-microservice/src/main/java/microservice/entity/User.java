@@ -19,7 +19,7 @@ public class User extends BaseEntity {
   private Timestamp registeredAt;
 
   @Builder
-  public User(String id, String userName, String firstName, String lastName, Timestamp registeredAt) {
+  public User(Long id, String userName, String firstName, String lastName, Timestamp registeredAt) {
     super(id);
     this.userName = userName;
     this.firstName = firstName;

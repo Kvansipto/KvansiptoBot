@@ -2,6 +2,7 @@ package microservice.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Random;
 import java.util.UUID;
 import kvansipto.exercise.dto.ExerciseDto;
 import microservice.entity.MuscleGroup;
@@ -22,7 +23,7 @@ class ExerciseServiceIntegrationTest extends AbstractPostgreTestContainerTestBas
 
   @Test
   void create() {
-    String exerciseId = UUID.randomUUID().toString();
+    Long exerciseId = new Random(10).nextLong();
 
     ExerciseDto expected = ExerciseDto.builder()
         .id(exerciseId)

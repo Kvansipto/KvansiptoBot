@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.UUID;
 import kvansipto.exercise.dto.ExerciseDto;
 import kvansipto.exercise.dto.ExerciseResultDto;
 import kvansipto.exercise.dto.UserDto;
@@ -42,14 +41,14 @@ class ExerciseResultServiceTest {
   private static User user;
   private static Exercise exercise;
 
-  private final List<String> idsToDelete = new ArrayList<>();
+  private final List<Long> idsToDelete = new ArrayList<>();
 
   @BeforeAll
   static void setUpBeforeClass(@Autowired UserService userService, @Autowired ExerciseService exerciseService) {
     ExerciseResultServiceTest.userService = userService;
     ExerciseResultServiceTest.exerciseService = exerciseService;
     user = User.builder()
-        .id(UUID.randomUUID().toString())
+        .id(new Random(10).nextLong())
         .userName("John Doe Test")
         .firstName("John")
         .lastName("Doe")
@@ -57,7 +56,7 @@ class ExerciseResultServiceTest {
         .build();
     userService.create(user);
     exercise = Exercise.builder()
-        .id(UUID.randomUUID().toString())
+        .id(new Random(10).nextLong())
         .name(new RandomString(8).nextString())
         .imageUrl(new RandomString(8).nextString())
         .muscleGroup(MuscleGroup.BACK)
@@ -87,7 +86,7 @@ class ExerciseResultServiceTest {
   @Test
   void toDto() {
     ExerciseResult expected = ExerciseResult.builder()
-        .id(UUID.randomUUID().toString())
+        .id(new Random(10).nextLong())
         .exercise(exercise)
         .weight(new Random().nextInt(100))
         .numberOfSets((byte) new Random().nextInt(100))
@@ -110,7 +109,7 @@ class ExerciseResultServiceTest {
   @Test
   void toEntity() {
     ExerciseResultDto expected = ExerciseResultDto.builder()
-        .id(UUID.randomUUID().toString())
+        .id(new Random(10).nextLong())
         .exercise(exerciseService.getOne(exercise.getId()))
         .weight(new Random().nextInt(100))
         .numberOfSets((byte) new Random().nextInt(100))
@@ -132,7 +131,7 @@ class ExerciseResultServiceTest {
 
   @Test
   void create() {
-    String exerciseResultId = UUID.randomUUID().toString();
+    Long exerciseResultId = new Random(10).nextLong();
     ExerciseResultDto expected = ExerciseResultDto.builder()
         .id(exerciseResultId)
         .exercise(exerciseService.getOne(exercise.getId()))
@@ -154,7 +153,7 @@ class ExerciseResultServiceTest {
   void getAll() {
     List<ExerciseResult> expected = new ArrayList<>();
     ExerciseResult exerciseResult1 = ExerciseResult.builder()
-        .id(UUID.randomUUID().toString())
+        .id(new Random(10).nextLong())
         .exercise(exercise)
         .weight(new Random().nextInt(100))
         .numberOfSets((byte) new Random().nextInt(100))
@@ -163,7 +162,7 @@ class ExerciseResultServiceTest {
         .user(user)
         .build();
     ExerciseResult exerciseResult2 = ExerciseResult.builder()
-        .id(UUID.randomUUID().toString())
+        .id(new Random(10).nextLong())
         .exercise(exercise)
         .weight(new Random().nextInt(100))
         .numberOfSets((byte) new Random().nextInt(100))
@@ -187,7 +186,7 @@ class ExerciseResultServiceTest {
     ExerciseDto exerciseDto = exerciseService.getOne(exercise.getId());
     UserDto userDto = userService.getOne(user.getId());
     ExerciseResultDto exerciseResultDto1 = ExerciseResultDto.builder()
-        .id(UUID.randomUUID().toString())
+        .id(new Random(10).nextLong())
         .exercise(exerciseDto)
         .weight(new Random().nextInt(100))
         .numberOfSets((byte) new Random().nextInt(100))
@@ -196,7 +195,7 @@ class ExerciseResultServiceTest {
         .user(userDto)
         .build();
     ExerciseResultDto exerciseResultDto2 = ExerciseResultDto.builder()
-        .id(UUID.randomUUID().toString())
+        .id(new Random(10).nextLong())
         .exercise(exerciseDto)
         .weight(new Random().nextInt(100))
         .numberOfSets((byte) new Random().nextInt(100))
@@ -216,7 +215,7 @@ class ExerciseResultServiceTest {
 
   @Test
   void update() {
-    String exerciseResultId = UUID.randomUUID().toString();
+    Long exerciseResultId = new Random(10).nextLong();
     ExerciseResult exerciseResult = ExerciseResult.builder()
         .id(exerciseResultId)
         .exercise(exercise)
@@ -230,7 +229,7 @@ class ExerciseResultServiceTest {
     idsToDelete.add(exerciseResult.getId());
 
     User newUser = User.builder()
-        .id(UUID.randomUUID().toString())
+        .id(new Random(10).nextLong())
         .userName(new RandomString(8).nextString())
         .firstName(new RandomString(8).nextString())
         .lastName(new RandomString(8).nextString())
@@ -238,7 +237,7 @@ class ExerciseResultServiceTest {
         .build();
     userService.create(newUser);
     Exercise newExercise = Exercise.builder()
-        .id(UUID.randomUUID().toString())
+        .id(new Random(10).nextLong())
         .name(new RandomString(8).nextString())
         .imageUrl(new RandomString(8).nextString())
         .muscleGroup(MuscleGroup.LEGS)
@@ -269,7 +268,7 @@ class ExerciseResultServiceTest {
 
   @Test
   void exists() {
-    String exerciseResultId = UUID.randomUUID().toString();
+    Long exerciseResultId = new Random(10).nextLong();
     ExerciseResult exerciseResult = ExerciseResult.builder()
         .id(exerciseResultId)
         .exercise(exercise)
@@ -287,7 +286,7 @@ class ExerciseResultServiceTest {
 
   @Test
   void delete() {
-    String exerciseResultId = UUID.randomUUID().toString();
+    Long exerciseResultId = new Random(10).nextLong();
     ExerciseResult exerciseResult = ExerciseResult.builder()
         .id(exerciseResultId)
         .exercise(exercise)
@@ -310,7 +309,7 @@ class ExerciseResultServiceTest {
     ExerciseDto exerciseDto = exerciseService.getOne(exercise.getId());
     UserDto userDto = userService.getOne(user.getId());
     ExerciseResultDto exerciseResult1 = ExerciseResultDto.builder()
-        .id(UUID.randomUUID().toString())
+        .id(new Random(10).nextLong())
         .exercise(exerciseDto)
         .weight(new Random().nextInt(100))
         .numberOfSets((byte) new Random().nextInt(100))
@@ -319,7 +318,7 @@ class ExerciseResultServiceTest {
         .user(userDto)
         .build();
     ExerciseResultDto exerciseResult2 = ExerciseResultDto.builder()
-        .id(UUID.randomUUID().toString())
+        .id(new Random(10).nextLong())
         .exercise(exerciseDto)
         .weight(new Random().nextInt(100))
         .numberOfSets((byte) new Random().nextInt(100))

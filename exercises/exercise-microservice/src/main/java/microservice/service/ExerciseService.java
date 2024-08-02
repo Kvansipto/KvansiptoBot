@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 @Service
 @CacheConfig(cacheNames = "exercises")
 public class ExerciseService extends
-    BaseMappedService<Exercise, ExerciseDto, String, ExerciseRepository, ExerciseMapper> {
+    BaseMappedService<Exercise, ExerciseDto, Long, ExerciseRepository, ExerciseMapper> {
 
   protected ExerciseService(ExerciseRepository repository, ExerciseMapper exerciseMapper) {
     super(repository, exerciseMapper);

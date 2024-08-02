@@ -30,7 +30,7 @@ public class MuscleGroupCommand extends MainMenuCommand {
         .toList();
 
     return SendMessageWrapper.newBuilder()
-        .chatId(chatId.toString())
+        .chatId(chatId)
         .replyMarkup(KeyboardMarkupUtil.createRows(answerDtoList, 2))
         .text("Выберите группу мышц")
         .build();

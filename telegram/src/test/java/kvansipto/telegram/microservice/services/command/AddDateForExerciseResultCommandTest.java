@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mockStatic;
@@ -96,7 +97,7 @@ class AddDateForExerciseResultCommandTest {
   @Test
   void process_shouldReturnEditMessageWrapper() {
     // Arrange
-    when(userStateFactory.createUserSession(anyString())).thenReturn(userState);
+    when(userStateFactory.createUserSession(anyLong())).thenReturn(userState);
     ExerciseDto exercise = ExerciseDto.builder().build();
     when(restToExercises.getExerciseByName("exerciseName")).thenReturn(exercise);
 
@@ -127,7 +128,7 @@ class AddDateForExerciseResultCommandTest {
       // Verify user state changes
       verify(userState).setCurrentExercise(exercise);
       verify(userState).setCurrentState("CHOOSING DATE");
-      verify(userStateService).setCurrentState("123456", userState);
+      verify(userStateService).setCurrentState(123456L, userState);
 
       // Verify that the createRows method was called with the correct arguments
       mockedStaticKeyboardMarkupUtil.verify(() -> KeyboardMarkupUtil.createRows(eq(expectedAnswers), eq(2)), times(1));

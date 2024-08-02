@@ -3,6 +3,7 @@ package kvansipto.telegram.microservice.services.command;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
@@ -106,7 +107,7 @@ class ShowExerciseResultHistoryCommandTest {
   void process_shouldReturnEditMessageWrapper_whenExerciseResultsAreEmpty() {
     // Arrange
     List<ExerciseResultDto> emptyResults = new ArrayList<>();
-    when(restToExercises.getExerciseResults(any(ExerciseDto.class), anyString())).thenReturn(emptyResults);
+    when(restToExercises.getExerciseResults(any(ExerciseDto.class), anyLong())).thenReturn(emptyResults);
 
     // Act
     BotApiMethodInterface result = showExerciseResultHistoryCommand.process(update);
@@ -138,7 +139,7 @@ class ShowExerciseResultHistoryCommandTest {
             .numberOfRepetitions((byte) (10))
             .build());
 
-    when(restToExercises.getExerciseResults(any(ExerciseDto.class), anyString())).thenReturn(exerciseResults);
+    when(restToExercises.getExerciseResults(any(ExerciseDto.class), anyLong())).thenReturn(exerciseResults);
     when(TableImage.drawTableImage(any(String[].class), any(String[][].class))).thenReturn(file);
 
     // Act

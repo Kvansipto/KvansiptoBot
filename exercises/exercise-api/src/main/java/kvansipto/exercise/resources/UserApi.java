@@ -6,7 +6,7 @@ public interface UserApi {
 
   UserDto register(UserDto user);
 
-  boolean exists(String chatId);
+  boolean exists(Long chatId);
 
-  UserDto get(String chatId);
+  UserDto get(Long chatId);
 }

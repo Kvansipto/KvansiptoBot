@@ -32,15 +32,15 @@ public class AddResultForExerciseResultCommand extends Command {
 
   @Override
   public boolean supports(Update update) {
-    return update.hasMessage() && userStateService.getCurrentState(update.getMessage().getChatId().toString()) != null
-        && userStateService.getCurrentState(update.getMessage().getChatId().toString()).getCurrentState()
+    return update.hasMessage() && userStateService.getCurrentState(update.getMessage().getChatId()) != null
+        && userStateService.getCurrentState(update.getMessage().getChatId()).getCurrentState()
         .equals(AddExerciseResultCommand.WAITING_FOR_RESULT_STATE_TEXT);
   }
 
   @Override
   public BotApiMethodInterface process(Update update) {
     var message = update.getMessage().getText();
-    var chatId = update.getMessage().getChatId().toString();
+    var chatId = update.getMessage().getChatId();
 
     BotApiMethodWrapper botApiMethodWrapper = new BotApiMethodWrapper();
     SendMessageWrapperBuilder sendMessageWrapperBuilder = SendMessageWrapper.newBuilder().chatId(chatId);

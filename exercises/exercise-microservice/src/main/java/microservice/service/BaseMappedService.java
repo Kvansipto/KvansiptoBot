@@ -4,7 +4,6 @@ import jakarta.persistence.EntityNotFoundException;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.StreamSupport;
 import kvansipto.exercise.dto.BaseDto;
 import microservice.entity.BaseEntity;
@@ -34,9 +33,9 @@ public abstract class BaseMappedService<E extends BaseEntity,
   }
 
   public E create(E entity) {
-    if (entity.getId() == null) {
-      entity.setId(UUID.randomUUID().toString());
-    }
+//    if (entity.getId() == null) {
+//      entity.setId(UUID.randomUUID().toString());
+//    }
     return save(entity);
   }
 

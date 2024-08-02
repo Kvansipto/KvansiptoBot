@@ -5,7 +5,6 @@ import com.querydsl.core.types.Predicate;
 import kvansipto.exercise.filter.ExerciseResultFilter;
 import microservice.entity.MuscleGroup;
 import microservice.entity.QExerciseResult;
-import microservice.mapper.ExerciseMapper;
 import org.springframework.stereotype.Component;
 
 @Component

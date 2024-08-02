@@ -5,7 +5,7 @@ import microservice.entity.Exercise;
 import microservice.entity.MuscleGroup;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface ExerciseRepository extends JpaRepository<Exercise, String> {
+public interface ExerciseRepository extends JpaRepository<Exercise, Long> {
 
   List<Exercise> findByMuscleGroup(MuscleGroup muscleGroup);
 

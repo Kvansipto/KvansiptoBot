@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 import kvansipto.exercise.dto.ExerciseDto;
 import microservice.entity.Exercise;
@@ -22,7 +23,7 @@ class ExerciseServiceTest {
   @Autowired
   private ExerciseService service;
 
-  private final List<String> idsToDelete = new ArrayList<>();
+  private final List<Long> idsToDelete = new ArrayList<>();
 
   @AfterEach
   void tearDown() {
@@ -57,7 +58,7 @@ class ExerciseServiceTest {
   @Test
   void toEntity() {
     ExerciseDto exerciseDto = ExerciseDto.builder()
-        .id(UUID.randomUUID().toString())
+        .id(new Random(10).nextLong())
         .name(new RandomString(8).nextString())
         .imageUrl(new RandomString(8).nextString())
         .muscleGroup(MuscleGroup.CORE.name().toLowerCase())
@@ -79,7 +80,7 @@ class ExerciseServiceTest {
 
   @Test
   void create() {
-    String exerciseId = UUID.randomUUID().toString();
+    Long exerciseId = new Random(10).nextLong();
 
     ExerciseDto expected = ExerciseDto.builder()
         .id(exerciseId)
@@ -105,7 +106,7 @@ class ExerciseServiceTest {
   void getAll() {
     List<Exercise> expected = new ArrayList<>();
     Exercise exercise1 = Exercise.builder()
-        .id(UUID.randomUUID().toString())
+        .id(new Random(10).nextLong())
         .name(new RandomString(8).nextString())
         .imageUrl(new RandomString(8).nextString())
         .muscleGroup(MuscleGroup.BACK)
@@ -113,7 +114,7 @@ class ExerciseServiceTest {
         .videoUrl(new RandomString(8).nextString())
         .build();
     Exercise exercise2 = Exercise.builder()
-        .id(UUID.randomUUID().toString())
+        .id(new Random(10).nextLong())
         .name(new RandomString(8).nextString())
         .imageUrl(new RandomString(8).nextString())
         .muscleGroup(MuscleGroup.CHEST)
@@ -134,7 +135,7 @@ class ExerciseServiceTest {
   void getAllAsDto() {
     List<ExerciseDto> expected = new ArrayList<>();
     ExerciseDto exerciseDto1 = ExerciseDto.builder()
-        .id(UUID.randomUUID().toString())
+        .id(new Random(10).nextLong())
         .name(new RandomString(8).nextString())
         .imageUrl(new RandomString(8).nextString())
         .muscleGroup(MuscleGroup.CORE.name().toLowerCase())
@@ -142,7 +143,7 @@ class ExerciseServiceTest {
         .videoUrl(new RandomString(8).nextString())
         .build();
     ExerciseDto exerciseDto2 = ExerciseDto.builder()
-        .id(UUID.randomUUID().toString())
+        .id(new Random(10).nextLong())
         .name(new RandomString(8).nextString())
         .imageUrl(new RandomString(8).nextString())
         .muscleGroup(MuscleGroup.CORE.name().toLowerCase())
@@ -162,7 +163,7 @@ class ExerciseServiceTest {
 
   @Test
   void update() {
-    String exerciseId = UUID.randomUUID().toString();
+    Long exerciseId = new Random(10).nextLong();
     Exercise exercise = Exercise.builder()
         .id(exerciseId)
         .name(new RandomString(8).nextString())
@@ -196,7 +197,7 @@ class ExerciseServiceTest {
 
   @Test
   void exists() {
-    String exerciseId = UUID.randomUUID().toString();
+    Long exerciseId = new Random(10).nextLong();
     Exercise exercise = Exercise.builder()
         .id(exerciseId)
         .name(new RandomString(8).nextString())
@@ -213,7 +214,7 @@ class ExerciseServiceTest {
 
   @Test
   void delete() {
-    String exerciseId = UUID.randomUUID().toString();
+    Long exerciseId = new Random(10).nextLong();
     Exercise exercise = Exercise.builder()
         .id(exerciseId)
         .name(new RandomString(8).nextString())
@@ -233,7 +234,7 @@ class ExerciseServiceTest {
   void getExercisesByMuscleGroup() {
     List<ExerciseDto> expected = new ArrayList<>();
     ExerciseDto exerciseDto1 = ExerciseDto.builder()
-        .id(UUID.randomUUID().toString())
+        .id(new Random(10).nextLong())
         .name(new RandomString(8).nextString())
         .imageUrl(new RandomString(8).nextString())
         .muscleGroup(MuscleGroup.CORE.name().toLowerCase())
@@ -241,7 +242,7 @@ class ExerciseServiceTest {
         .videoUrl(new RandomString(8).nextString())
         .build();
     ExerciseDto exerciseDto2 = ExerciseDto.builder()
-        .id(UUID.randomUUID().toString())
+        .id(new Random(10).nextLong())
         .name(new RandomString(8).nextString())
         .imageUrl(new RandomString(8).nextString())
         .muscleGroup(MuscleGroup.CORE.name().toLowerCase())
@@ -262,7 +263,7 @@ class ExerciseServiceTest {
   void getExerciseByName() {
     String exerciseName = new RandomString(8).nextString();
     ExerciseDto expected = ExerciseDto.builder()
-        .id(UUID.randomUUID().toString())
+        .id(new Random(10).nextLong())
         .name(exerciseName)
         .imageUrl(new RandomString(8).nextString())
         .muscleGroup(MuscleGroup.CORE.name().toLowerCase())

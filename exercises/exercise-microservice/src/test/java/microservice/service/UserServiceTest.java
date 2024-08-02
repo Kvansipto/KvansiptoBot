@@ -7,6 +7,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 import kvansipto.exercise.dto.UserDto;
 import microservice.entity.User;
@@ -21,7 +22,7 @@ class UserServiceTest {
   @Autowired
   UserService service;
 
-  private final List<String> idsToDelete = new ArrayList<>();
+  private final List<Long> idsToDelete = new ArrayList<>();
 
   @AfterEach
   void tearDown() {
@@ -33,7 +34,7 @@ class UserServiceTest {
 
   @Test
   void testCreateUser() {
-    String userID = UUID.randomUUID().toString();
+    Long userID = new Random(10).nextLong();
 
     UserDto expected = UserDto.builder()
         .id(userID)
@@ -57,7 +58,7 @@ class UserServiceTest {
 
   @Test
   void toDto() {
-    String userID = UUID.randomUUID().toString();
+    Long userID = new Random(10).nextLong();
     User expected = User.builder()
         .id(userID)
         .userName("John Doe Test")
@@ -78,7 +79,7 @@ class UserServiceTest {
 
   @Test
   void toEntity() {
-    String userID = UUID.randomUUID().toString();
+    Long userID = new Random(10).nextLong();
     UserDto expected = UserDto.builder()
         .id(userID)
         .userName("John Doe Test")
@@ -101,7 +102,7 @@ class UserServiceTest {
   void getAll() {
     List<User> expected = new ArrayList<>();
     User user1 = User.builder()
-        .id(UUID.randomUUID().toString())
+        .id(new Random(10).nextLong())
         .userName("John Doe Test")
         .firstName("John")
         .lastName("Doe")
@@ -109,7 +110,7 @@ class UserServiceTest {
         .build();
 
     User user2 = User.builder()
-        .id(UUID.randomUUID().toString())
+        .id(new Random(10).nextLong())
         .userName("Jane White Test")
         .firstName("Jane")
         .lastName("White")
@@ -131,7 +132,7 @@ class UserServiceTest {
   @Test
   void getAllAsDto() {
     UserDto userDto1 = UserDto.builder()
-        .id(UUID.randomUUID().toString())
+        .id(new Random(10).nextLong())
         .userName("John Doe Test")
         .firstName("John")
         .lastName("Doe")
@@ -139,7 +140,7 @@ class UserServiceTest {
         .build();
 
     UserDto userDto2 = UserDto.builder()
-        .id(UUID.randomUUID().toString())
+        .id(new Random(10).nextLong())
         .userName("Jane White Test")
         .firstName("Jane")
         .lastName("White")
@@ -161,7 +162,7 @@ class UserServiceTest {
 
   @Test
   void update() {
-    String userID = UUID.randomUUID().toString();
+    Long userID = new Random(10).nextLong();
     User user = User.builder()
         .id(userID)
         .userName("userName")
@@ -194,7 +195,7 @@ class UserServiceTest {
 
   @Test
   void exists() {
-    String userID = UUID.randomUUID().toString();
+    Long userID = new Random(10).nextLong();
     User user = User.builder()
         .id(userID)
         .userName("userName")
@@ -212,7 +213,7 @@ class UserServiceTest {
 
   @Test
   void delete() {
-    String userID = UUID.randomUUID().toString();
+    Long userID = new Random(10).nextLong();
     User user = User.builder()
         .id(userID)
         .userName("userName")

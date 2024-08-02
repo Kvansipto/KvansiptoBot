@@ -12,5 +12,5 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 public abstract class BaseDto implements Serializable {
 
-  private String id;
+  private Long id;
 }

@@ -37,7 +37,7 @@ public class ShowExerciseResultHistoryCommand extends Command {
   public BotApiMethodInterface process(Update update) {
     String exerciseName = AnswerData.deserialize(update.getCallbackQuery().getData()).getHiddenText();
     ExerciseDto exercise = restToExercises.getExerciseByName(exerciseName);
-    String chatId = update.getCallbackQuery().getMessage().getChatId().toString();
+    Long chatId = update.getCallbackQuery().getMessage().getChatId();
 
     List<ExerciseResultDto> exerciseResults = restToExercises.getExerciseResults(exercise, chatId);
     EditMessageWrapperBuilder editMessageWrapperBuilder = EditMessageWrapper.newBuilder()
