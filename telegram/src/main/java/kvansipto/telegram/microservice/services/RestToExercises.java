@@ -3,6 +3,10 @@ package kvansipto.telegram.microservice.services;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
 import kvansipto.exercise.dto.ExerciseDto;
 import kvansipto.exercise.dto.ExerciseResultDto;
 import kvansipto.exercise.dto.UserDto;
@@ -11,13 +15,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -92,7 +96,10 @@ public class RestToExercises {
             String.class);
     JsonNode root = objectMapper.readTree(response.getBody());
     JsonNode content = root.get("content");
-    return objectMapper.convertValue(content, new TypeReference<List<ExerciseResultDto>>() {});
+    List<ExerciseResultDto> result = objectMapper.convertValue(content, new TypeReference<>() {
+    });
+    result.sort(Comparator.comparing(ExerciseResultDto::getDate).reversed());
+    return result;
   }
 
   public List<String> getMuscleGroups() {
