@@ -33,7 +33,7 @@ public class AddExerciseResultCommand extends Command {
   @Override
   public BotApiMethodInterface process(Update update) {
     String date = AnswerData.deserialize(update.getCallbackQuery().getData()).getHiddenText();
-    String chatId = update.getCallbackQuery().getMessage().getChatId().toString();
+    Long chatId = update.getCallbackQuery().getMessage().getChatId();
     int days = Integer.parseInt(date.split("/")[0]);
     int month = Integer.parseInt(date.split("/")[1]);
     LocalDate localDate = LocalDate.of(LocalDate.now().getYear(), month, days);

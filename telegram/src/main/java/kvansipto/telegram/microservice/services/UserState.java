@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 @Data
 public class UserState {
 
-  private String chatId;
+  private Long chatId;
   private ExerciseDto currentExercise;
   private String currentState;
   private LocalDate exerciseResultDate;

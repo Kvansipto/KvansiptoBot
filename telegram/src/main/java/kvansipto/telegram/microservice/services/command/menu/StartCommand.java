@@ -31,7 +31,7 @@ public class StartCommand extends MainMenuCommand {
     String firstName = update.getMessage().getChat().getFirstName();
     String answer = EmojiParser.parseToUnicode("Hi, " + firstName + "! Nice to meet you!" + " :fire:");
     return SendMessageWrapper.newBuilder()
-        .chatId(message.getChatId().toString())
+        .chatId(message.getChatId())
         .text(answer)
         .build();
   }
@@ -42,8 +42,8 @@ public class StartCommand extends MainMenuCommand {
   }
 
   private void registerUser(Message message) {
-    if (!restToExercises.userExists(message.getChatId().toString())) {
-      var chatId = message.getChatId().toString();
+    if (!restToExercises.userExists(message.getChatId())) {
+      var chatId = message.getChatId();
       var chat = message.getChat();
 
       UserDto user = UserDto.builder()

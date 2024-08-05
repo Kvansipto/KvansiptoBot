@@ -43,7 +43,7 @@ public class AddDateForExerciseResultCommand extends Command {
   @Override
   public BotApiMethodInterface process(Update update) {
     String exerciseName = AnswerData.deserialize(update.getCallbackQuery().getData()).getHiddenText();
-    String chatId = update.getCallbackQuery().getMessage().getChatId().toString();
+    Long chatId = update.getCallbackQuery().getMessage().getChatId();
     ExerciseDto exercise = restToExercises.getExerciseByName(exerciseName);
 
     UserState userState = userStateFactory.createUserSession(chatId);

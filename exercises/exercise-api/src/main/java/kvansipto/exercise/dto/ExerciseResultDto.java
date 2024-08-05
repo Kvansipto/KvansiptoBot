@@ -22,6 +22,7 @@ public class ExerciseResultDto extends BaseDto {
   byte numberOfSets;
   byte numberOfRepetitions;
   UserDto user;
+  String comment;
 
   @PastOrPresent(message = "The date cannot be in the future")
   LocalDate date;

@@ -24,13 +24,13 @@ public class UserController implements UserApi {
 
   @Override
   @GetMapping("/users/{id}/exists")
-  public boolean exists(@PathVariable("id") String chatId) {
+  public boolean exists(@PathVariable("id") Long chatId) {
     return service.exists(chatId);
   }
 
   @Override
   @GetMapping("/users/{id}")
-  public UserDto get(@PathVariable("id") String chatId) {
+  public UserDto get(@PathVariable("id") Long chatId) {
     return service.getOne(chatId);
   }
 }

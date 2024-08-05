@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class UserService extends
-    BaseMappedService<User, UserDto, String, UserRepository, UserMapper> {
+    BaseMappedService<User, UserDto, Long, UserRepository, UserMapper> {
 
   protected UserService(UserRepository repository, UserMapper mapper) {
     super(repository, mapper);

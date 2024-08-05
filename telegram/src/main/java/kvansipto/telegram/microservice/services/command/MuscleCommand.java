@@ -26,7 +26,7 @@ public class MuscleCommand extends Command {
 
   @Override
   public BotApiMethodInterface process(Update update) {
-    String chatId = update.getCallbackQuery().getMessage().getChatId().toString();
+    Long chatId = update.getCallbackQuery().getMessage().getChatId();
     String muscleGroup = AnswerData.deserialize(update.getCallbackQuery().getData()).getButtonText();
     System.out.println("Группа мышц " + muscleGroup);
 

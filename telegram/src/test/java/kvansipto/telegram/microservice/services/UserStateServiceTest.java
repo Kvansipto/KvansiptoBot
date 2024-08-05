@@ -9,7 +9,7 @@ class UserStateServiceTest {
 
   private UserStateService userStateService;
   private UserState userState;
-  private final String chatId = "123456";
+  private final Long chatId = 123456L;
 
   @BeforeEach
   void setUp() {

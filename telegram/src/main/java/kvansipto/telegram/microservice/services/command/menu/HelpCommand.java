@@ -20,7 +20,7 @@ public class HelpCommand extends MainMenuCommand {
   @Override
   public BotApiMethodInterface process(Update update) {
     return SendMessageWrapper.newBuilder()
-        .chatId(update.getMessage().getChatId().toString())
+        .chatId(update.getMessage().getChatId())
         .text(HELP_TEXT)
         .build();
   }

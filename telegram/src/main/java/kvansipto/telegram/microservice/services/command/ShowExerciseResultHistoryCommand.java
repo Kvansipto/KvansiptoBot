@@ -22,7 +22,7 @@ public class ShowExerciseResultHistoryCommand extends Command {
 
   public static final String EMPTY_LIST_EXERCISE_RESULT_TEXT = "Результаты по упражнению %s отсутствуют";
   public static final String EXERCISE_RESULT_HISTORY_LIST_TEXT = "История результатов упражнения %s";
-  public static final String[] HEADERS = {"Дата", "Вес (кг)", "Подходы", "Повторения"};
+  public static final String[] HEADERS = {"Дата", "Вес (кг)", "Подходы", "Повторения", "Комментарий"};
 
   @Autowired
   RestToExercises restToExercises;
@@ -37,7 +37,7 @@ public class ShowExerciseResultHistoryCommand extends Command {
   public BotApiMethodInterface process(Update update) {
     String exerciseName = AnswerData.deserialize(update.getCallbackQuery().getData()).getHiddenText();
     ExerciseDto exercise = restToExercises.getExerciseByName(exerciseName);
-    String chatId = update.getCallbackQuery().getMessage().getChatId().toString();
+    Long chatId = update.getCallbackQuery().getMessage().getChatId();
 
     List<ExerciseResultDto> exerciseResults = restToExercises.getExerciseResults(exercise, chatId);
     EditMessageWrapperBuilder editMessageWrapperBuilder = EditMessageWrapper.newBuilder()
@@ -54,7 +54,8 @@ public class ShowExerciseResultHistoryCommand extends Command {
       for (int i = 0; i < exerciseResults.size(); i++) {
         ExerciseResultDto exerciseResult = exerciseResults.get(i);
         data[i] = new String[]{exerciseResult.getDate().format(dtf), String.valueOf(exerciseResult.getWeight()),
-            String.valueOf(exerciseResult.getNumberOfSets()), String.valueOf(exerciseResult.getNumberOfRepetitions())};
+            String.valueOf(exerciseResult.getNumberOfSets()),
+            String.valueOf(exerciseResult.getNumberOfRepetitions()), exerciseResult.getComment()};
       }
 
       editMessageWrapperBuilder.text(EXERCISE_RESULT_HISTORY_LIST_TEXT.formatted(exerciseName));

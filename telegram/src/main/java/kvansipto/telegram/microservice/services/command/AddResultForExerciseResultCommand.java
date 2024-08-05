@@ -32,24 +32,27 @@ public class AddResultForExerciseResultCommand extends Command {
 
   @Override
   public boolean supports(Update update) {
-    return update.hasMessage() && userStateService.getCurrentState(update.getMessage().getChatId().toString()) != null
-        && userStateService.getCurrentState(update.getMessage().getChatId().toString()).getCurrentState()
+    return update.hasMessage() && userStateService.getCurrentState(update.getMessage().getChatId()) != null
+        && userStateService.getCurrentState(update.getMessage().getChatId()).getCurrentState()
         .equals(AddExerciseResultCommand.WAITING_FOR_RESULT_STATE_TEXT);
   }
 
   @Override
   public BotApiMethodInterface process(Update update) {
     var message = update.getMessage().getText();
-    var chatId = update.getMessage().getChatId().toString();
+    var chatId = update.getMessage().getChatId();
 
     BotApiMethodWrapper botApiMethodWrapper = new BotApiMethodWrapper();
-    SendMessageWrapperBuilder sendMessageWrapperBuilder = SendMessageWrapper.newBuilder()
-        .chatId(chatId);
+    SendMessageWrapperBuilder sendMessageWrapperBuilder = SendMessageWrapper.newBuilder().chatId(chatId);
     try {
-      String[] parts = message.split(" ");
+      String[] parts = message.split(" ", 4);
       double weight = Double.parseDouble(parts[0]);
       byte sets = Byte.parseByte(parts[1]);
       byte reps = Byte.parseByte(parts[2]);
+      String comment = null;
+      if (parts.length == 4) {
+        comment = parts[3];
+      }
       ExerciseResultDto exerciseResult = ExerciseResultDto.builder()
           .weight(weight)
           .numberOfSets(sets)
@@ -57,6 +60,7 @@ public class AddResultForExerciseResultCommand extends Command {
           .user(restToExercises.getUser(chatId))
           .exercise(userStateService.getCurrentState(chatId).getCurrentExercise())
           .date(userStateService.getCurrentState(chatId).getExerciseResultDate())
+          .comment(comment)
           .build();
       restToExercises.saveExerciseResult(exerciseResult);
       sendMessageWrapperBuilder.text(SAVE_RESULT_SUCCESS_TEXT);

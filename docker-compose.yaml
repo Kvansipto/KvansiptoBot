@@ -7,12 +7,13 @@ services:
       - "8080:8080"
     container_name: exercises
     environment:
-      spring.datasource.url: jdbc:postgresql://db:5432/tgbot
+      spring.datasource.url: jdbc:postgresql://db:5432/kvbot
       spring.datasource.username: ${POSTGRES_USER}
       spring.datasource.password: ${POSTGRES_PASSWORD}
       SPRING_PROFILES_ACTIVE: docker
     depends_on:
       - db
+      - redis
 
   telegram:
     build: ./telegram
@@ -44,6 +45,13 @@ services:
       STOP_ON_MIGRATION_FAILURE: "false"
     volumes:
       - db-data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    restart: always
 
 volumes:
   db-data:

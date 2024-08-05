@@ -3,6 +3,7 @@ package kvansipto.telegram.microservice.services.command;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -71,7 +72,7 @@ class AddResultForExerciseResultCommandTest {
 
   @Test
   void supports_shouldReturnTrue_whenUpdateHasMessageAndUserStateIsWaitingForResult() {
-    when(userStateService.getCurrentState(anyString())).thenReturn(userState);
+    when(userStateService.getCurrentState(anyLong())).thenReturn(userState);
     when(userState.getCurrentState()).thenReturn(AddExerciseResultCommand.WAITING_FOR_RESULT_STATE_TEXT);
     when(userState.getCurrentExercise()).thenReturn(exercise);
     boolean result = addResultForExerciseResultCommand.supports(update);
@@ -80,12 +81,12 @@ class AddResultForExerciseResultCommandTest {
 
   @Test
   void process_shouldReturnBotApiMethodWrapper_whenInputIsValid() {
-    when(userStateService.getCurrentState(anyString())).thenReturn(userState);
+    when(userStateService.getCurrentState(anyLong())).thenReturn(userState);
     when(userState.getCurrentState()).thenReturn(AddExerciseResultCommand.WAITING_FOR_RESULT_STATE_TEXT);
     when(userState.getCurrentExercise()).thenReturn(exercise);
     UserDto user = UserDto.builder().build();
     // Arrange
-    when(restToExercises.getUser(anyString())).thenReturn(user);
+    when(restToExercises.getUser(anyLong())).thenReturn(user);
     when(userState.getExerciseResultDate()).thenReturn(LocalDate.now());
 
     // Act
@@ -100,11 +101,11 @@ class AddResultForExerciseResultCommandTest {
     assertThat(actions.get(0)).isInstanceOf(SendMessageWrapper.class);
     SendMessageWrapper sendMessageWrapper = (SendMessageWrapper) actions.get(0);
 
-    assertThat(sendMessageWrapper.getChatId()).isEqualTo("123456");
+    assertThat(sendMessageWrapper.getNumberChatId()).isEqualTo(123456L);
     assertThat(sendMessageWrapper.getText()).isEqualTo(AddResultForExerciseResultCommand.SAVE_RESULT_SUCCESS_TEXT);
 
     // Verify user state changes
-    verify(userStateService, times(1)).removeUserState("123456");
+    verify(userStateService, times(1)).removeUserState(123456L);
     verify(restToExercises, times(1)).saveExerciseResult(any(ExerciseResultDto.class));
   }
 
@@ -114,7 +115,7 @@ class AddResultForExerciseResultCommandTest {
     message.setText("invalid input");
     message.setMessageId(new Random(5).nextInt());
     update.setMessage(message);
-    when(userStateService.getCurrentState(anyString())).thenReturn(userState);
+    when(userStateService.getCurrentState(anyLong())).thenReturn(userState);
     when(userState.getCurrentState()).thenReturn(AddExerciseResultCommand.WAITING_FOR_RESULT_STATE_TEXT);
     when(userState.getCurrentExercise()).thenReturn(exercise);
 
@@ -130,7 +131,7 @@ class AddResultForExerciseResultCommandTest {
     assertThat(actions.get(0)).isInstanceOf(SendMessageWrapper.class);
     SendMessageWrapper sendMessageWrapper = (SendMessageWrapper) actions.get(0);
 
-    assertThat(sendMessageWrapper.getChatId()).isEqualTo("123456");
+    assertThat(sendMessageWrapper.getChatId()).isEqualTo(123456L);
     assertThat(sendMessageWrapper.getText()).isEqualTo(AddResultForExerciseResultCommand.SAVE_RESULT_FAIL_TEXT);
   }
 }

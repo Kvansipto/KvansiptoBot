@@ -14,7 +14,7 @@ import lombok.Setter;
 public class ExerciseResultFilter {
 
   @NotBlank
-  String userChatId;
+  Long userChatId;
   ExerciseDto exerciseDto;
   @PastOrPresent
   LocalDate date;

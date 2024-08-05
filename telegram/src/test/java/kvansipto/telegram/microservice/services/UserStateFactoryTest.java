@@ -11,7 +11,7 @@ class UserStateFactoryTest {
   @Test
   void createUserSession_shouldReturnUserStateWithCorrectChatId() {
     // Arrange
-    String chatId = "123456";
+    Long chatId = 123456L;
 
     // Act
     UserState userState = userStateFactory.createUserSession(chatId);
