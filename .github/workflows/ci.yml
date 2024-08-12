@@ -40,6 +40,6 @@ jobs:
         run: docker build -t kvansipto .
         
       - name: Push to DockerHub
-        run: docker push docker push kvansipto1/kvansipto_exercises:latest
+        run: docker push kvansipto1/kvansipto_exercises:latest
         
       
