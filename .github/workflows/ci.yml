@@ -37,7 +37,7 @@ jobs:
         run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
 
       - name: Build the Docker image
-        run: docker build -t kvansipto .
+        run: docker build -t kvansipto_exercises .
         
       - name: Push to DockerHub
         run: docker push kvansipto1/kvansipto_exercises:latest
