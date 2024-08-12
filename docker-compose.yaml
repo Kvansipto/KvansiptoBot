@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   exercises:
-    build: ./exercises/exercise-microservice
+    image: "${DOCKER_USERNAME}/exercises:latest"
     ports:
       - "8080:8080"
     container_name: exercises
@@ -16,7 +16,7 @@ services:
       - redis
 
   telegram:
-    build: ./telegram
+    image: "${DOCKER_USERNAME}/telegram:latest"
     volumes:
       - ./resources:/app/resources
     ports:
