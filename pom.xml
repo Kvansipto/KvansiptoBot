@@ -21,7 +21,7 @@
   </modules>
 
   <properties>
-    <java.version>18</java.version>
+    <java.version>17</java.version>
     <telegram.version>6.9.7.1</telegram.version>
     <spring.boot.version>3.2.5</spring.boot.version>
     <lombok.version>1.18.32</lombok.version>

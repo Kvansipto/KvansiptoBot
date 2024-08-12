@@ -1,4 +1,4 @@
-FROM openjdk:18-jdk-slim
+FROM openjdk:17.0.2-jdk-slim
 LABEL authors="sheldor"
 # Установка библиотеки libfreetype
 RUN apt-get update && apt-get install -y fontconfig libfreetype6
