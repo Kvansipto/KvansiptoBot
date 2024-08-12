@@ -29,9 +29,6 @@ jobs:
         run: mvn test
         continue-on-error: true
 
-      - name: List target directory
-        run: ls -la ./target
-
       - name: Start SSH Agent and Add Key
         uses: webfactory/ssh-agent@v0.5.3
         with:
