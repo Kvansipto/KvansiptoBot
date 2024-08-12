@@ -20,7 +20,7 @@ public class ExerciseController implements ExerciseApi {
   @Override
   @GetMapping("/exercises")
   public List<ExerciseDto> getExercisesByMuscleGroup(@RequestParam("muscleGroup") String muscleGroup) {
-    System.out.println("Получение упражнений для группы мышц: " + muscleGroup);
+    System.out.println("sada Получение упражнений для группы мышц: " + muscleGroup);
     return service.getExercisesByMuscleGroup(muscleGroup);
   }
 

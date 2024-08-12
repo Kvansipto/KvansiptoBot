@@ -20,7 +20,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 @Component
 public class ShowExerciseResultHistoryCommand extends Command {
 
-  public static final String EMPTY_LIST_EXERCISE_RESULT_TEXT = "Результаты по упражнению %s отсутствуют";
+  public static final String EMPTY_LIST_EXERCISE_RESULT_TEXT = "Результаты по упражнению %s отсутствуют asdasd";
   public static final String EXERCISE_RESULT_HISTORY_LIST_TEXT = "История результатов упражнения %s";
   public static final String[] HEADERS = {"Дата", "Вес (кг)", "Подходы", "Повторения", "Комментарий"};
 
