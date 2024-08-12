@@ -1,0 +1,25 @@
+name: CD Pipeline
+
+on:
+  workflow_run:
+    workflows: [ "CI Pipeline" ]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Pull Docker images
+        run: |
+          docker pull ${{ secrets.DOCKER_USERNAME }}/exercises:latest
+          docker pull ${{ secrets.DOCKER_USERNAME }}/telegram:latest
+
+      - name: Update Docker Compose services
+        run: |
+          docker-compose down
+          docker-compose up -d
