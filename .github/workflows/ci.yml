@@ -35,7 +35,16 @@ jobs:
       - name: Build and push Docker images
         uses: docker/build-push-action@v2
         with:
-          context: .
           push: true
-          tags: ${{secrets.DOCKER_USERNAME}}/exercises:latest, ${{secrets.DOCKER_USERNAME}}/telegram:latest
-      
+          tags: your-dockerhub-username/exercises:latest
+          context: ./exercises/exercise-microservice
+          file: ./exercises/exercise-microservice/Dockerfile
+    
+      - name: Build and push Telegram Docker image
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: your-dockerhub-username/telegram:latest
+          context: ./telegram
+          file: ./telegram/Dockerfile
+
