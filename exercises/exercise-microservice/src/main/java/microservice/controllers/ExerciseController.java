@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class ExerciseController implements ExerciseApi {
 
-  private static final Logger log = LoggerFactory.getLogger(ExerciseController.class);
+//  private static final Logger log = LoggerFactory.getLogger(ExerciseController.class);
 
   @Autowired
   ExerciseService service;
@@ -24,8 +24,8 @@ public class ExerciseController implements ExerciseApi {
   @Override
   @GetMapping("/exercises")
   public List<ExerciseDto> getExercisesByMuscleGroup(@RequestParam("muscleGroup") String muscleGroup) {
-    log.info("Получение упражнений для группы мышц: {}" + muscleGroup);
-//    System.out.println("123256 Получение упражнений для группы мышц: " + muscleGroup);
+//    log.info("Получение упражнений для группы мышц: {}" + muscleGroup);
+    System.out.println("Получение упражнений для группы мышц: " + muscleGroup);
     return service.getExercisesByMuscleGroup(muscleGroup);
   }
 
