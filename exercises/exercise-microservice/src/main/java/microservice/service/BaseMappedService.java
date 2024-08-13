@@ -6,11 +6,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.StreamSupport;
 import kvansipto.exercise.dto.BaseDto;
-import microservice.entity.BaseEntity;
 import microservice.mapper.basic.BaseMapper;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public abstract class BaseMappedService<E extends BaseEntity,
+public abstract class BaseMappedService<E extends Serializable,
     D extends BaseDto,
     I extends Serializable,
     R extends JpaRepository<E, I>,
