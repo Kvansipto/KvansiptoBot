@@ -15,28 +15,14 @@ jobs:
       - name: Log in to Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-      - name: Check if new image exists for exercises
-        id: check_exercises_image
-        run: |
-          if docker pull ${{ secrets.DOCKER_USERNAME }}/exercises:${{ github.sha }}; then
-            echo "image_exists=true" >> $GITHUB_ENV
-          else
-            echo "image_exists=false" >> $GITHUB_ENV
-          fi
-
-      - name: Check if new image exists for telegram
-        id: check_telegram_image
-        run: |
-          if docker pull ${{ secrets.DOCKER_USERNAME }}/telegram:${{ github.sha }}; then
-            echo "image_exists=true" >> $GITHUB_ENV
-          else
-            echo "image_exists=false" >> $GITHUB_ENV
-          fi
-
-      - name: Deploy Services
-        if: env.image_exists == 'true'
+      - name: Deploy Exercises Service
+        if: ${{ github.event.workflow_run.outputs.EXERCISES_IMAGE_UPDATED == 'true' }}
         run: |
           docker pull ${{ secrets.DOCKER_USERNAME }}/exercises:latest
+          docker-compose up -d exercises
+
+      - name: Deploy Telegram Service
+        if: ${{ github.event.workflow_run.outputs.TELEGRAM_IMAGE_UPDATED == 'true' }}
+        run: |
           docker pull ${{ secrets.DOCKER_USERNAME }}/telegram:latest
-          docker-compose down
-          docker-compose up -d
+          docker-compose up -d telegram
