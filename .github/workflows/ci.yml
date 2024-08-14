@@ -29,31 +29,53 @@ jobs:
         run: mvn test
         continue-on-error: true
 
-      - name: Log in to Docker Hub
+      - name: Check if changes in exercises src
+        id: changes_in_exercises_src
         if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+        run: |
+          if git diff --name-only ${{ github.sha }} ${{ github.event.before }} | grep '^exercises/exercise-microservice/src/'; then echo "true"; else echo "false"; fi
+        shell: bash
+        continue-on-error: false
+
+      - name: Check if changes in telegram src
+        id: changes_in_telegram_src
+        if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+        run: |
+          if git diff --name-only ${{ github.sha }} ${{ github.event.before }} | grep '^telegram/src/'; then echo "true"; else echo "false"; fi
+        shell: bash
+        continue-on-error: false
+
+      - name: Log in to Docker Hub
+        if: steps.changes_in_exercises_src.outputs.CHANGES_IN_EXERCISES_SRC == 'true' || steps.changes_in_telegram_src.outputs.CHANGES_IN_TELEGRAM_SRC == 'true'
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and push Docker images
-        if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+      - name: Build and push Docker image for exercises
+        if: steps.changes_in_exercises_src.outputs.CHANGES_IN_EXERCISES_SRC == 'true'
         uses: docker/build-push-action@v2
         with:
           push: true
           tags: |
             ${{ secrets.DOCKER_USERNAME }}/exercises:latest
-            ${{ secrets.DOCKER_USERNAME }}/exercises:${{ github.sha }}
           context: ./exercises/exercise-microservice
           file: ./exercises/exercise-microservice/Dockerfile
 
-      - name: Build and push Telegram Docker image
-        if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+      - name: Save exercises image updated flag
+        if: steps.changes_in_exercises_src.outputs.CHANGES_IN_EXERCISES_SRC == 'true'
+        run: echo "EXERCISES_IMAGE_UPDATED=true" >> $GITHUB_ENV
+
+      - name: Build and push Docker image for telegram
+        if: steps.changes_in_telegram_src.outputs.CHANGES_IN_TELEGRAM_SRC == 'true'
         uses: docker/build-push-action@v2
         with:
           push: true
           tags: |
             ${{ secrets.DOCKER_USERNAME }}/telegram:latest
-            ${{ secrets.DOCKER_USERNAME }}/telegram:${{ github.sha }}
           context: ./telegram
           file: ./telegram/Dockerfile
+
+      - name: Save telegram image updated flag
+        if: steps.changes_in_telegram_src.outputs.CHANGES_IN_TELEGRAM_SRC == 'true'
+        run: echo "TELEGRAM_IMAGE_UPDATED=true" >> $GITHUB_ENV
