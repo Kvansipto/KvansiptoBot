@@ -13,10 +13,16 @@ spring:
       key-serializer: org.apache.kafka.common.serialization.LongSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
     consumer:
+      group-id: server.exercise.results
       key-deserializer: org.apache.kafka.common.serialization.LongDeserializer
+      #      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       value-deserializer: kvansipto.telegram.microservice.utils.ExerciseResultDeserializer
       properties:
         spring.json.trusted.packages: "*"
+
+kafka.topic:
+  request: request-to-exercises
+  response: response-from-exercises
 
 telegram:
   bot:

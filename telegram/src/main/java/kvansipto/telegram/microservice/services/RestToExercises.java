@@ -29,8 +29,9 @@ public class RestToExercises {
   private final KafkaTemplate<Long, ExerciseResultFilter> exerciseResultFilterKafkaTemplate;
   @Autowired
   private final KafkaConsumerService kafkaConsumerService;
-  private String requestTopic = "request-to-exercises";
-//  private String responseTopic = "response-from-exercises";
+
+  @Value("${kafka.topic.request}")
+  private String exerciseResultTopicRequest;
 
   private final RestTemplate restTemplate;
 
@@ -39,28 +40,29 @@ public class RestToExercises {
 
   public boolean userExists(Long chatId) {
     return Boolean.TRUE.equals(
-            restTemplate.getForEntity(String.format("%s/users/%s/exists", exercisesUrl, chatId), Boolean.class)
-                    .getBody());
+        restTemplate.getForEntity(String.format("%s/users/%s/exists", exercisesUrl, chatId), Boolean.class)
+            .getBody());
   }
 
   public UserDto saveUser(UserDto user) {
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
     HttpEntity<UserDto> requestEntity = new HttpEntity<>(user, headers);
-    ResponseEntity<UserDto> response = restTemplate.postForEntity(String.format("%s/users", exercisesUrl), requestEntity,
-            UserDto.class);
+    ResponseEntity<UserDto> response = restTemplate.postForEntity(String.format("%s/users", exercisesUrl),
+        requestEntity,
+        UserDto.class);
     return response.getBody();
   }
 
   public UserDto getUser(Long chatId) {
     ResponseEntity<UserDto> response = restTemplate.getForEntity(
-            String.format("%s/users/%s", exercisesUrl, chatId), UserDto.class);
+        String.format("%s/users/%s", exercisesUrl, chatId), UserDto.class);
     return response.getBody();
   }
 
   public List<ExerciseDto> getExercisesByMuscleGroup(String muscleGroup) {
     ResponseEntity<ExerciseDto[]> response = restTemplate.getForEntity(
-            String.format("%s/exercises?muscleGroup=%s", exercisesUrl, muscleGroup), ExerciseDto[].class);
+        String.format("%s/exercises?muscleGroup=%s", exercisesUrl, muscleGroup), ExerciseDto[].class);
     List<ExerciseDto> exercises = Arrays.asList(Objects.requireNonNull(response.getBody()));
     System.out.println("Упражнения, полученные для группы мышц " + muscleGroup + ": " + exercises);
     return exercises;
@@ -68,7 +70,7 @@ public class RestToExercises {
 
   public ExerciseDto getExerciseByName(String exerciseName) {
     ResponseEntity<ExerciseDto> response = restTemplate.getForEntity(
-            String.format("%s/exercise?name=%s", exercisesUrl, exerciseName), ExerciseDto.class);
+        String.format("%s/exercise?name=%s", exercisesUrl, exerciseName), ExerciseDto.class);
     return response.getBody();
   }
 
@@ -76,9 +78,10 @@ public class RestToExercises {
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
     HttpEntity<ExerciseResultDto> requestEntity = new HttpEntity<>(exerciseResultDto, headers);
-    ResponseEntity<ExerciseResultDto> response = restTemplate.postForEntity(String.format("%s/exercise-results", exercisesUrl),
-            requestEntity,
-            ExerciseResultDto.class);
+    ResponseEntity<ExerciseResultDto> response = restTemplate.postForEntity(
+        String.format("%s/exercise-results", exercisesUrl),
+        requestEntity,
+        ExerciseResultDto.class);
     return response.getStatusCode().is2xxSuccessful();
   }
 
@@ -88,9 +91,9 @@ public class RestToExercises {
         .exerciseDto(exercise)
         .userChatId(chatId)
         .build();
-    exerciseResultFilterKafkaTemplate.send(requestTopic, chatId, body);
-    log.info("sent to kafka topic: {}, {}", requestTopic, body);
-    List<ExerciseResultDto> result = kafkaConsumerService.waitForResponse(chatId);
+    exerciseResultFilterKafkaTemplate.send(exerciseResultTopicRequest, chatId, body);
+    log.info("sent to kafka topic: {}, {}", exerciseResultTopicRequest, body);
+    List<ExerciseResultDto> result = kafkaConsumerService.waitForResponse(chatId).getContent();
     log.info("get exercise result: {}", result);
 
     result.sort(Comparator.comparing(ExerciseResultDto::getDate).reversed());
@@ -99,7 +102,7 @@ public class RestToExercises {
 
   public List<String> getMuscleGroups() {
     ResponseEntity<String[]> response = restTemplate.getForEntity(String.format("%s/muscle-groups", exercisesUrl),
-            String[].class);
+        String[].class);
     return Arrays.asList(Objects.requireNonNull(response.getBody()));
   }
 }

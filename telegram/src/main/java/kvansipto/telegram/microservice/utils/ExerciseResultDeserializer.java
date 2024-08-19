@@ -1,16 +1,15 @@
 package kvansipto.telegram.microservice.utils;
 
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import java.util.Map;
 import kvansipto.exercise.dto.ExerciseResultDto;
+import kvansipto.exercise.dto.PageDto;
 import org.apache.kafka.common.header.Headers;
 import org.apache.kafka.common.serialization.Deserializer;
 
-import java.util.List;
-import java.util.Map;
-
-public class ExerciseResultDeserializer implements Deserializer<List<ExerciseResultDto>> {
+public class ExerciseResultDeserializer implements Deserializer<PageDto<ExerciseResultDto>> {
 
   private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
@@ -19,13 +18,14 @@ public class ExerciseResultDeserializer implements Deserializer<List<ExerciseRes
   }
 
   @Override
-  public List<ExerciseResultDto> deserialize(String topic, byte[] data) {
+  public PageDto<ExerciseResultDto> deserialize(String topic, byte[] data) {
     if (data == null || data.length == 0) {
       return null;
     }
 
     try {
-      return objectMapper.readValue(data, new TypeReference<List<ExerciseResultDto>>() {});
+      return objectMapper.readValue(data, new TypeReference<>() {
+      });
     } catch (Exception e) {
       e.printStackTrace();
       return null;
@@ -33,7 +33,7 @@ public class ExerciseResultDeserializer implements Deserializer<List<ExerciseRes
   }
 
   @Override
-  public List<ExerciseResultDto> deserialize(String topic, Headers headers, byte[] data) {
+  public PageDto<ExerciseResultDto> deserialize(String topic, Headers headers, byte[] data) {
     return deserialize(topic, data);
   }
 

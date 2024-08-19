@@ -4,8 +4,3 @@ exercises:
 spring:
   kafka:
     bootstrap-servers: kafka:9092
-
-kafka:
-  server: kafka:9092
-  group:
-    id: server.exercise.results

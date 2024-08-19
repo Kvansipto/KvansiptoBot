@@ -3,13 +3,14 @@ package microservice.service;
 import com.querydsl.core.types.Predicate;
 import java.util.List;
 import kvansipto.exercise.dto.ExerciseResultDto;
+import kvansipto.exercise.dto.PageDto;
 import kvansipto.exercise.filter.ExerciseResultFilter;
 import lombok.extern.slf4j.Slf4j;
 import microservice.entity.ExerciseResult;
-import microservice.mapper.ExerciseMapper;
 import microservice.mapper.ExerciseResultMapper;
 import microservice.repository.ExerciseResultRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -24,32 +25,35 @@ import org.springframework.stereotype.Service;
 public class ExerciseResultService extends
     BaseMappedService<ExerciseResult, ExerciseResultDto, Long, ExerciseResultRepository, ExerciseResultMapper> {
 
-  private final ExerciseMapper exerciseMapper;
+  @Value("${kafka.topic.response}")
+  private String exerciseResultTopicResponse;
 
   @Autowired
   private ExerciseResultPredicateBuilder predicateBuilder;
 
-  private final KafkaTemplate<Long, List<ExerciseResultDto>> kafkaTemplate;
+  private final KafkaTemplate<Long, PageDto<ExerciseResultDto>> kafkaTemplate;
 
   protected ExerciseResultService(ExerciseResultRepository repository, ExerciseResultMapper mapper,
-      ExerciseMapper exerciseMapper, KafkaTemplate<Long, List<ExerciseResultDto>> kafkaTemplate) {
+      KafkaTemplate<Long, PageDto<ExerciseResultDto>> kafkaTemplate) {
     super(repository, mapper);
-    this.exerciseMapper = exerciseMapper;
     this.kafkaTemplate = kafkaTemplate;
   }
 
-  @KafkaListener(topics = "request-to-exercises", groupId = "server.exercise.results")
+  @KafkaListener(topics = "${kafka.topic.request}")
   public void processExerciseRequest(@Payload ExerciseResultFilter filter,
       @Header(KafkaHeaders.RECEIVED_KEY) Long chatId) {
     Pageable pageable = PageRequest.of(0, 20);
     Predicate predicate = predicateBuilder.apply(filter);
     List<ExerciseResultDto> exerciseResultDtoList =
         repository.findAll(predicate, pageable).stream().map(mapper::toDto).toList();
-//    Page<ExerciseResultDto> exerciseResultDtoPage = new PageImpl<>(exerciseResultDtoList, pageable,
-//        exerciseResultDtoList.size());
+    PageDto<ExerciseResultDto> exerciseResultDtoPageDto = PageDto.<ExerciseResultDto>builder()
+        .content(exerciseResultDtoList)
+        .pageNumber(0)
+        .pageSize(20)
+        .totalElements(exerciseResultDtoList.size())
+        .build();
 
-    // Отправляем ответ в ответный топик
-    kafkaTemplate.send("response-from-exercises", chatId, exerciseResultDtoList);
-    log.info("sent to kafka topic: {}, {}", "response-from-exercises", exerciseResultDtoList);
+    kafkaTemplate.send(exerciseResultTopicResponse, chatId, exerciseResultDtoPageDto);
+    log.info("sent to kafka topic: {}, {}", exerciseResultTopicResponse, exerciseResultDtoPageDto);
   }
 }
