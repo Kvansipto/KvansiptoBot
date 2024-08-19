@@ -1,8 +1,5 @@
 package kvansipto.telegram.microservice.services;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -13,22 +10,27 @@ import kvansipto.exercise.dto.UserDto;
 import kvansipto.exercise.filter.ExerciseResultFilter;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class RestToExercises {
 
+  private final KafkaTemplate<Long, ExerciseResultFilter> exerciseResultFilterKafkaTemplate;
   @Autowired
-  private ObjectMapper objectMapper;
+  private final KafkaConsumerService kafkaConsumerService;
+  private String requestTopic = "request-to-exercises";
+//  private String responseTopic = "response-from-exercises";
 
   private final RestTemplate restTemplate;
 
@@ -81,23 +83,16 @@ public class RestToExercises {
   }
 
   @SneakyThrows
-  public List<ExerciseResultDto> getExerciseResults(ExerciseDto exercise, Long chatId){
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
+  public List<ExerciseResultDto> getExerciseResults(ExerciseDto exercise, Long chatId) {
     ExerciseResultFilter body = ExerciseResultFilter.builder()
-            .exerciseDto(exercise)
-            .userChatId(chatId)
-            .build();
-    HttpEntity<ExerciseResultFilter> requestEntity = new HttpEntity<>(body, headers);
-    ResponseEntity<String> response = restTemplate.exchange(
-            String.format("%s/exercise-results/", exercisesUrl),
-            HttpMethod.POST,
-            requestEntity,
-            String.class);
-    JsonNode root = objectMapper.readTree(response.getBody());
-    JsonNode content = root.get("content");
-    List<ExerciseResultDto> result = objectMapper.convertValue(content, new TypeReference<>() {
-    });
+        .exerciseDto(exercise)
+        .userChatId(chatId)
+        .build();
+    exerciseResultFilterKafkaTemplate.send(requestTopic, chatId, body);
+    log.info("sent to kafka topic: {}, {}", requestTopic, body);
+    List<ExerciseResultDto> result = kafkaConsumerService.waitForResponse(chatId);
+    log.info("get exercise result: {}", result);
+
     result.sort(Comparator.comparing(ExerciseResultDto::getDate).reversed());
     return result;
   }

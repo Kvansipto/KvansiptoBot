@@ -1,2 +1,11 @@
 exercises:
   url: http://exercises:8080
+
+spring:
+  kafka:
+    bootstrap-servers: kafka:9092
+
+kafka:
+  server: kafka:9092
+  group:
+    id: server.exercise.results
