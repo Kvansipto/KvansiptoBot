@@ -2,7 +2,8 @@ version: '3.8'
 
 services:
   exercises:
-    image: "${DOCKER_USERNAME}/exercises:latest"
+    build: ./exercises/exercise-microservice
+    #    image: "${DOCKER_USERNAME}/exercises:latest"
     ports:
       - "8080:8080"
     container_name: exercises
@@ -14,9 +15,11 @@ services:
     depends_on:
       - db
       - redis
+      - kafka
 
   telegram:
-    image: "${DOCKER_USERNAME}/telegram:latest"
+    build: ./telegram
+    #    image: "${DOCKER_USERNAME}/telegram:latest"
     volumes:
       - ./resources:/app/resources
     ports:
@@ -39,7 +42,6 @@ services:
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      # имя БД
       POSTGRES_DB: kvbot
       POSTGRES_SCHEMA: public
       STOP_ON_MIGRATION_FAILURE: "false"
@@ -52,6 +54,49 @@ services:
     ports:
       - "6379:6379"
     restart: always
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      # Фактор репликации 1 для всех топиков
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_MIN_INSYNC_REPLICAS: 1
+      KAFKA_NUM_PARTITIONS: 3
+      KAFKA_LOG_RETENTION_HOURS: 168
+      KAFKA_BROKER_ID: 1
+    ports:
+      - "9092:9092"
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+    command: >
+      sh -c "
+      /etc/confluent/docker/run &&
+      sleep 30 &&
+      kafka-topics --create --topic request-to-exercises --bootstrap-server kafka:9092 --partitions 1 
+      --replication-factor 1 &&
+      kafka-topics --create --topic response-from-exercises --bootstrap-server kafka:9092 --partitions 1 
+      --replication-factor 1 &&
+      kafka-topics --list --bootstrap-server kafka:9092
+      "
 
 volumes:
   db-data:

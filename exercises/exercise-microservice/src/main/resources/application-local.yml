@@ -4,3 +4,5 @@ spring:
   data:
     redis:
       host: localhost
+  kafka:
+    bootstrap-servers: localhost:9092
