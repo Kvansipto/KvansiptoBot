@@ -1,7 +1,6 @@
 package kvansipto.telegram.microservice.services;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import kvansipto.exercise.dto.ExerciseDto;
@@ -9,9 +8,7 @@ import kvansipto.exercise.dto.ExerciseResultDto;
 import kvansipto.exercise.dto.UserDto;
 import kvansipto.exercise.filter.ExerciseResultFilter;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -27,8 +24,6 @@ import org.springframework.web.client.RestTemplate;
 public class RestToExercises {
 
   private final KafkaTemplate<Long, ExerciseResultFilter> exerciseResultFilterKafkaTemplate;
-  @Autowired
-  private final KafkaConsumerService kafkaConsumerService;
 
   @Value("${kafka.topic.request}")
   private String exerciseResultTopicRequest;
@@ -85,19 +80,13 @@ public class RestToExercises {
     return response.getStatusCode().is2xxSuccessful();
   }
 
-  @SneakyThrows
-  public List<ExerciseResultDto> getExerciseResults(ExerciseDto exercise, Long chatId) {
+  public void requestExerciseResults(ExerciseDto exercise, Long chatId) {
     ExerciseResultFilter body = ExerciseResultFilter.builder()
         .exerciseDto(exercise)
         .userChatId(chatId)
         .build();
     exerciseResultFilterKafkaTemplate.send(exerciseResultTopicRequest, chatId, body);
     log.info("sent to kafka topic: {}, {}", exerciseResultTopicRequest, body);
-    List<ExerciseResultDto> result = kafkaConsumerService.waitForResponse(chatId).getContent();
-    log.info("get exercise result: {}", result);
-
-    result.sort(Comparator.comparing(ExerciseResultDto::getDate).reversed());
-    return result;
   }
 
   public List<String> getMuscleGroups() {
