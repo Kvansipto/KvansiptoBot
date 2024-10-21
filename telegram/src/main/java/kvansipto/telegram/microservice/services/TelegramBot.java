@@ -7,8 +7,10 @@ import kvansipto.telegram.microservice.config.BotConfig;
 import kvansipto.telegram.microservice.services.command.Command;
 import kvansipto.telegram.microservice.services.command.menu.HelpCommand;
 import kvansipto.telegram.microservice.services.command.menu.MainMenuCommand;
+import kvansipto.telegram.microservice.services.dto.TelegramActionEvent;
 import kvansipto.telegram.microservice.services.wrapper.BotApiMethodInterface;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
@@ -85,7 +87,12 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
   }
 
-  public void executeTelegramAction(BotApiMethodInterface action) {
+  @EventListener
+  private void handleTelegramActionEvent(TelegramActionEvent event) {
+    executeTelegramAction(event.action());
+  }
+
+  private void executeTelegramAction(BotApiMethodInterface action) {
     try {
       action.accept(this);
     } catch (TelegramApiException e) {

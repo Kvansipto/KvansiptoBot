@@ -25,6 +25,19 @@ spring:
     out-of-order: false
     schemas: public
     validateMigrationNaming: true
+  kafka:
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.LongSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      group-id: server.exercise.results
+      key-deserializer: org.apache.kafka.common.serialization.LongDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring:
+          json:
+            trusted:
+              packages: "*"
 
   cache:
     type: redis
@@ -33,6 +46,9 @@ spring:
   data:
     redis:
       port: 6379
-#      host: redis
       repositories:
         enabled: false
+
+kafka.topic:
+  request: request-to-exercises
+  response: response-from-exercises
