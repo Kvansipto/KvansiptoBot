@@ -4,16 +4,18 @@ import java.awt.Color;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.io.File;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import javax.imageio.ImageIO;
-import lombok.experimental.UtilityClass;
+import lombok.NoArgsConstructor;
+import org.springframework.stereotype.Service;
 
-@UtilityClass
-public class TableImage {
+@Service
+@NoArgsConstructor
+public class TableImageService {
 
-  public File drawTableImage(String[] headers, String[][] data) {
+  //TODO CompletableFuture ?
+  public byte[] drawTableImage(String[] headers, String[][] data) {
     int rowHeight = 30;
     int colWidth = 100;
     int commentColumnWidth = 300;
@@ -59,17 +61,12 @@ public class TableImage {
 
     g2d.dispose();
 
-    try {
-      String filePath = "resources/" + LocalDateTime.now() + ".png";
-      File file = new File(filePath);
-      file.getParentFile().mkdirs();
-      ImageIO.write(image, "PNG", file);
-      System.out.println("Изображение таблицы сохранено.");
-      return file;
+    try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+      ImageIO.write(image, "PNG", baos);
+      return baos.toByteArray();
     } catch (IOException e) {
-      System.err.println("Ошибка при сохранении изображения.");
       e.printStackTrace();
+      return null;
     }
-    return null;
   }
 }

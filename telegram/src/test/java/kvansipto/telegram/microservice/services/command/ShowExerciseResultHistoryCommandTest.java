@@ -14,7 +14,7 @@ import kvansipto.telegram.microservice.services.dto.AnswerData;
 import kvansipto.telegram.microservice.services.dto.AnswerDto;
 import kvansipto.telegram.microservice.services.wrapper.BotApiMethodInterface;
 import kvansipto.telegram.microservice.services.wrapper.EditMessageWrapper;
-import kvansipto.telegram.microservice.utils.TableImage;
+import kvansipto.telegram.microservice.utils.TableImageService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,7 +42,7 @@ class ShowExerciseResultHistoryCommandTest {
   private RestToExercises restToExercises;
 
   private MockedStatic<AnswerData> mockedStaticAnswerData;
-  private MockedStatic<TableImage> mockedStaticTableImage;
+  private MockedStatic<TableImageService> mockedStaticTableImage;
   private static Update update;
   private static AnswerDto answerDto;
   private static ExerciseDto exercise;
@@ -73,7 +73,7 @@ class ShowExerciseResultHistoryCommandTest {
     when(restToExercises.getExerciseByName(anyString())).thenReturn(exercise);
     mockedStaticAnswerData = mockStatic(AnswerData.class);
     mockedStaticAnswerData.when(() -> AnswerData.deserialize("mockData")).thenReturn(answerDto);
-    mockedStaticTableImage = mockStatic(TableImage.class);
+    mockedStaticTableImage = mockStatic(TableImageService.class);
   }
 
   @AfterEach
