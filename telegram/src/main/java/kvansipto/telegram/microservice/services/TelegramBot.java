@@ -3,6 +3,10 @@ package kvansipto.telegram.microservice.services;
 import jakarta.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import kvansipto.telegram.microservice.config.BotConfig;
 import kvansipto.telegram.microservice.services.command.Command;
 import kvansipto.telegram.microservice.services.command.menu.HelpCommand;
@@ -11,6 +15,7 @@ import kvansipto.telegram.microservice.services.dto.TelegramActionEvent;
 import kvansipto.telegram.microservice.services.wrapper.BotApiMethodInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
@@ -28,12 +33,14 @@ public class TelegramBot extends TelegramLongPollingBot {
 
   private final List<Command> commandList;
   public static String HELP_TEXT;
+  private final Map<Long, ExecutorService> executors;
 
   @Autowired
   public TelegramBot(List<Command> commandList, BotConfig config) {
     super(config.getBotToken());
     this.config = config;
     this.commandList = commandList;
+    this.executors = new ConcurrentHashMap<>();
     List<BotCommand> mainMenuCommandList = new ArrayList<>();
 
     StringBuilder helpText = new StringBuilder("This bot was made by Kvansipto\n\n");
@@ -76,19 +83,26 @@ public class TelegramBot extends TelegramLongPollingBot {
   @Override
   public void onUpdateReceived(Update update) {
     if (update.hasMessage() && update.getMessage().hasText() || update.hasCallbackQuery()) {
+      Long userId =
+          update.hasMessage() ? update.getMessage().getFrom().getId() : update.getCallbackQuery().getFrom().getId();
 
-      BotApiMethodInterface sendMessage = commandList.stream()
-          .filter(clazz -> clazz.supports(update))
-          .findFirst()
-          .map(m -> m.process(update))
-          .orElseThrow(RuntimeException::new);
+      ExecutorService userExecutor = executors.computeIfAbsent(userId, id -> Executors.newSingleThreadExecutor());
 
-      executeTelegramAction(sendMessage);
+      userExecutor.submit(() -> {
+        BotApiMethodInterface sendMessage = commandList.stream()
+            .filter(clazz -> clazz.supports(update))
+            .findFirst()
+            .map(m -> m.process(update))
+            .orElseThrow(RuntimeException::new);
+
+        executeTelegramAction(sendMessage);
+      });
     }
   }
 
   @EventListener
-  private void handleTelegramActionEvent(TelegramActionEvent event) {
+  @Async
+  protected void handleTelegramActionEvent(TelegramActionEvent event) {
     executeTelegramAction(event.action());
   }
 
