@@ -1,5 +1,7 @@
 package kvansipto.telegram.microservice.services.command;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import kvansipto.exercise.dto.ExerciseDto;
@@ -13,7 +15,7 @@ import kvansipto.telegram.microservice.services.wrapper.BotApiMethodWrapper;
 import kvansipto.telegram.microservice.services.wrapper.EditMessageWrapper;
 import kvansipto.telegram.microservice.services.wrapper.SendMessageWrapper;
 import kvansipto.telegram.microservice.services.wrapper.SendPhotoWrapper;
-import kvansipto.telegram.microservice.utils.TableImage;
+import kvansipto.telegram.microservice.utils.TableImageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
@@ -29,6 +31,9 @@ public class ShowExerciseResultHistoryCommand extends Command {
 
   @Autowired
   RestToExercises restToExercises;
+
+  @Autowired
+  TableImageService tableImageService;
 
   @Autowired
   ApplicationEventPublisher eventPublisher;
@@ -61,11 +66,12 @@ public class ShowExerciseResultHistoryCommand extends Command {
             String.valueOf(exerciseResult.getNumberOfSets()),
             String.valueOf(exerciseResult.getNumberOfRepetitions()), exerciseResult.getComment()};
       }
-
+      byte[] imageBytes = tableImageService.drawTableImage(HEADERS, data);
+      InputStream is = new ByteArrayInputStream(imageBytes);
       botApiMethodWrapper.addAction(
           SendPhotoWrapper.newBuilder()
               .chatId(chatId)
-              .photo(new InputFile().setMedia(TableImage.drawTableImage(HEADERS, data)))
+              .photo(new InputFile(is, "table.png"))
               .build()
       );
       TelegramActionEvent telegramActionEvent = new TelegramActionEvent(botApiMethodWrapper);
