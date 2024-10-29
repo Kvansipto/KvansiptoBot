@@ -15,7 +15,9 @@ services:
     depends_on:
       - db
       - redis
-      - kafka
+      - kafka-broker-1
+      - kafka-broker-2
+      - kafka-broker-3
 
   telegram:
     build: ./telegram
@@ -32,6 +34,9 @@ services:
     container_name: telegram
     depends_on:
       - exercises
+      - kafka-broker-1
+      - kafka-broker-2
+      - kafka-broker-3
 
   db:
     image: postgres:latest
@@ -61,42 +66,56 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
 
-  kafka:
+  kafka-broker-1:
     image: confluentinc/cp-kafka:7.4.0
-    container_name: kafka
+    container_name: kafka-broker-1
     depends_on:
       - zookeeper
     environment:
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
-      # Фактор репликации 1 для всех топиков
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-      KAFKA_MIN_INSYNC_REPLICAS: 1
-      KAFKA_NUM_PARTITIONS: 3
-      KAFKA_LOG_RETENTION_HOURS: 168
       KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-broker-1:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+      KAFKA_LOG_RETENTION_HOURS: 168
     ports:
       - "9092:9092"
-    deploy:
-      resources:
-        limits:
-          memory: 1G
-          cpus: '1.0'
-    command: >
-      sh -c "
-      /etc/confluent/docker/run &&
-      sleep 30 &&
-      kafka-topics --create --topic request-to-exercises --bootstrap-server kafka:9092 --partitions 1 
-      --replication-factor 1 &&
-      kafka-topics --create --topic response-from-exercises --bootstrap-server kafka:9092 --partitions 1 
-      --replication-factor 1 &&
-      kafka-topics --list --bootstrap-server kafka:9092
-      "
+
+  kafka-broker-2:
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: kafka-broker-2
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-broker-2:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+      KAFKA_LOG_RETENTION_HOURS: 168
+    ports:
+      - "9093:9093"
+
+  kafka-broker-3:
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: kafka-broker-3
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 3
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-broker-3:9094
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+      KAFKA_LOG_RETENTION_HOURS: 168
+    ports:
+      - "9094:9094"
 
 volumes:
   db-data:

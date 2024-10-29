@@ -1,8 +1,8 @@
-package kvansipto.telegram.microservice.services;
+package microservice.service;
 
-import kvansipto.exercise.wrapper.BotApiMethodInterface;
-import kvansipto.telegram.microservice.services.dto.TelegramActionEvent;
+import kvansipto.exercise.dto.UpdateDto;
 import lombok.extern.slf4j.Slf4j;
+import microservice.service.event.UserInputCommandEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -22,9 +22,9 @@ public class KafkaConsumerService {
     this.eventPublisher = eventPublisher;
   }
 
-  @KafkaListener(topics = "${kafka.topic.actions}")
-  public void listenCommandAction(@Payload BotApiMethodInterface action,
+  @KafkaListener(topics = "${kafka.topic.messages}")
+  public void listenMessagesTopic(@Payload UpdateDto update,
       @Header(KafkaHeaders.RECEIVED_KEY) Long chatId) {
-    eventPublisher.publishEvent(new TelegramActionEvent(action));
+    eventPublisher.publishEvent(new UserInputCommandEvent(this, chatId, update));
   }
 }
