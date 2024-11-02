@@ -1,12 +1,19 @@
 package kvansipto.telegram.microservice.config;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.jsontype.NamedType;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import kvansipto.exercise.dto.UpdateDto;
 import kvansipto.exercise.wrapper.BotApiMethodInterface;
+import kvansipto.exercise.wrapper.BotApiMethodWrapper;
+import kvansipto.exercise.wrapper.DeleteMessagesWrapper;
+import kvansipto.exercise.wrapper.EditMessageWrapper;
+import kvansipto.exercise.wrapper.SendMessageWrapper;
+import kvansipto.exercise.wrapper.SendPhotoWrapper;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -40,6 +47,10 @@ public class KafkaConfig {
 
   @Value("${kafka.topic.main-menu-commands}")
   private String mainMenuCommandsTopicName;
+  @Value("${kafka.group.id.main-menu-commands}")
+  private String mainMenuCommandsGroupId;
+  @Value("${kafka.group.id.actions}")
+  private String actionsGroupId;
 
   @Bean
   public NewTopic messagesToExercisesTopic() {
@@ -76,7 +87,7 @@ public class KafkaConfig {
   public ConsumerFactory<String, List<BotCommand>> botCommandListConsumerFactory() {
     Map<String, Object> config = new HashMap<>();
     config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-    config.put(ConsumerConfig.GROUP_ID_CONFIG, "main-menu-command-group");
+    config.put(ConsumerConfig.GROUP_ID_CONFIG, mainMenuCommandsGroupId);
     config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
     config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, BotCommandListDeserializer.class);
     return new DefaultKafkaConsumerFactory<>(config);
@@ -95,7 +106,7 @@ public class KafkaConfig {
   public ConsumerFactory<Long, BotApiMethodInterface> botApiMethodConsumerFactory() {
     Map<String, Object> config = new HashMap<>();
     config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-    config.put(ConsumerConfig.GROUP_ID_CONFIG, "exercise_bot_group");
+    config.put(ConsumerConfig.GROUP_ID_CONFIG, actionsGroupId);
     config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, LongDeserializer.class);
     config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, BotApiMethodDeserializer.class);
     return new DefaultKafkaConsumerFactory<>(config);
@@ -108,18 +119,45 @@ public class KafkaConfig {
     factory.setConsumerFactory(botApiMethodConsumerFactory());
     return factory;
   }
-  public static class BotApiMethodDeserializer implements Deserializer<BotApiMethodInterface> {
-    private final ObjectMapper objectMapper = new ObjectMapper();
+//  public static class BotApiMethodDeserializer implements Deserializer<BotApiMethodInterface> {
+//    private final ObjectMapper objectMapper = new ObjectMapper();
+//
+//    @Override
+//    public BotApiMethodInterface deserialize(String topic, byte[] data) {
+//      try {
+//        return objectMapper.readValue(data, BotApiMethodInterface.class);
+//      } catch (Exception e) {
+//        throw new RuntimeException("Ошибка при десериализации BotApiMethodInterface", e);
+//      }
+//    }
+//  }
+public static class BotApiMethodDeserializer implements Deserializer<BotApiMethodInterface> {
+  private final ObjectMapper objectMapper;
 
-    @Override
-    public BotApiMethodInterface deserialize(String topic, byte[] data) {
-      try {
-        return objectMapper.readValue(data, BotApiMethodInterface.class);
-      } catch (Exception e) {
-        throw new RuntimeException("Ошибка при десериализации BotApiMethodInterface", e);
-      }
+  public BotApiMethodDeserializer() {
+    objectMapper = new ObjectMapper();
+    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    // Регистрация подтипов вручную для десериализации
+    objectMapper.registerSubtypes(
+        new NamedType(BotApiMethodWrapper.class, "BotApiMethodWrapper"),
+        new NamedType(SendMessageWrapper.class, "SendMessageWrapper"),
+        new NamedType(EditMessageWrapper.class, "EditMessageWrapper"),
+        new NamedType(SendPhotoWrapper.class, "SendPhotoWrapper"),
+        new NamedType(DeleteMessagesWrapper.class, "DeleteMessageWrapper")
+    );
+  }
+
+  @Override
+  public BotApiMethodInterface deserialize(String topic, byte[] data) {
+    try {
+      return objectMapper.readValue(data, BotApiMethodInterface.class);
+    } catch (Exception e) {
+      throw new RuntimeException("Ошибка при десериализации BotApiMethodInterface", e);
     }
   }
+}
+
+
 
   public static class BotCommandListDeserializer implements Deserializer<List<BotCommand>> {
     private final ObjectMapper objectMapper = new ObjectMapper();

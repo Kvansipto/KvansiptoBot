@@ -4,11 +4,12 @@ import java.util.List;
 import kvansipto.exercise.wrapper.EditMessageWrapper;
 import microservice.service.ExerciseService;
 import microservice.service.KeyboardMarkupUtil;
-import microservice.service.UserState;
-import microservice.service.UserStateService;
 import microservice.service.dto.AnswerData;
 import microservice.service.dto.AnswerDto;
 import microservice.service.event.UserInputCommandEvent;
+import microservice.service.user.state.UserState;
+import microservice.service.user.state.UserStateService;
+import microservice.service.user.state.UserStateType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -26,13 +27,11 @@ public class MuscleCommand extends Command {
   @Override
   public boolean supports(UserInputCommandEvent event) {
     Long chatId = event.chatId();
-
     String buttonCode = AnswerData.deserialize(event.update().getMessage()).getButtonCode();
-
     UserState userState = userStateService.getCurrentState(chatId).orElse(null);
 
     return userState != null
-        && "CHOOSING MUSCLE GROUP".equals(userState.getCurrentState())
+        && UserStateType.CHOOSING_MUSCLE_GROUP.equals(userState.getUserStateType())
         && "muscle_group".equals(buttonCode);
   }
 
@@ -41,24 +40,21 @@ public class MuscleCommand extends Command {
     Long chatId = event.chatId();
 
     String muscleGroup = AnswerData.deserialize(event.update().getMessage()).getButtonText();
-    System.out.println("Группа мышц: " + muscleGroup);
 
     List<AnswerDto> answerDtoList = exerciseService.getExercisesByMuscleGroup(muscleGroup).stream()
         .map(e -> new AnswerDto(e.getName(), "exercise"))
         .toList();
 
-    System.out.println("Упражнения для группы мышц " + muscleGroup + ": " + answerDtoList);
-
     UserState userState = userStateService.getCurrentState(chatId).orElse(new UserState());
-    userState.setCurrentState("CHOOSING EXERCISE");
+    userState.setUserStateType(UserStateType.CHOOSING_EXERCISE);
     userStateService.setCurrentState(chatId, userState);
 
-    kafkaTemplate.send("actions-from-exercises", event.chatId(),
+    kafkaService.send("actions-from-exercises", event.chatId(),
         EditMessageWrapper.newBuilder()
             .chatId(chatId)
             .messageId(event.update().getMessageId())
             .replyMarkup(KeyboardMarkupUtil.createRows(answerDtoList, 1))
             .text(MUSCLE_COMMAND_TEXT)
-            .build());
+            .build(), kafkaTemplate);
   }
 }

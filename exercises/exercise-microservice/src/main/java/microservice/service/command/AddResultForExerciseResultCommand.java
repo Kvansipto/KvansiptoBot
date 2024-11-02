@@ -1,23 +1,24 @@
 package microservice.service.command;
 
-import java.util.ArrayList;
-import java.util.List;
 import kvansipto.exercise.dto.ExerciseResultDto;
 import kvansipto.exercise.wrapper.BotApiMethodWrapper;
-import kvansipto.exercise.wrapper.DeleteMessagesWrapper;
 import kvansipto.exercise.wrapper.SendMessageWrapper;
 import kvansipto.exercise.wrapper.SendMessageWrapper.SendMessageWrapperBuilder;
 import microservice.service.ExerciseResultService;
 import microservice.service.UserService;
-import microservice.service.UserState;
-import microservice.service.UserStateService;
 import microservice.service.event.UserInputCommandEvent;
+import microservice.service.user.state.UserState;
+import microservice.service.user.state.UserStateService;
+import microservice.service.user.state.UserStateType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class AddResultForExerciseResultCommand extends Command {
 
+  private static final Logger log = LoggerFactory.getLogger(AddResultForExerciseResultCommand.class);
   @Autowired
   private UserService userService;
   @Autowired
@@ -26,9 +27,6 @@ public class AddResultForExerciseResultCommand extends Command {
   private UserStateService userStateService;
 
   public static final String SAVE_RESULT_SUCCESS_TEXT = "Результат успешно сохранен";
-  public static final String SAVE_RESULT_FAIL_TEXT = "Неверный формат ввода. Пожалуйста, введите данные снова.";
-
-  private final List<Integer> wrongAttempts = new ArrayList<>();
 
   @Override
   public boolean supports(UserInputCommandEvent event) {
@@ -36,7 +34,7 @@ public class AddResultForExerciseResultCommand extends Command {
 
     UserState userState = userStateService.getCurrentState(chatId).orElse(null);
     return userState != null
-        && AddExerciseResultCommand.WAITING_FOR_RESULT_STATE_TEXT.equals(userState.getCurrentState());
+        && UserStateType.WAITING_FOR_RESULT.equals(userState.getUserStateType());
   }
 
   @Override
@@ -47,12 +45,13 @@ public class AddResultForExerciseResultCommand extends Command {
     BotApiMethodWrapper botApiMethodWrapper = new BotApiMethodWrapper();
     SendMessageWrapperBuilder sendMessageWrapperBuilder = SendMessageWrapper.newBuilder().chatId(chatId);
 
-    try {
       String[] parts = message.split(" ", 4);
       double weight = Double.parseDouble(parts[0]);
-      byte sets = Byte.parseByte(parts[1]);
-      byte reps = Byte.parseByte(parts[2]);
+      int sets = Integer.parseInt(parts[1]);
+      int reps = Integer.parseInt(parts[2]);
       String comment = (parts.length == 4) ? parts[3] : null;
+
+      log.info("Data was parsed into: weight={}, sets={}, reps={}, comment={}", weight, sets, reps, comment);
 
       UserState userState = userStateService.getCurrentState(chatId).orElseThrow();
       ExerciseResultDto exerciseResult = ExerciseResultDto.builder()
@@ -70,17 +69,8 @@ public class AddResultForExerciseResultCommand extends Command {
 
       userStateService.removeUserState(chatId);
 
-      if (!wrongAttempts.isEmpty()) {
-        DeleteMessagesWrapper deleteMessagesWrapper = new DeleteMessagesWrapper(chatId, new ArrayList<>(wrongAttempts));
-        botApiMethodWrapper.addAction(deleteMessagesWrapper);
-        wrongAttempts.clear();
-      }
-    } catch (Exception e) {
-      // Добавление сообщения об ошибке в список неудачных попыток
-      wrongAttempts.add(event.update().getMessageId());
-      sendMessageWrapperBuilder.text(SAVE_RESULT_FAIL_TEXT);
-    }
     botApiMethodWrapper.addAction(sendMessageWrapperBuilder.build());
-    kafkaTemplate.send("actions-from-exercises", event.chatId(), botApiMethodWrapper);
+    kafkaService.send("actions-from-exercises", event.chatId(),
+        botApiMethodWrapper, kafkaTemplate);
   }
 }

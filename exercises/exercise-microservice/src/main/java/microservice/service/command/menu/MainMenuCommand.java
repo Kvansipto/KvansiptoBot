@@ -9,7 +9,7 @@ public abstract class MainMenuCommand extends Command {
 
   @Override
   public boolean supports(UserInputCommandEvent update) {
-    return update.update().getMessage().equals(this.getClass().getDeclaredAnnotation(Component.class).value());
+    return update.update().getMessage().equals(this.getClass().getDeclaredAnnotation(CommandName.class).value());
   }
 
   public abstract String explanation();

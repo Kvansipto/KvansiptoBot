@@ -1,6 +1,7 @@
 package microservice.service.command;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -10,17 +11,25 @@ import kvansipto.exercise.filter.ExerciseResultFilter;
 import kvansipto.exercise.wrapper.BotApiMethodWrapper;
 import kvansipto.exercise.wrapper.SendMessageWrapper;
 import kvansipto.exercise.wrapper.SendPhotoWrapper;
+import lombok.extern.slf4j.Slf4j;
 import microservice.service.ExerciseResultService;
 import microservice.service.TableImageService;
-import microservice.service.UserState;
-import microservice.service.UserStateService;
 import microservice.service.dto.AnswerData;
 import microservice.service.event.UserInputCommandEvent;
+import microservice.service.user.state.UserState;
+import microservice.service.user.state.UserStateService;
+import microservice.service.user.state.UserStateType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 
 @Component
+@Slf4j
+//TODO Изображение не доходит до telegram
+/**
+ * 2024-11-01 20:28:38 Error executing kvansipto.exercise.wrapper.SendPhotoWrapper query:
+ * [400] Bad Request: there is no photo in the request
+ */
 public class ShowExerciseResultHistoryCommand extends Command {
 
   private static final String EMPTY_LIST_EXERCISE_RESULT_TEXT = "Результаты по упражнению отсутствуют";
@@ -43,7 +52,7 @@ public class ShowExerciseResultHistoryCommand extends Command {
     UserState userState = userStateService.getCurrentState(chatId).orElse(null);
 
     return userState != null
-        && "VIEWING EXERCISE".equals(userState.getCurrentState())
+        && UserStateType.VIEWING_EXERCISE.equals(userState.getUserStateType())
         && ExerciseCommand.SHOW_EXERCISE_RESULT_HISTORY.equals(buttonCode);
   }
 
@@ -51,11 +60,7 @@ public class ShowExerciseResultHistoryCommand extends Command {
   public void process(UserInputCommandEvent event) {
     Long chatId = event.chatId();
 
-    ExerciseDto exercise = userStateService.getCurrentState(event.chatId()).get().getCurrentExercise();
-    UserState userState = userStateService.getCurrentState(chatId).orElse(new UserState());
-    userState.setCurrentExercise(exercise);
-    userState.setCurrentState("LOADING_HISTORY");
-    userStateService.setCurrentState(chatId, userState);
+    ExerciseDto exercise = userStateService.getCurrentState(event.chatId()).orElseThrow().getCurrentExercise();
 
     ExerciseResultFilter exerciseResultFilter = ExerciseResultFilter.builder()
         .exerciseDto(exercise)
@@ -85,14 +90,31 @@ public class ShowExerciseResultHistoryCommand extends Command {
         };
       }
       byte[] imageBytes = tableImageService.drawTableImage(HEADERS, data);
+      if (imageBytes == null || imageBytes.length == 0) {
+        log.error("Image wasn't created, byte array is empty.");
+        return;
+      }
+      log.info("Размер изображения: {} байт", imageBytes.length);
       InputStream is = new ByteArrayInputStream(imageBytes);
+      try {
+        if (is.available() == 0) {
+          log.error("InputStream для фото пустой.");
+          return;
+        }
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+      InputFile inputFile = new InputFile(is, "table.png");
+      log.info("Photo was prepared to send: {} ", inputFile);
       botApiMethodWrapper.addAction(
           SendPhotoWrapper.newBuilder()
               .chatId(chatId)
-              .photo(new InputFile(is, "table.png"))
+              .photo(inputFile)
               .build()
       );
     }
-    kafkaTemplate.send("actions-from-exercises", event.chatId(), botApiMethodWrapper);
+    kafkaService.send("actions-from-exercises", event.chatId(),
+        botApiMethodWrapper, kafkaTemplate);
+    userStateService.removeUserState(chatId);
   }
 }

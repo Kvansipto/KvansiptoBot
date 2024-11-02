@@ -5,16 +5,17 @@ import microservice.service.CommandInitializer;
 import microservice.service.event.UserInputCommandEvent;
 import org.springframework.stereotype.Component;
 
-@Component("/help")
+@Component()
+@CommandName("/help")
 public class HelpCommand extends MainMenuCommand {
 
   @Override
   public void process(UserInputCommandEvent event) {
-    kafkaTemplate.send("actions-from-exercises", event.chatId(),
+    kafkaService.send("actions-from-exercises", event.chatId(),
         SendMessageWrapper.newBuilder()
             .chatId(event.chatId())
             .text(CommandInitializer.HELP_TEXT)
-            .build());
+            .build(), kafkaTemplate);
   }
 
   @Override

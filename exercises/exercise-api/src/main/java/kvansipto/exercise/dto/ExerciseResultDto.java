@@ -19,8 +19,8 @@ public class ExerciseResultDto extends BaseDto {
 
   ExerciseDto exercise;
   double weight;
-  byte numberOfSets;
-  byte numberOfRepetitions;
+  int numberOfSets;
+  int numberOfRepetitions;
   UserDto user;
   String comment;
 

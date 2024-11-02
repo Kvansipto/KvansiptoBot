@@ -43,7 +43,10 @@ spring:
       repositories:
         enabled: false
 
-kafka.topic:
-  messages: messages-to-exercises
-  actions: actions-from-exercises
-  main-menu-commands: main-menu-commands
+kafka:
+  topic:
+    messages: messages-to-exercises
+    actions: actions-from-exercises
+    main-menu-commands: main-menu-commands
+  group.id:
+    messages: update-dto-group

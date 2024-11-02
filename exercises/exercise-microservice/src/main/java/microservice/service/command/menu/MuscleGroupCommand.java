@@ -5,15 +5,17 @@ import java.util.List;
 import kvansipto.exercise.wrapper.SendMessageWrapper;
 import microservice.entity.MuscleGroup;
 import microservice.service.KeyboardMarkupUtil;
-import microservice.service.UserState;
-import microservice.service.UserStateFactory;
-import microservice.service.UserStateService;
 import microservice.service.dto.AnswerDto;
 import microservice.service.event.UserInputCommandEvent;
+import microservice.service.user.state.UserState;
+import microservice.service.user.state.UserStateFactory;
+import microservice.service.user.state.UserStateService;
+import microservice.service.user.state.UserStateType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-@Component("/exercise_info")
+@Component()
+@CommandName("/exercise_info")
 public class MuscleGroupCommand extends MainMenuCommand {
 
   @Autowired
@@ -29,7 +31,7 @@ public class MuscleGroupCommand extends MainMenuCommand {
     UserState userState = userStateService.getCurrentState(chatId)
         .orElseGet(() -> userStateFactory.createUserSession(chatId));
 
-    userState.setCurrentState("CHOOSING MUSCLE GROUP");
+    userState.setUserStateType(UserStateType.CHOOSING_MUSCLE_GROUP);
 
     userStateService.setCurrentState(chatId, userState);
 
@@ -37,12 +39,12 @@ public class MuscleGroupCommand extends MainMenuCommand {
         .map(muscleGroup -> new AnswerDto(muscleGroup.getName(), "muscle_group"))
         .toList();
 
-    kafkaTemplate.send("actions-from-exercises", event.chatId(),
+    kafkaService.send("actions-from-exercises", event.chatId(),
         SendMessageWrapper.newBuilder()
             .chatId(chatId)
             .replyMarkup(KeyboardMarkupUtil.createRows(answerDtoList, 2))
             .text("Выберите группу мышц")
-            .build());
+            .build(), kafkaTemplate);
   }
 
   @Override

@@ -8,11 +8,18 @@ spring:
     name: telegram-microservice
   jmx:
     enabled: false
+  aop:
+    proxy-target-class: true
 
-kafka.topic:
-  messages: messages-to-exercises
-  actions: actions-from-exercises
-  main-menu-commands: main-menu-commands
+kafka:
+  topic:
+    messages: messages-to-exercises
+    actions: actions-from-exercises
+    main-menu-commands: main-menu-commands
+  group.id:
+    main-menu-commands: main-menu-command-group
+    actions: exercise_bot_group
+
 
 telegram:
   bot:

@@ -22,9 +22,11 @@ public class KafkaConsumerService {
     this.eventPublisher = eventPublisher;
   }
 
-  @KafkaListener(topics = "${kafka.topic.actions}")
+  @KafkaListener(topics = "${kafka.topic.actions}", groupId = "${kafka.group.id.actions}",
+      containerFactory = "botApiMethodKafkaListenerFactory")
   public void listenCommandAction(@Payload BotApiMethodInterface action,
       @Header(KafkaHeaders.RECEIVED_KEY) Long chatId) {
+    log.info("Received command action: {}", action);
     eventPublisher.publishEvent(new TelegramActionEvent(action));
   }
 }

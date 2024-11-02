@@ -5,14 +5,14 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import kvansipto.exercise.dto.ExerciseDto;
 import kvansipto.exercise.wrapper.EditMessageWrapper;
 import microservice.service.KeyboardMarkupUtil;
-import microservice.service.UserState;
-import microservice.service.UserStateService;
 import microservice.service.dto.AnswerData;
 import microservice.service.dto.AnswerDto;
 import microservice.service.event.UserInputCommandEvent;
+import microservice.service.user.state.UserState;
+import microservice.service.user.state.UserStateService;
+import microservice.service.user.state.UserStateType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -33,7 +33,7 @@ public class AddDateForExerciseResultCommand extends Command {
     String buttonCode = AnswerData.deserialize(event.update().getMessage()).getButtonCode();
     UserState userState = userStateService.getCurrentState(chatId).orElse(null);
     return userState != null
-        && "CHOOSING EXERCISE".equals(userState.getCurrentState())
+        && UserStateType.VIEWING_EXERCISE.equals(userState.getUserStateType())
         && ExerciseCommand.ADD_EXERCISE_RESULT_TEXT.equals(buttonCode);
   }
 
@@ -42,9 +42,7 @@ public class AddDateForExerciseResultCommand extends Command {
     Long chatId = event.chatId();
 
     UserState userState = userStateService.getCurrentState(chatId).orElse(new UserState());
-    ExerciseDto exercise = userState.getCurrentExercise();
-
-    userState.setCurrentState("CHOOSING DATE");
+    userState.setUserStateType(UserStateType.CHOOSING_DATE);
     userStateService.setCurrentState(chatId, userState);
 
     DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM");
@@ -56,13 +54,12 @@ public class AddDateForExerciseResultCommand extends Command {
       String text = i < dayTexts.length ? dayTexts[i] : date;
       answers.add(new AnswerDto(text, ADD_DATE_EXERCISE_RESULT_TEXT));
     }
-
-    kafkaTemplate.send("actions-from-exercises", event.chatId(),
+    kafkaService.send("actions-from-exercises", event.chatId(),
         EditMessageWrapper.newBuilder()
             .chatId(chatId)
             .messageId(event.update().getMessageId())
             .replyMarkup(KeyboardMarkupUtil.createRows(answers, 2))
             .text(ADD_DATE_FOR_EXERCISE_RESULT_TEXT)
-            .build());
+            .build(), kafkaTemplate);
   }
 }

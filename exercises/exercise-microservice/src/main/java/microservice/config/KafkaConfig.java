@@ -23,25 +23,29 @@ import org.springframework.kafka.core.ProducerFactory;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 
 @Configuration
 public class KafkaConfig {
 
   @Value("${spring.kafka.bootstrap-servers}")
   private String bootstrapServers;
+  @Value("${kafka.group.id.messages}")
+  private String groupIdMessages;
 
   //producer MainMenuCommand
   @Bean
-  public ProducerFactory<String, List<MainMenuCommand>> botCommandListProducerFactory() {
+  public ProducerFactory<String, List<BotCommand>> botCommandListProducerFactory() {
     Map<String, Object> config = new HashMap<>();
     config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-    config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.StringSerializer.class);
+    config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
+        org.apache.kafka.common.serialization.StringSerializer.class);
     config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, BotCommandListSerializer.class);
     return new DefaultKafkaProducerFactory<>(config);
   }
 
   @Bean
-  public KafkaTemplate<String, List<MainMenuCommand>> botCommandListKafkaTemplate() {
+  public KafkaTemplate<String, List<BotCommand>> botCommandListKafkaTemplate() {
     return new KafkaTemplate<>(botCommandListProducerFactory());
   }
 
@@ -52,6 +56,7 @@ public class KafkaConfig {
     config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
     config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, LongSerializer.class);
     config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, BotApiMethodSerializer.class);
+    config.put(ProducerConfig.MAX_REQUEST_SIZE_CONFIG, 20971520);
     return new DefaultKafkaProducerFactory<>(config);
   }
 
@@ -65,7 +70,7 @@ public class KafkaConfig {
   public ConsumerFactory<Long, UpdateDto> updateDtoConsumerFactory() {
     Map<String, Object> config = new HashMap<>();
     config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-    config.put(ConsumerConfig.GROUP_ID_CONFIG, "update_dto_group");
+    config.put(ConsumerConfig.GROUP_ID_CONFIG, groupIdMessages);
     config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, LongDeserializer.class);
     config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, UpdateDtoDeserializer.class);
     return new DefaultKafkaConsumerFactory<>(config);
@@ -80,7 +85,8 @@ public class KafkaConfig {
   }
 
   public static class UpdateDtoDeserializer implements Deserializer<UpdateDto> {
-    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
 
     @Override
     public UpdateDto deserialize(String topic, byte[] data) {
@@ -92,11 +98,12 @@ public class KafkaConfig {
     }
   }
 
-  public static class BotCommandListSerializer implements Serializer<List<MainMenuCommand>> {
-    private final ObjectMapper objectMapper = new ObjectMapper();
+  public static class BotCommandListSerializer implements Serializer<List<BotCommand>> {
+
+    private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
 
     @Override
-    public byte[] serialize(String topic, List<MainMenuCommand> data) {
+    public byte[] serialize(String topic, List<BotCommand> data) {
       try {
         return objectMapper.writeValueAsBytes(data);
       } catch (Exception e) {
@@ -104,8 +111,10 @@ public class KafkaConfig {
       }
     }
   }
+
   public static class BotApiMethodSerializer implements Serializer<BotApiMethodInterface> {
-    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
 
     @Override
     public byte[] serialize(String topic, BotApiMethodInterface data) {

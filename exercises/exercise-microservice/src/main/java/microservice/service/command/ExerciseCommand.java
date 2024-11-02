@@ -6,11 +6,12 @@ import kvansipto.exercise.dto.ExerciseDto;
 import kvansipto.exercise.wrapper.EditMessageWrapper;
 import microservice.service.ExerciseService;
 import microservice.service.KeyboardMarkupUtil;
-import microservice.service.UserState;
-import microservice.service.UserStateService;
 import microservice.service.dto.AnswerData;
 import microservice.service.dto.AnswerDto;
 import microservice.service.event.UserInputCommandEvent;
+import microservice.service.user.state.UserState;
+import microservice.service.user.state.UserStateService;
+import microservice.service.user.state.UserStateType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -36,7 +37,7 @@ public class ExerciseCommand extends Command {
 
     UserState userState = userStateService.getCurrentState(chatId).orElse(null);
     return userState != null
-        && "CHOOSING EXERCISE".equals(userState.getCurrentState())
+        && UserStateType.CHOOSING_EXERCISE.equals(userState.getUserStateType())
         && "exercise".equals(buttonCode);
   }
 
@@ -52,10 +53,11 @@ public class ExerciseCommand extends Command {
     answerDtoList.add(new AnswerDto(ADD_EXERCISE_RESULT_BUTTON_TEXT, ADD_EXERCISE_RESULT_TEXT));
 
     UserState userState = userStateService.getCurrentState(chatId).orElse(new UserState());
-    userState.setCurrentState("VIEWING EXERCISE");
+    userState.setUserStateType(UserStateType.VIEWING_EXERCISE);
+    userState.setCurrentExercise(exercise);
     userStateService.setCurrentState(chatId, userState);
 
-    kafkaTemplate.send("actions-from-exercises", event.chatId(),
+    kafkaService.send("actions-from-exercises", event.chatId(),
         EditMessageWrapper.newBuilder()
             .chatId(chatId)
             .messageId(event.update().getMessageId())
@@ -63,6 +65,6 @@ public class ExerciseCommand extends Command {
             .text(String.format("%s%n" + EXERCISE_TEXT, exercise.getDescription(), exercise.getVideoUrl()))
             .parseMode("MarkdownV2")
             .disableWebPagePreview(false)
-            .build());
+            .build(), kafkaTemplate);
   }
 }

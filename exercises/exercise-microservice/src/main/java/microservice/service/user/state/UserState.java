@@ -1,4 +1,4 @@
-package microservice.service;
+package microservice.service.user.state;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -16,6 +16,6 @@ public class UserState implements Serializable {
 
   private Long chatId;
   private ExerciseDto currentExercise;
-  private String currentState;
+  private UserStateType userStateType;
   private LocalDate exerciseResultDate;
 }
