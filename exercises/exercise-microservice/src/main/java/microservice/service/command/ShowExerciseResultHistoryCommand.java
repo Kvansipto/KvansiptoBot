@@ -113,8 +113,9 @@ public class ShowExerciseResultHistoryCommand extends Command {
               .build()
       );
     }
-    kafkaService.send("actions-from-exercises", event.chatId(),
-        botApiMethodWrapper, kafkaTemplate);
+    kafkaService.sendBotApiMethod("actions-from-exercises", event.chatId(),
+            botApiMethodWrapper)
+        .subscribe();
     userStateService.removeUserState(chatId);
   }
 }

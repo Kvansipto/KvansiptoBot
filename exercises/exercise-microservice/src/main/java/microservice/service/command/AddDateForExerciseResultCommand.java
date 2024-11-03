@@ -54,12 +54,13 @@ public class AddDateForExerciseResultCommand extends Command {
       String text = i < dayTexts.length ? dayTexts[i] : date;
       answers.add(new AnswerDto(text, ADD_DATE_EXERCISE_RESULT_TEXT));
     }
-    kafkaService.send("actions-from-exercises", event.chatId(),
-        EditMessageWrapper.newBuilder()
-            .chatId(chatId)
-            .messageId(event.update().getMessageId())
-            .replyMarkup(KeyboardMarkupUtil.createRows(answers, 2))
-            .text(ADD_DATE_FOR_EXERCISE_RESULT_TEXT)
-            .build(), kafkaTemplate);
+    kafkaService.sendBotApiMethod("actions-from-exercises", event.chatId(),
+            EditMessageWrapper.newBuilder()
+                .chatId(chatId)
+                .messageId(event.update().getMessageId())
+                .replyMarkup(KeyboardMarkupUtil.createRows(answers, 2))
+                .text(ADD_DATE_FOR_EXERCISE_RESULT_TEXT)
+                .build())
+        .subscribe();
   }
 }

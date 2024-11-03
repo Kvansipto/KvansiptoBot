@@ -11,11 +11,12 @@ public class HelpCommand extends MainMenuCommand {
 
   @Override
   public void process(UserInputCommandEvent event) {
-    kafkaService.send("actions-from-exercises", event.chatId(),
-        SendMessageWrapper.newBuilder()
-            .chatId(event.chatId())
-            .text(CommandInitializer.HELP_TEXT)
-            .build(), kafkaTemplate);
+    kafkaService.sendBotApiMethod("actions-from-exercises", event.chatId(),
+            SendMessageWrapper.newBuilder()
+                .chatId(event.chatId())
+                .text(CommandInitializer.HELP_TEXT)
+                .build())
+        .subscribe();
   }
 
   @Override

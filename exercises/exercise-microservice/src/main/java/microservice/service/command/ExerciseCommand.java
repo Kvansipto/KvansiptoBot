@@ -57,14 +57,15 @@ public class ExerciseCommand extends Command {
     userState.setCurrentExercise(exercise);
     userStateService.setCurrentState(chatId, userState);
 
-    kafkaService.send("actions-from-exercises", event.chatId(),
-        EditMessageWrapper.newBuilder()
-            .chatId(chatId)
-            .messageId(event.update().getMessageId())
-            .replyMarkup(KeyboardMarkupUtil.createRows(answerDtoList, 1))
-            .text(String.format("%s%n" + EXERCISE_TEXT, exercise.getDescription(), exercise.getVideoUrl()))
-            .parseMode("MarkdownV2")
-            .disableWebPagePreview(false)
-            .build(), kafkaTemplate);
+    kafkaService.sendBotApiMethod("actions-from-exercises", event.chatId(),
+            EditMessageWrapper.newBuilder()
+                .chatId(chatId)
+                .messageId(event.update().getMessageId())
+                .replyMarkup(KeyboardMarkupUtil.createRows(answerDtoList, 1))
+                .text(String.format("%s%n" + EXERCISE_TEXT, exercise.getDescription(), exercise.getVideoUrl()))
+                .parseMode("MarkdownV2")
+                .disableWebPagePreview(false)
+                .build())
+        .subscribe();
   }
 }

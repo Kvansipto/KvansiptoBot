@@ -49,12 +49,13 @@ public class MuscleCommand extends Command {
     userState.setUserStateType(UserStateType.CHOOSING_EXERCISE);
     userStateService.setCurrentState(chatId, userState);
 
-    kafkaService.send("actions-from-exercises", event.chatId(),
-        EditMessageWrapper.newBuilder()
-            .chatId(chatId)
-            .messageId(event.update().getMessageId())
-            .replyMarkup(KeyboardMarkupUtil.createRows(answerDtoList, 1))
-            .text(MUSCLE_COMMAND_TEXT)
-            .build(), kafkaTemplate);
+    kafkaService.sendBotApiMethod("actions-from-exercises", event.chatId(),
+            EditMessageWrapper.newBuilder()
+                .chatId(chatId)
+                .messageId(event.update().getMessageId())
+                .replyMarkup(KeyboardMarkupUtil.createRows(answerDtoList, 1))
+                .text(MUSCLE_COMMAND_TEXT)
+                .build())
+        .subscribe();
   }
 }
