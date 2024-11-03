@@ -5,7 +5,7 @@ import microservice.service.CommandInitializer;
 import microservice.service.event.UserInputCommandEvent;
 import org.springframework.stereotype.Component;
 
-@Component()
+@Component
 @CommandName("/help")
 public class HelpCommand extends MainMenuCommand {
 

@@ -9,7 +9,7 @@ import microservice.service.event.UserInputCommandEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-@Component()
+@Component
 @CommandName("/start")
 @Slf4j
 public class StartCommand extends MainMenuCommand {

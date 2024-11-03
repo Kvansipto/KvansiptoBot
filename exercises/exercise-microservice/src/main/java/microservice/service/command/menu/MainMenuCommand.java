@@ -13,4 +13,10 @@ public abstract class MainMenuCommand extends Command {
   }
 
   public abstract String explanation();
+
+  @Override
+  public String toString() {
+    return String.format("MainMenuCommand: %s with explanation %s", this.getClass().getSimpleName(),
+        this.explanation());
+  }
 }

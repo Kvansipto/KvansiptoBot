@@ -14,7 +14,7 @@ import microservice.service.user.state.UserStateType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-@Component()
+@Component
 @CommandName("/exercise_info")
 public class MuscleGroupCommand extends MainMenuCommand {
 
