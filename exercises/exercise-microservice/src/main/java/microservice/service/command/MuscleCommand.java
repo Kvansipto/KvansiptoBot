@@ -49,7 +49,7 @@ public class MuscleCommand extends Command {
     userState.setUserStateType(UserStateType.CHOOSING_EXERCISE);
     userStateService.setCurrentState(chatId, userState);
 
-    kafkaService.sendBotApiMethod("actions-from-exercises", event.chatId(),
+    kafkaExerciseService.sendBotApiMethod(event.chatId(),
             EditMessageWrapper.newBuilder()
                 .chatId(chatId)
                 .messageId(event.update().getMessageId())

@@ -51,7 +51,7 @@ public class AddExerciseResultCommand extends Command {
     userState.setUserStateType(UserStateType.WAITING_FOR_RESULT);
     userStateService.setCurrentState(chatId, userState);
 
-    kafkaService.sendBotApiMethod("actions-from-exercises", event.chatId(),
+    kafkaExerciseService.sendBotApiMethod(event.chatId(),
             EditMessageWrapper.newBuilder()
                 .chatId(chatId)
                 .messageId(event.update().getMessageId())

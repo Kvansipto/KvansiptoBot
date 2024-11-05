@@ -70,8 +70,6 @@ public class AddResultForExerciseResultCommand extends Command {
     userStateService.removeUserState(chatId);
 
     botApiMethodWrapper.addAction(sendMessageWrapperBuilder.build());
-    kafkaService.sendBotApiMethod("actions-from-exercises", event.chatId(),
-            botApiMethodWrapper)
-        .subscribe();
+    kafkaExerciseService.sendBotApiMethod(event.chatId(), botApiMethodWrapper).subscribe();
   }
 }

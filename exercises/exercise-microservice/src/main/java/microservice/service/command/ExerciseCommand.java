@@ -57,7 +57,7 @@ public class ExerciseCommand extends Command {
     userState.setCurrentExercise(exercise);
     userStateService.setCurrentState(chatId, userState);
 
-    kafkaService.sendBotApiMethod("actions-from-exercises", event.chatId(),
+    kafkaExerciseService.sendBotApiMethod(event.chatId(),
             EditMessageWrapper.newBuilder()
                 .chatId(chatId)
                 .messageId(event.update().getMessageId())

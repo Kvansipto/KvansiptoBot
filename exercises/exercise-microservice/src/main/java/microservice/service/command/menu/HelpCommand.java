@@ -11,7 +11,7 @@ public class HelpCommand extends MainMenuCommand {
 
   @Override
   public void process(UserInputCommandEvent event) {
-    kafkaService.sendBotApiMethod("actions-from-exercises", event.chatId(),
+    kafkaExerciseService.sendBotApiMethod(event.chatId(),
             SendMessageWrapper.newBuilder()
                 .chatId(event.chatId())
                 .text(CommandInitializer.HELP_TEXT)

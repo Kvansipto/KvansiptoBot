@@ -39,7 +39,7 @@ public class MuscleGroupCommand extends MainMenuCommand {
         .map(muscleGroup -> new AnswerDto(muscleGroup.getName(), "muscle_group"))
         .toList();
 
-    kafkaService.sendBotApiMethod("actions-from-exercises", event.chatId(),
+    kafkaExerciseService.sendBotApiMethod(event.chatId(),
             SendMessageWrapper.newBuilder()
                 .chatId(chatId)
                 .replyMarkup(KeyboardMarkupUtil.createRows(answerDtoList, 2))

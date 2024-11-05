@@ -54,7 +54,7 @@ public class AddDateForExerciseResultCommand extends Command {
       String text = i < dayTexts.length ? dayTexts[i] : date;
       answers.add(new AnswerDto(text, ADD_DATE_EXERCISE_RESULT_TEXT));
     }
-    kafkaService.sendBotApiMethod("actions-from-exercises", event.chatId(),
+    kafkaExerciseService.sendBotApiMethod(event.chatId(),
             EditMessageWrapper.newBuilder()
                 .chatId(chatId)
                 .messageId(event.update().getMessageId())
