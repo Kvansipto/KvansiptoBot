@@ -48,5 +48,6 @@ kafka:
     messages: messages-to-exercises
     actions: actions-from-exercises
     main-menu-commands: main-menu-commands
+    media: media-from-exercises
   group.id:
     messages: update-dto-group

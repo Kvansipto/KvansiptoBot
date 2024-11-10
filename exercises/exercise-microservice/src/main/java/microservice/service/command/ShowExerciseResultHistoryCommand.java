@@ -1,16 +1,13 @@
 package microservice.service.command;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.time.format.DateTimeFormatter;
+import java.util.Base64;
 import java.util.List;
 import kvansipto.exercise.dto.ExerciseDto;
 import kvansipto.exercise.dto.ExerciseResultDto;
 import kvansipto.exercise.filter.ExerciseResultFilter;
 import kvansipto.exercise.wrapper.BotApiMethodWrapper;
-import kvansipto.exercise.wrapper.SendMessageWrapper;
-import kvansipto.exercise.wrapper.SendPhotoWrapper;
+import kvansipto.exercise.wrapper.EditMessageWrapper;
 import lombok.extern.slf4j.Slf4j;
 import microservice.service.ExerciseResultService;
 import microservice.service.TableImageService;
@@ -21,18 +18,13 @@ import microservice.service.user.state.UserStateService;
 import microservice.service.user.state.UserStateType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.objects.InputFile;
 
 @Component
 @Slf4j
-//TODO Изображение не доходит до telegram
-/**
- * 2024-11-01 20:28:38 Error executing kvansipto.exercise.wrapper.SendPhotoWrapper query:
- * [400] Bad Request: there is no photo in the request
- */
 public class ShowExerciseResultHistoryCommand extends Command {
 
   private static final String EMPTY_LIST_EXERCISE_RESULT_TEXT = "Результаты по упражнению отсутствуют";
+  private static final String EXERCISE_RESULT_TEXT = "Результаты по упражнению %s";
   private static final String[] HEADERS = {"Дата", "Вес (кг)", "Подходы", "Повторения", "Комментарий"};
 
   @Autowired
@@ -72,8 +64,9 @@ public class ShowExerciseResultHistoryCommand extends Command {
 
     if (exerciseResults.isEmpty()) {
       botApiMethodWrapper.addAction(
-          SendMessageWrapper.newBuilder()
+          EditMessageWrapper.newBuilder()
               .chatId(chatId)
+              .messageId(event.update().getMessageId())
               .text(EMPTY_LIST_EXERCISE_RESULT_TEXT)
               .build());
     } else {
@@ -90,30 +83,15 @@ public class ShowExerciseResultHistoryCommand extends Command {
         };
       }
       byte[] imageBytes = tableImageService.drawTableImage(HEADERS, data);
-      if (imageBytes == null || imageBytes.length == 0) {
-        log.error("Image wasn't created, byte array is empty.");
-        return;
-      }
-      log.info("Размер изображения: {} байт", imageBytes.length);
-      InputStream is = new ByteArrayInputStream(imageBytes);
-      try {
-        if (is.available() == 0) {
-          log.error("InputStream для фото пустой.");
-          return;
-        }
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
-      InputFile inputFile = new InputFile(is, "table.png");
-      log.info("Photo was prepared to send: {} ", inputFile);
-      botApiMethodWrapper.addAction(
-          SendPhotoWrapper.newBuilder()
-              .chatId(chatId)
-              .photo(inputFile)
-              .build()
-      );
+      kafkaExerciseService.sendMedia(chatId, Base64.getEncoder().encodeToString(imageBytes)).subscribe();
+
+      botApiMethodWrapper.addAction(EditMessageWrapper.newBuilder()
+          .chatId(chatId)
+          .text(String.format(EXERCISE_RESULT_TEXT, exercise.getName()))
+          .messageId(event.update().getMessageId())
+          .build());
+      kafkaExerciseService.sendBotApiMethod(chatId, botApiMethodWrapper).subscribe();
     }
-    kafkaExerciseService.sendBotApiMethod(event.chatId(), botApiMethodWrapper).subscribe();
     userStateService.removeUserState(chatId);
   }
 }

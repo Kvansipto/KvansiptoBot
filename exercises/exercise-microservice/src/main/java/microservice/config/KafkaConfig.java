@@ -43,6 +43,17 @@ public class KafkaConfig {
     return new ReactiveKafkaProducerTemplate<>(senderOptions);
   }
 
+  //producer Media (photo)
+  @Bean
+  public ReactiveKafkaProducerTemplate<Long, String> imageReactiveSender() {
+    Map<String, Object> config = new HashMap<>();
+    config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+    config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, LongSerializer.class);
+    config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+    SenderOptions<Long, String> senderOptions = SenderOptions.create(config);
+    return new ReactiveKafkaProducerTemplate<>(senderOptions);
+  }
+
   //producer BotApiMethodInterface
   @Bean
   public ReactiveKafkaProducerTemplate<Long, BotApiMethodInterface> botApiMethodReactiveSender() {

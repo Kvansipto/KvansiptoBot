@@ -49,6 +49,10 @@ public class KafkaConfig {
   private String mainMenuCommandsGroupId;
   @Value("${kafka.group.id.actions}")
   private String actionsGroupId;
+  @Value("${kafka.topic.media}")
+  private String mediaTopicName;
+  @Value("${kafka.group.id.media}")
+  private String mediaGroupId;
 
   @Bean
   public NewTopic messagesToExercisesTopic() {
@@ -63,6 +67,23 @@ public class KafkaConfig {
   @Bean
   public NewTopic mainMenuCommandsFromExercisesTopic() {
     return new NewTopic(mainMenuCommandsTopicName, 3, (short) 3);
+  }
+
+  @Bean
+  public NewTopic mediaFromExercisesTopic() {
+    return new NewTopic(mediaTopicName, 3, (short) 3);
+  }
+
+  @Bean
+  public ReactiveKafkaConsumerTemplate<Long, String> mediaReactiveKafkaConsumerTemplate() {
+    Map<String, Object> config = new HashMap<>();
+    config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+    config.put(ConsumerConfig.GROUP_ID_CONFIG, mediaGroupId);
+    config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, LongDeserializer.class);
+    config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+    ReceiverOptions<Long, String> receiverOptions = ReceiverOptions.<Long, String>create(config)
+        .subscription(List.of(mediaTopicName));
+    return new ReactiveKafkaConsumerTemplate<>(receiverOptions);
   }
 
   @Bean
@@ -105,7 +126,6 @@ public class KafkaConfig {
   public BotApiMethodDeserializer() {
     objectMapper = new ObjectMapper();
     objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    // Регистрация подтипов вручную для десериализации
     objectMapper.registerSubtypes(
         new NamedType(BotApiMethodWrapper.class, "BotApiMethodWrapper"),
         new NamedType(SendMessageWrapper.class, "SendMessageWrapper"),
@@ -124,8 +144,6 @@ public class KafkaConfig {
     }
   }
 }
-
-
 
   public static class BotCommandListDeserializer implements Deserializer<List<BotCommand>> {
     private final ObjectMapper objectMapper = new ObjectMapper();

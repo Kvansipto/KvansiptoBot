@@ -24,6 +24,7 @@ public class KafkaExerciseService implements CommandLineRunner {
   private final ReactiveKafkaProducerTemplate<Long, BotApiMethodInterface> botApiMethodSender;
   private final ReactiveKafkaProducerTemplate<String, List<BotCommand>> botCommandSender;
   private final ReactiveKafkaConsumerTemplate<Long, UpdateDto> updateDtoReceiver;
+  private final ReactiveKafkaProducerTemplate<Long, String> mediaSender;
 
   @Value("${kafka.topic.messages}")
   private String messagesTopic;
@@ -31,16 +32,20 @@ public class KafkaExerciseService implements CommandLineRunner {
   private String mainMenuCommandTopic;
   @Value("${kafka.topic.actions}")
   private String actionsTopic;
+  @Value("${kafka.topic.media}")
+  private String mediaTopic;
 
   @Autowired
   public KafkaExerciseService(ApplicationEventPublisher eventPublisher,
       ReactiveKafkaProducerTemplate<Long, BotApiMethodInterface> botApiMethodSender,
       ReactiveKafkaProducerTemplate<String, List<BotCommand>> botCommandSender,
-      ReactiveKafkaConsumerTemplate<Long, UpdateDto> updateDtoReceiver) {
+      ReactiveKafkaConsumerTemplate<Long, UpdateDto> updateDtoReceiver,
+      ReactiveKafkaProducerTemplate<Long, String> mediaSender) {
     this.eventPublisher = eventPublisher;
     this.botApiMethodSender = botApiMethodSender;
     this.botCommandSender = botCommandSender;
     this.updateDtoReceiver = updateDtoReceiver;
+    this.mediaSender = mediaSender;
   }
 
   private <K, V> Mono<Void> sendMessage(ReactiveKafkaProducerTemplate<K, V> sender, String topic, @Nullable K key,
@@ -59,6 +64,10 @@ public class KafkaExerciseService implements CommandLineRunner {
 
   public Mono<Void> sendMainMenuCommands(List<BotCommand> data) {
     return sendMessage(botCommandSender, mainMenuCommandTopic, null, data);
+  }
+
+  public Mono<Void> sendMedia(Long chatId, String serializedImage) {
+    return sendMessage(mediaSender, mediaTopic, chatId, serializedImage);
   }
 
   public Mono<Void> receiveUpdateDto() {
