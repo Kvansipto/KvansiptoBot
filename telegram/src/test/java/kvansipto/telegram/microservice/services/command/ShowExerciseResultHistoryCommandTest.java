@@ -104,6 +104,6 @@ class ShowExerciseResultHistoryCommandTest {
     EditMessageWrapper editMessageWrapper = (EditMessageWrapper) result;
     assertThat(editMessageWrapper.getChatId()).isEqualTo("123456");
     assertThat(editMessageWrapper.getText()).isEqualTo(String.format(
-        "Загрузка данных по упражнению '%s', пожалуйста, подождите...", "exerciseName"));
+        "Загрузка данных по упражнению %s, пожалуйста, подождите...", "exerciseName"));
   }
 }

@@ -9,9 +9,15 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 public class EditMessageWrapper extends EditMessageText implements BotApiMethodInterface {
 
   @Builder(builderClassName = "EditMessageWrapperBuilder", builderMethodName = "newBuilder")
-  public static EditMessageWrapper create(Long chatId, Integer messageId, String text,
-      InlineKeyboardMarkup replyMarkup, String parseMode, boolean disableWebPagePreview) {
-    EditMessageWrapper editMessageWrapper = new EditMessageWrapper();
+  public static EditMessageWrapper create(
+          Long chatId,
+          Integer messageId,
+          String text,
+          InlineKeyboardMarkup replyMarkup,
+          String parseMode,
+          boolean disableWebPagePreview
+  ) {
+    var editMessageWrapper = new EditMessageWrapper();
     editMessageWrapper.setChatId(chatId);
     editMessageWrapper.setMessageId(messageId);
     editMessageWrapper.setText(text);

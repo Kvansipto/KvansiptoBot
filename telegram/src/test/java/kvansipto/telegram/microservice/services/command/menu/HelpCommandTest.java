@@ -1,6 +1,5 @@
 package kvansipto.telegram.microservice.services.command.menu;
 
-import static kvansipto.telegram.microservice.services.TelegramBot.HELP_TEXT;
 import static kvansipto.telegram.microservice.services.command.menu.HelpCommand.HELP_COMMAND_TEXT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -46,9 +45,10 @@ class HelpCommandTest {
   @Test
   void process_shouldReturnHelpText() {
     // Arrange
-    HELP_TEXT = "help command text";
+    var msg = "help command text";
 
     // Act
+    helpCommand.setHelpText(msg);
     BotApiMethodInterface result = helpCommand.process(update);
 
     // Assert
@@ -56,7 +56,7 @@ class HelpCommandTest {
     assertInstanceOf(SendMessageWrapper.class, result);
     SendMessageWrapper sendMessageWrapper = (SendMessageWrapper) result;
     assertEquals("123456", sendMessageWrapper.getChatId());
-    assertEquals(HELP_TEXT, sendMessageWrapper.getText());
+    assertEquals(msg, sendMessageWrapper.getText());
   }
 
   @Test

@@ -5,9 +5,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import kvansipto.exercise.dto.ExerciseDto;
+
 import kvansipto.telegram.microservice.services.RestToExercises;
-import kvansipto.telegram.microservice.services.UserState;
 import kvansipto.telegram.microservice.services.UserStateFactory;
 import kvansipto.telegram.microservice.services.UserStateService;
 import kvansipto.telegram.microservice.services.dto.AnswerData;
@@ -15,19 +14,17 @@ import kvansipto.telegram.microservice.services.dto.AnswerDto;
 import kvansipto.telegram.microservice.services.wrapper.BotApiMethodInterface;
 import kvansipto.telegram.microservice.services.wrapper.EditMessageWrapper;
 import kvansipto.telegram.microservice.utils.KeyboardMarkupUtil;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 @Component
+@RequiredArgsConstructor
 public class AddDateForExerciseResultCommand extends Command {
 
-  @Autowired
-  UserStateService userStateService;
-  @Autowired
-  private UserStateFactory userStateFactory;
-  @Autowired
-  private RestToExercises restToExercises;
+  private final UserStateService userStateService;
+  private final UserStateFactory userStateFactory;
+  private final RestToExercises restToExercises;
 
   public static final String ADD_DATE_FOR_EXERCISE_RESULT_TEXT = "Выберите дату";
   public static final String TODAY_TEXT = "Сегодня";
@@ -42,22 +39,22 @@ public class AddDateForExerciseResultCommand extends Command {
 
   @Override
   public BotApiMethodInterface process(Update update) {
-    String exerciseName = AnswerData.deserialize(update.getCallbackQuery().getData()).getHiddenText();
-    Long chatId = update.getCallbackQuery().getMessage().getChatId();
-    ExerciseDto exercise = restToExercises.getExerciseByName(exerciseName);
+    var exerciseName = AnswerData.deserialize(update.getCallbackQuery().getData()).getHiddenText();
+    var chatId = update.getCallbackQuery().getMessage().getChatId();
+    var exercise = restToExercises.getExerciseByName(exerciseName);
 
-    UserState userState = userStateFactory.createUserSession(chatId);
+    var userState = userStateFactory.createUserSession(chatId);
     userState.setCurrentExercise(exercise);
     userState.setCurrentState("CHOOSING DATE");
     userStateService.setCurrentState(chatId, userState);
 
-    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM");
+    var dtf = DateTimeFormatter.ofPattern("dd/MM");
     List<AnswerDto> answers = new ArrayList<>();
 
     String[] dayTexts = {TODAY_TEXT, YESTERDAY_TEXT};
     for (int i = 0; i < DayOfWeek.values().length; i++) {
-      String date = LocalDate.now().minusDays(i).format(dtf);
-      String text = i < dayTexts.length ? dayTexts[i] : date;
+      var date = LocalDate.now().minusDays(i).format(dtf);
+      var text = i < dayTexts.length ? dayTexts[i] : date;
       answers.add(new AnswerDto(text, ADD_DATE_EXERCISE_RESULT_TEXT, date));
     }
     return EditMessageWrapper.newBuilder()

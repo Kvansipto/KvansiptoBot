@@ -11,19 +11,17 @@ import kvansipto.telegram.microservice.services.wrapper.BotApiMethodWrapper;
 import kvansipto.telegram.microservice.services.wrapper.DeleteMessagesWrapper;
 import kvansipto.telegram.microservice.services.wrapper.SendMessageWrapper;
 import kvansipto.telegram.microservice.services.wrapper.SendMessageWrapper.SendMessageWrapperBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 @Component
+@RequiredArgsConstructor
 public class AddResultForExerciseResultCommand extends Command {
 
-  @Autowired
-  RestToExercises restToExercises;
-  @Autowired
-  UserStateFactory userStateFactory;
-  @Autowired
-  UserStateService userStateService;
+  private final RestToExercises restToExercises;
+  private final UserStateFactory userStateFactory;
+  private final UserStateService userStateService;
 
   public static final String SAVE_RESULT_SUCCESS_TEXT = "Результат успешно сохранен";
   public static final String SAVE_RESULT_FAIL_TEXT = "Неверный формат ввода. Пожалуйста, введите данные снова.";
@@ -53,7 +51,7 @@ public class AddResultForExerciseResultCommand extends Command {
       if (parts.length == 4) {
         comment = parts[3];
       }
-      ExerciseResultDto exerciseResult = ExerciseResultDto.builder()
+      var exerciseResult = ExerciseResultDto.builder()
           .weight(weight)
           .numberOfSets(sets)
           .numberOfRepetitions(reps)
@@ -67,7 +65,7 @@ public class AddResultForExerciseResultCommand extends Command {
       userStateService.removeUserState(chatId);
 
       if (!wrongAttempts.isEmpty()) {
-        DeleteMessagesWrapper deleteMessagesWrapper = new DeleteMessagesWrapper(chatId, new ArrayList<>(wrongAttempts));
+        var deleteMessagesWrapper = new DeleteMessagesWrapper(chatId, new ArrayList<>(wrongAttempts));
         botApiMethodWrapper.addAction(deleteMessagesWrapper);
         wrongAttempts.clear();
       }
