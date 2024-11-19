@@ -19,6 +19,7 @@ import kvansipto.telegram.microservice.services.RestToExercises;
 import kvansipto.telegram.microservice.services.wrapper.BotApiMethodInterface;
 import kvansipto.telegram.microservice.services.wrapper.SendMessageWrapper;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
@@ -40,7 +41,6 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 @MockitoSettings(strictness = Strictness.LENIENT)
 class StartCommandTest {
 
-  @InjectMocks
   private StartCommand startCommand;
   @Mock
   private RestToExercises restToExercises;
@@ -48,8 +48,8 @@ class StartCommandTest {
   private static Update update;
   private static Message message;
 
-  @BeforeAll
-  static void setUp() {
+  @BeforeEach
+  void setUp() {
     Chat chat = new Chat();
     chat.setId(123456L);
     chat.setFirstName("John");
@@ -60,6 +60,8 @@ class StartCommandTest {
     message.setText(StartCommand.START_COMMAND_TEXT);
     update = new Update();
     update.setMessage(message);
+
+    startCommand = new StartCommand(restToExercises);
   }
 
   @Test

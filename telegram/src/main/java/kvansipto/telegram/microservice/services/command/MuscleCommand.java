@@ -40,7 +40,7 @@ public class MuscleCommand extends Command {
     return EditMessageWrapper.newBuilder()
         .chatId(chatId)
         .messageId(update.getCallbackQuery().getMessage().getMessageId())
-        .replyMarkup(KeyboardMarkupUtil.createRows(answerDtoList, answerDtoList.size()))
+        .replyMarkup(KeyboardMarkupUtil.createRows(answerDtoList, 1))
         .text(MUSCLE_COMMAND_TEXT)
         .build();
   }

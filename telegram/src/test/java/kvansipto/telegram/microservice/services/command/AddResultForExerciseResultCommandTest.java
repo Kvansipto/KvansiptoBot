@@ -131,7 +131,7 @@ class AddResultForExerciseResultCommandTest {
     assertThat(actions.get(0)).isInstanceOf(SendMessageWrapper.class);
     SendMessageWrapper sendMessageWrapper = (SendMessageWrapper) actions.get(0);
 
-    assertThat(sendMessageWrapper.getChatId()).isEqualTo(123456);
+    assertThat(sendMessageWrapper.getChatId()).isEqualTo("123456");
     assertThat(sendMessageWrapper.getText()).isEqualTo(AddResultForExerciseResultCommand.SAVE_RESULT_FAIL_TEXT);
   }
 }
