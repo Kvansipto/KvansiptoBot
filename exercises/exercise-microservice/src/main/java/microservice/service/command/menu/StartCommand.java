@@ -23,10 +23,11 @@ public class StartCommand extends MainMenuCommand {
     registerUser(event.update().getUser());
     String answer = EmojiParser.parseToUnicode(
         "Hi, " + event.update().getUser().getFirstName() + "! Nice to meet you!" + " :fire:");
-    kafkaService.send("actions-from-exercises", event.chatId(), SendMessageWrapper.newBuilder()
-        .chatId(event.chatId())
-        .text(answer)
-        .build(), kafkaTemplate);
+    kafkaExerciseService.sendBotApiMethod(event.chatId(), SendMessageWrapper.newBuilder()
+            .chatId(event.chatId())
+            .text(answer)
+            .build())
+        .subscribe();
   }
 
   @Override

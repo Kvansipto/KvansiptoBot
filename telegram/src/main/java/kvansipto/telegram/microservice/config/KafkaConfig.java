@@ -25,13 +25,11 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
-import org.springframework.kafka.core.ConsumerFactory;
-import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.core.DefaultKafkaProducerFactory;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.core.ProducerFactory;
+import org.springframework.kafka.core.reactive.ReactiveKafkaConsumerTemplate;
+import org.springframework.kafka.core.reactive.ReactiveKafkaProducerTemplate;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
+import reactor.kafka.receiver.ReceiverOptions;
+import reactor.kafka.sender.SenderOptions;
 
 @Configuration
 public class KafkaConfig {
@@ -51,6 +49,10 @@ public class KafkaConfig {
   private String mainMenuCommandsGroupId;
   @Value("${kafka.group.id.actions}")
   private String actionsGroupId;
+  @Value("${kafka.topic.media}")
+  private String mediaTopicName;
+  @Value("${kafka.group.id.media}")
+  private String mediaGroupId;
 
   @Bean
   public NewTopic messagesToExercisesTopic() {
@@ -67,77 +69,63 @@ public class KafkaConfig {
     return new NewTopic(mainMenuCommandsTopicName, 3, (short) 3);
   }
 
-  //producer UpdateDto
   @Bean
-  public ProducerFactory<Long, UpdateDto> updateDtoProducerFactory() {
+  public NewTopic mediaFromExercisesTopic() {
+    return new NewTopic(mediaTopicName, 3, (short) 3);
+  }
+
+  @Bean
+  public ReactiveKafkaConsumerTemplate<Long, String> mediaReactiveKafkaConsumerTemplate() {
+    Map<String, Object> config = new HashMap<>();
+    config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+    config.put(ConsumerConfig.GROUP_ID_CONFIG, mediaGroupId);
+    config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, LongDeserializer.class);
+    config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+    ReceiverOptions<Long, String> receiverOptions = ReceiverOptions.<Long, String>create(config)
+        .subscription(List.of(mediaTopicName));
+    return new ReactiveKafkaConsumerTemplate<>(receiverOptions);
+  }
+
+  @Bean
+  public ReactiveKafkaProducerTemplate<Long, UpdateDto> updateDtoReactiveSender() {
     Map<String, Object> config = new HashMap<>();
     config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
     config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, LongSerializer.class);
     config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, UpdateDtoSerializer.class);
-    return new DefaultKafkaProducerFactory<>(config);
+    SenderOptions<Long, UpdateDto> senderOptions = SenderOptions.create(config);
+    return new ReactiveKafkaProducerTemplate<>(senderOptions);
   }
 
   @Bean
-  public KafkaTemplate<Long, UpdateDto> updateDtoKafkaTemplate() {
-    return new KafkaTemplate<>(updateDtoProducerFactory());
-  }
-
-  //consumer BotCommand
-  @Bean
-  public ConsumerFactory<String, List<BotCommand>> botCommandListConsumerFactory() {
+  public ReactiveKafkaConsumerTemplate<String, List<BotCommand>> botCommandReactiveKafkaConsumerTemplate() {
     Map<String, Object> config = new HashMap<>();
     config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
     config.put(ConsumerConfig.GROUP_ID_CONFIG, mainMenuCommandsGroupId);
     config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
     config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, BotCommandListDeserializer.class);
-    return new DefaultKafkaConsumerFactory<>(config);
+    ReceiverOptions<String, List<BotCommand>> receiverOptions = ReceiverOptions.<String, List<BotCommand>>create(config)
+        .subscription(List.of(mainMenuCommandsTopicName));
+    return new ReactiveKafkaConsumerTemplate<>(receiverOptions);
   }
 
   @Bean
-  public ConcurrentKafkaListenerContainerFactory<String, List<BotCommand>> botCommandListKafkaListenerFactory() {
-    ConcurrentKafkaListenerContainerFactory<String, List<BotCommand>> factory =
-        new ConcurrentKafkaListenerContainerFactory<>();
-    factory.setConsumerFactory(botCommandListConsumerFactory());
-    return factory;
-  }
-
-  //consumer BotApiMethodInterface
-  @Bean
-  public ConsumerFactory<Long, BotApiMethodInterface> botApiMethodConsumerFactory() {
+  public ReactiveKafkaConsumerTemplate<Long, BotApiMethodInterface> botApiMethodReactiveKafkaConsumerTemplate() {
     Map<String, Object> config = new HashMap<>();
     config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
     config.put(ConsumerConfig.GROUP_ID_CONFIG, actionsGroupId);
     config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, LongDeserializer.class);
     config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, BotApiMethodDeserializer.class);
-    return new DefaultKafkaConsumerFactory<>(config);
+    ReceiverOptions<Long, BotApiMethodInterface> receiverOptions = ReceiverOptions.<Long, BotApiMethodInterface>create(config)
+        .subscription(List.of(actionsFromExercisesTopicName));
+    return new ReactiveKafkaConsumerTemplate<>(receiverOptions);
   }
 
-  @Bean
-  public ConcurrentKafkaListenerContainerFactory<Long, BotApiMethodInterface> botApiMethodKafkaListenerFactory() {
-    ConcurrentKafkaListenerContainerFactory<Long, BotApiMethodInterface> factory =
-        new ConcurrentKafkaListenerContainerFactory<>();
-    factory.setConsumerFactory(botApiMethodConsumerFactory());
-    return factory;
-  }
-//  public static class BotApiMethodDeserializer implements Deserializer<BotApiMethodInterface> {
-//    private final ObjectMapper objectMapper = new ObjectMapper();
-//
-//    @Override
-//    public BotApiMethodInterface deserialize(String topic, byte[] data) {
-//      try {
-//        return objectMapper.readValue(data, BotApiMethodInterface.class);
-//      } catch (Exception e) {
-//        throw new RuntimeException("Ошибка при десериализации BotApiMethodInterface", e);
-//      }
-//    }
-//  }
-public static class BotApiMethodDeserializer implements Deserializer<BotApiMethodInterface> {
-  private final ObjectMapper objectMapper;
+  public static class BotApiMethodDeserializer implements Deserializer<BotApiMethodInterface> {
+    private final ObjectMapper objectMapper;
 
   public BotApiMethodDeserializer() {
     objectMapper = new ObjectMapper();
     objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    // Регистрация подтипов вручную для десериализации
     objectMapper.registerSubtypes(
         new NamedType(BotApiMethodWrapper.class, "BotApiMethodWrapper"),
         new NamedType(SendMessageWrapper.class, "SendMessageWrapper"),
@@ -156,8 +144,6 @@ public static class BotApiMethodDeserializer implements Deserializer<BotApiMetho
     }
   }
 }
-
-
 
   public static class BotCommandListDeserializer implements Deserializer<List<BotCommand>> {
     private final ObjectMapper objectMapper = new ObjectMapper();

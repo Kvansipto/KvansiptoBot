@@ -16,9 +16,11 @@ kafka:
     messages: messages-to-exercises
     actions: actions-from-exercises
     main-menu-commands: main-menu-commands
+    media: media-from-exercises
   group.id:
     main-menu-commands: main-menu-command-group
     actions: exercise_bot_group
+    media: media-group
 
 
 telegram:

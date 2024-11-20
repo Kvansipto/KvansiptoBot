@@ -39,12 +39,13 @@ public class MuscleGroupCommand extends MainMenuCommand {
         .map(muscleGroup -> new AnswerDto(muscleGroup.getName(), "muscle_group"))
         .toList();
 
-    kafkaService.send("actions-from-exercises", event.chatId(),
-        SendMessageWrapper.newBuilder()
-            .chatId(chatId)
-            .replyMarkup(KeyboardMarkupUtil.createRows(answerDtoList, 2))
-            .text("Выберите группу мышц")
-            .build(), kafkaTemplate);
+    kafkaExerciseService.sendBotApiMethod(event.chatId(),
+            SendMessageWrapper.newBuilder()
+                .chatId(chatId)
+                .replyMarkup(KeyboardMarkupUtil.createRows(answerDtoList, 2))
+                .text("Выберите группу мышц")
+                .build())
+        .subscribe();
   }
 
   @Override

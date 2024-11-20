@@ -45,32 +45,31 @@ public class AddResultForExerciseResultCommand extends Command {
     BotApiMethodWrapper botApiMethodWrapper = new BotApiMethodWrapper();
     SendMessageWrapperBuilder sendMessageWrapperBuilder = SendMessageWrapper.newBuilder().chatId(chatId);
 
-      String[] parts = message.split(" ", 4);
-      double weight = Double.parseDouble(parts[0]);
-      int sets = Integer.parseInt(parts[1]);
-      int reps = Integer.parseInt(parts[2]);
-      String comment = (parts.length == 4) ? parts[3] : null;
+    String[] parts = message.split(" ", 4);
+    double weight = Double.parseDouble(parts[0]);
+    int sets = Integer.parseInt(parts[1]);
+    int reps = Integer.parseInt(parts[2]);
+    String comment = (parts.length == 4) ? parts[3] : null;
 
-      log.info("Data was parsed into: weight={}, sets={}, reps={}, comment={}", weight, sets, reps, comment);
+    log.info("Data was parsed into: weight={}, sets={}, reps={}, comment={}", weight, sets, reps, comment);
 
-      UserState userState = userStateService.getCurrentState(chatId).orElseThrow();
-      ExerciseResultDto exerciseResult = ExerciseResultDto.builder()
-          .weight(weight)
-          .numberOfSets(sets)
-          .numberOfRepetitions(reps)
-          .user(userService.getOne(chatId))
-          .exercise(userState.getCurrentExercise())
-          .date(userState.getExerciseResultDate())
-          .comment(comment)
-          .build();
+    UserState userState = userStateService.getCurrentState(chatId).orElseThrow();
+    ExerciseResultDto exerciseResult = ExerciseResultDto.builder()
+        .weight(weight)
+        .numberOfSets(sets)
+        .numberOfRepetitions(reps)
+        .user(userService.getOne(chatId))
+        .exercise(userState.getCurrentExercise())
+        .date(userState.getExerciseResultDate())
+        .comment(comment)
+        .build();
 
-      exerciseResultService.create(exerciseResult);
-      sendMessageWrapperBuilder.text(SAVE_RESULT_SUCCESS_TEXT);
+    exerciseResultService.create(exerciseResult);
+    sendMessageWrapperBuilder.text(SAVE_RESULT_SUCCESS_TEXT);
 
-      userStateService.removeUserState(chatId);
+    userStateService.removeUserState(chatId);
 
     botApiMethodWrapper.addAction(sendMessageWrapperBuilder.build());
-    kafkaService.send("actions-from-exercises", event.chatId(),
-        botApiMethodWrapper, kafkaTemplate);
+    kafkaExerciseService.sendBotApiMethod(event.chatId(), botApiMethodWrapper).subscribe();
   }
 }

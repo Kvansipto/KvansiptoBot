@@ -2,7 +2,6 @@ package kvansipto.telegram.microservice.services;
 
 import jakarta.annotation.PostConstruct;
 import java.sql.Timestamp;
-import java.util.List;
 import kvansipto.exercise.dto.UpdateDto;
 import kvansipto.exercise.dto.UserDto;
 import kvansipto.exercise.wrapper.BotApiMethodInterface;
@@ -10,10 +9,7 @@ import kvansipto.telegram.microservice.config.BotConfig;
 import kvansipto.telegram.microservice.services.dto.TelegramActionEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.EventListener;
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -23,8 +19,6 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
-import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
-import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
@@ -34,32 +28,24 @@ public class TelegramBot extends TelegramLongPollingBot implements TelegramBotIn
 
   final BotConfig config;
 
-  @Value("${kafka.topic.messages}")
-  private String messagesToExercisesTopicName;
-//  @Value("${kafka.topic.callbacks}")
-//  private String callbacksToExercisesTopicName;
-//  @Value("${kafka.topic.actions}")
-//  private String actionsFromExercisesTopicName;
-
-  private final KafkaTemplate<Long, UpdateDto> kafkaTemplate;
+  private final KafkaTelegramService kafkaTelegramService;
 
   @Autowired
-  public TelegramBot(BotConfig config, KafkaTemplate<Long, UpdateDto> kafkaTemplate) {
+  public TelegramBot(BotConfig config,
+      KafkaTelegramService kafkaTelegramService) {
     super(config.getBotToken());
     this.config = config;
-    this.kafkaTemplate = kafkaTemplate;
+    this.kafkaTelegramService = kafkaTelegramService;
   }
 
-  @KafkaListener(topics = "${kafka.topic.main-menu-commands}",
-      groupId = "${kafka.group.id.main-menu-commands}",
-      containerFactory = "botCommandListKafkaListenerFactory")
+  @EventListener
+  @Async
   @Override
-  public void receivedCommandList(List<BotCommand> commands) {
-    log.info("Received commands: {}", commands);
+  public void handleSetMyCommandEvent(SetMyCommands event) {
     try {
-      this.execute(new SetMyCommands(commands, new BotCommandScopeDefault(), null));
+      this.execute(event);
     } catch (TelegramApiException e) {
-      e.printStackTrace();
+      log.error(e.getMessage(), e);
     }
   }
 
@@ -69,7 +55,7 @@ public class TelegramBot extends TelegramLongPollingBot implements TelegramBotIn
     try {
       telegramBotsApi.registerBot(this);
     } catch (TelegramApiException e) {
-      e.printStackTrace();
+      log.error(e.getMessage(), e);
     }
   }
 
@@ -110,9 +96,7 @@ public class TelegramBot extends TelegramLongPollingBot implements TelegramBotIn
         .message(isMessage ? update.getMessage().getText() : update.getCallbackQuery().getData())
         .messageId(
             isMessage ? update.getMessage().getMessageId() : update.getCallbackQuery().getMessage().getMessageId());
-
-    kafkaTemplate.send(messagesToExercisesTopicName, chatId, updateDto.build());
-    log.info("Message sent to {} kafka topic : {}", messagesToExercisesTopicName, updateDto.build());
+    kafkaTelegramService.sendUpdateDto(chatId, updateDto.build()).subscribe();
   }
 
   @EventListener
@@ -126,7 +110,7 @@ public class TelegramBot extends TelegramLongPollingBot implements TelegramBotIn
     try {
       action.accept(this);
     } catch (TelegramApiException e) {
-      e.printStackTrace();
+      log.error(e.getMessage(), e);
     }
   }
 }

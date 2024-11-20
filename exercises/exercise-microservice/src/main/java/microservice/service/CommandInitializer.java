@@ -8,7 +8,6 @@ import microservice.service.command.menu.CommandName;
 import microservice.service.command.menu.HelpCommand;
 import microservice.service.command.menu.MainMenuCommand;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 
@@ -19,10 +18,11 @@ public class CommandInitializer {
   public static String HELP_TEXT;
 
   private final List<BotCommand> commands;
+  private final KafkaExerciseService kafkaExerciseService;
 
   @Autowired
-  public CommandInitializer(List<MainMenuCommand> mainMenuCommandList,
-      KafkaTemplate<String, List<BotCommand>> kafkaTemplate) {
+  public CommandInitializer(List<MainMenuCommand> mainMenuCommandList, KafkaExerciseService kafkaExerciseService) {
+    this.kafkaExerciseService = kafkaExerciseService;
 
     StringBuilder helpText = new StringBuilder("This bot was made by Kvansipto\n\n");
     commands = new ArrayList<>();
@@ -47,7 +47,6 @@ public class CommandInitializer {
 
     HELP_TEXT = helpText.toString();
     log.info("HELP TEXT: {}", HELP_TEXT);
-    kafkaTemplate.send("main-menu-commands", commands);
-    log.info("Sent main-menu-commands {} to kafka topic {}", commands, "main-menu-commands");
+    kafkaExerciseService.sendMainMenuCommands(commands).subscribe();
   }
 }

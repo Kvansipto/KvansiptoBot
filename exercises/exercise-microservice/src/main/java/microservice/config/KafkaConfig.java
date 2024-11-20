@@ -1,29 +1,26 @@
 package microservice.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import kvansipto.exercise.dto.UpdateDto;
 import kvansipto.exercise.wrapper.BotApiMethodInterface;
-import microservice.service.command.menu.MainMenuCommand;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.LongDeserializer;
 import org.apache.kafka.common.serialization.LongSerializer;
 import org.apache.kafka.common.serialization.Serializer;
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
-import org.springframework.kafka.core.ConsumerFactory;
-import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.core.DefaultKafkaProducerFactory;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.core.ProducerFactory;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import org.springframework.kafka.core.reactive.ReactiveKafkaConsumerTemplate;
+import org.springframework.kafka.core.reactive.ReactiveKafkaProducerTemplate;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
+import reactor.kafka.receiver.ReceiverOptions;
+import reactor.kafka.sender.SenderOptions;
 
 @Configuration
 public class KafkaConfig {
@@ -32,56 +29,55 @@ public class KafkaConfig {
   private String bootstrapServers;
   @Value("${kafka.group.id.messages}")
   private String groupIdMessages;
+  @Value("${kafka.topic.messages}")
+  private String topicMessages;
 
   //producer MainMenuCommand
   @Bean
-  public ProducerFactory<String, List<BotCommand>> botCommandListProducerFactory() {
+  public ReactiveKafkaProducerTemplate<String, List<BotCommand>> botCommandListReactiveSender() {
     Map<String, Object> config = new HashMap<>();
     config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-    config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
-        org.apache.kafka.common.serialization.StringSerializer.class);
+    config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
     config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, BotCommandListSerializer.class);
-    return new DefaultKafkaProducerFactory<>(config);
+    SenderOptions<String, List<BotCommand>> senderOptions = SenderOptions.create(config);
+    return new ReactiveKafkaProducerTemplate<>(senderOptions);
   }
 
+  //producer Media (photo)
   @Bean
-  public KafkaTemplate<String, List<BotCommand>> botCommandListKafkaTemplate() {
-    return new KafkaTemplate<>(botCommandListProducerFactory());
+  public ReactiveKafkaProducerTemplate<Long, String> imageReactiveSender() {
+    Map<String, Object> config = new HashMap<>();
+    config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+    config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, LongSerializer.class);
+    config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+    SenderOptions<Long, String> senderOptions = SenderOptions.create(config);
+    return new ReactiveKafkaProducerTemplate<>(senderOptions);
   }
 
   //producer BotApiMethodInterface
   @Bean
-  public ProducerFactory<Long, BotApiMethodInterface> botApiMethodProducerFactory() {
+  public ReactiveKafkaProducerTemplate<Long, BotApiMethodInterface> botApiMethodReactiveSender() {
     Map<String, Object> config = new HashMap<>();
     config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
     config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, LongSerializer.class);
     config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, BotApiMethodSerializer.class);
     config.put(ProducerConfig.MAX_REQUEST_SIZE_CONFIG, 20971520);
-    return new DefaultKafkaProducerFactory<>(config);
-  }
 
-  @Bean
-  public KafkaTemplate<Long, BotApiMethodInterface> botApiMethodKafkaTemplate() {
-    return new KafkaTemplate<>(botApiMethodProducerFactory());
+    SenderOptions<Long, BotApiMethodInterface> senderOptions = SenderOptions.create(config);
+    return new ReactiveKafkaProducerTemplate<>(senderOptions);
   }
 
   //consumer UpdateDto
   @Bean
-  public ConsumerFactory<Long, UpdateDto> updateDtoConsumerFactory() {
+  public ReactiveKafkaConsumerTemplate<Long, UpdateDto> updateDtoReactiveKafkaConsumerTemplate() {
     Map<String, Object> config = new HashMap<>();
     config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
     config.put(ConsumerConfig.GROUP_ID_CONFIG, groupIdMessages);
     config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, LongDeserializer.class);
     config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, UpdateDtoDeserializer.class);
-    return new DefaultKafkaConsumerFactory<>(config);
-  }
-
-  @Bean
-  public ConcurrentKafkaListenerContainerFactory<Long, UpdateDto> updateDtoKafkaListenerFactory() {
-    ConcurrentKafkaListenerContainerFactory<Long, UpdateDto> factory =
-        new ConcurrentKafkaListenerContainerFactory<>();
-    factory.setConsumerFactory(updateDtoConsumerFactory());
-    return factory;
+    ReceiverOptions<Long, UpdateDto> receiverOptions = ReceiverOptions.<Long, UpdateDto>create(config)
+        .subscription(List.of(topicMessages));
+    return new ReactiveKafkaConsumerTemplate<>(receiverOptions);
   }
 
   public static class UpdateDtoDeserializer implements Deserializer<UpdateDto> {
