@@ -12,7 +12,7 @@ public class SendMessageWrapper extends SendMessage implements BotApiMethodInter
   @Builder(builderClassName = "SendMessageWrapperBuilder", builderMethodName = "newBuilder")
   public static SendMessageWrapper create(Long chatId, String text, ReplyKeyboard replyMarkup, String parseMode,
       boolean disableWebPagePreview) {
-    SendMessageWrapper sendMessageWrapper = new SendMessageWrapper();
+    var sendMessageWrapper = new SendMessageWrapper();
     sendMessageWrapper.setChatId(chatId);
     sendMessageWrapper.setText(text);
     sendMessageWrapper.setReplyMarkup(replyMarkup);

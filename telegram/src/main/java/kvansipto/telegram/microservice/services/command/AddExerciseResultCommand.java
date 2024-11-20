@@ -1,8 +1,7 @@
 package kvansipto.telegram.microservice.services.command;
 
 import java.time.LocalDate;
-import kvansipto.exercise.dto.ExerciseDto;
-import kvansipto.telegram.microservice.services.UserState;
+
 import kvansipto.telegram.microservice.services.UserStateFactory;
 import kvansipto.telegram.microservice.services.UserStateService;
 import kvansipto.telegram.microservice.services.dto.AnswerData;
@@ -32,14 +31,14 @@ public class AddExerciseResultCommand extends Command {
 
   @Override
   public BotApiMethodInterface process(Update update) {
-    String date = AnswerData.deserialize(update.getCallbackQuery().getData()).getHiddenText();
-    Long chatId = update.getCallbackQuery().getMessage().getChatId();
+    var date = AnswerData.deserialize(update.getCallbackQuery().getData()).getHiddenText();
+    var chatId = update.getCallbackQuery().getMessage().getChatId();
     int days = Integer.parseInt(date.split("/")[0]);
     int month = Integer.parseInt(date.split("/")[1]);
-    LocalDate localDate = LocalDate.of(LocalDate.now().getYear(), month, days);
-    ExerciseDto exercise = userStateService.getCurrentState(chatId).getCurrentExercise();
+    var localDate = LocalDate.of(LocalDate.now().getYear(), month, days);
+    var exercise = userStateService.getCurrentState(chatId).getCurrentExercise();
 
-    UserState userState = userStateFactory.createUserSession(chatId);
+    var userState = userStateFactory.createUserSession(chatId);
     userState.setCurrentExercise(exercise);
     userState.setExerciseResultDate(localDate);
     userState.setCurrentState(WAITING_FOR_RESULT_STATE_TEXT);

@@ -10,7 +10,7 @@ public class SendPhotoWrapper extends SendPhoto implements BotApiMethodInterface
 
   @Builder(builderClassName = "SendPhotoWrapperBuilder", builderMethodName = "newBuilder")
   public static SendPhotoWrapper create(Long chatId, InputFile photo, String caption) {
-    SendPhotoWrapper sendPhotoWrapper = new SendPhotoWrapper();
+    var sendPhotoWrapper = new SendPhotoWrapper();
     sendPhotoWrapper.setChatId(chatId);
     sendPhotoWrapper.setPhoto(photo);
     sendPhotoWrapper.setCaption(caption);

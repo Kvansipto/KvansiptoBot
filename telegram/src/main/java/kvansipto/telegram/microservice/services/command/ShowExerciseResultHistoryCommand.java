@@ -16,7 +16,7 @@ import kvansipto.telegram.microservice.services.wrapper.EditMessageWrapper;
 import kvansipto.telegram.microservice.services.wrapper.SendMessageWrapper;
 import kvansipto.telegram.microservice.services.wrapper.SendPhotoWrapper;
 import kvansipto.telegram.microservice.utils.TableImageService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -24,39 +24,37 @@ import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 @Component
+@RequiredArgsConstructor
 public class ShowExerciseResultHistoryCommand extends Command {
 
   private static final String EMPTY_LIST_EXERCISE_RESULT_TEXT = "Результаты по упражнению отсутствуют";
   private static final String[] HEADERS = {"Дата", "Вес (кг)", "Подходы", "Повторения", "Комментарий"};
 
-  @Autowired
-  RestToExercises restToExercises;
-
-  @Autowired
-  TableImageService tableImageService;
-
-  @Autowired
-  ApplicationEventPublisher eventPublisher;
+  private final RestToExercises restToExercises;
+  private final TableImageService tableImageService;
+  private final ApplicationEventPublisher eventPublisher;
 
   @Override
   public boolean supports(Update update) {
-    return update.hasCallbackQuery() && AnswerData.deserialize(update.getCallbackQuery().getData()).getButtonCode()
-        .equals(ExerciseCommand.SHOW_EXERCISE_RESULT_HISTORY);
+    return update.hasCallbackQuery()
+            && AnswerData.deserialize(update.getCallbackQuery().getData()).getButtonCode()
+            .equals(ExerciseCommand.SHOW_EXERCISE_RESULT_HISTORY);
   }
 
   @EventListener
   public void handleExerciseResultEvent(ExerciseResultEvent exerciseResultEvent) {
-    Long chatId = exerciseResultEvent.chatId();
-    List<ExerciseResultDto> exerciseResults = exerciseResultEvent.exerciseResults();
+    var chatId = exerciseResultEvent.chatId();
+    var exerciseResults = exerciseResultEvent.exerciseResults();
 
-    BotApiMethodWrapper botApiMethodWrapper = new BotApiMethodWrapper();
+    var botApiMethodWrapper = new BotApiMethodWrapper();
 
     if (exerciseResults.isEmpty()) {
-      botApiMethodWrapper.addAction(
-          SendMessageWrapper.newBuilder()
+      var action = SendMessageWrapper.newBuilder()
               .chatId(chatId)
               .text(EMPTY_LIST_EXERCISE_RESULT_TEXT)
-              .build());
+              .build();
+      botApiMethodWrapper.addAction(action);
+
     } else {
       DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM");
       String[][] data = new String[exerciseResults.size()][HEADERS.length];

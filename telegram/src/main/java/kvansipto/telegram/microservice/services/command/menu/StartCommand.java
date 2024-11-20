@@ -6,17 +6,16 @@ import kvansipto.exercise.dto.UserDto;
 import kvansipto.telegram.microservice.services.RestToExercises;
 import kvansipto.telegram.microservice.services.wrapper.BotApiMethodInterface;
 import kvansipto.telegram.microservice.services.wrapper.SendMessageWrapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 @Component("/start")
+@RequiredArgsConstructor
 public class StartCommand extends MainMenuCommand {
 
-  @Autowired
-  private RestToExercises restToExercises;
-
+  private final RestToExercises restToExercises;
   public static final String START_COMMAND_TEXT = "/start";
 
   @Override

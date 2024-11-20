@@ -34,10 +34,11 @@ public class ExerciseCommand extends Command {
 
   @Override
   public BotApiMethodInterface process(Update update) {
-    Long chatId = update.getCallbackQuery().getMessage().getChatId();
-    ExerciseDto exercise =
-        restToExercises.getExerciseByName(AnswerData.deserialize(update.getCallbackQuery().getData()).getButtonText());
-    List<AnswerDto> answerDtoList = new ArrayList<>();
+    var chatId = update.getCallbackQuery().getMessage().getChatId();
+    var data = update.getCallbackQuery().getData();
+    var buttonText = AnswerData.deserialize(data).getButtonText();
+    var exercise = restToExercises.getExerciseByName(buttonText);
+    var answerDtoList = new ArrayList<AnswerDto>();
     answerDtoList.add(
         new AnswerDto(SHOW_EXERCISE_RESULT_HISTORY_BUTTON_TEXT, SHOW_EXERCISE_RESULT_HISTORY, exercise.getName()));
     answerDtoList.add(
