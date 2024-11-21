@@ -1,8 +1,6 @@
 package kvansipto.exercise.dto;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.PastOrPresent;
-import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -10,20 +8,14 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 @EqualsAndHashCode(callSuper = true)
-@Data
 @Valid
+@Data
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ExerciseResultDto extends BaseDto {
+public class UpdateDto extends BaseDto {
 
-  ExerciseDto exercise;
-  double weight;
-  int numberOfSets;
-  int numberOfRepetitions;
+  String message;
+  Integer messageId;
   UserDto user;
-  String comment;
-
-  @PastOrPresent(message = "The date cannot be in the future")
-  LocalDate date;
 }

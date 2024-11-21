@@ -1,6 +1,6 @@
 package kvansipto.telegram.microservice.services.dto;
 
-import kvansipto.telegram.microservice.services.wrapper.BotApiMethodInterface;
+import kvansipto.exercise.wrapper.BotApiMethodInterface;
 
 public record TelegramActionEvent(BotApiMethodInterface action) {
 

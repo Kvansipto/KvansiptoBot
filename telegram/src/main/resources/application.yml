@@ -8,14 +8,20 @@ spring:
     name: telegram-microservice
   jmx:
     enabled: false
-  kafka:
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.LongSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+  aop:
+    proxy-target-class: true
 
-kafka.topic:
-  request: request-to-exercises
-  response: response-from-exercises
+kafka:
+  topic:
+    messages: messages-to-exercises
+    actions: actions-from-exercises
+    main-menu-commands: main-menu-commands
+    media: media-from-exercises
+  group.id:
+    main-menu-commands: main-menu-command-group
+    actions: exercise_bot_group
+    media: media-group
+
 
 telegram:
   bot:
