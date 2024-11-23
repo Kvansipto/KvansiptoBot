@@ -22,7 +22,7 @@ public class ExerciseService extends
   @Cacheable(key = "#muscleGroup")
   public List<ExerciseDto> getExercisesByMuscleGroup(String muscleGroup) {
 
-    MuscleGroup existedMuscleGroup = MuscleGroup.fromName(muscleGroup);
+    var existedMuscleGroup = MuscleGroup.fromName(muscleGroup);
     return repository.findByMuscleGroup(existedMuscleGroup).stream()
         .map(mapper::toDto)
         .toList();

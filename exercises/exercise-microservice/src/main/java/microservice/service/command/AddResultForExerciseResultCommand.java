@@ -1,21 +1,32 @@
 package microservice.service.command;
 
 import kvansipto.exercise.dto.ExerciseResultDto;
+import kvansipto.exercise.wrapper.BotApiMethodInterface;
 import kvansipto.exercise.wrapper.BotApiMethodWrapper;
 import kvansipto.exercise.wrapper.SendMessageWrapper;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import microservice.service.ExerciseResultService;
+import microservice.service.KafkaExerciseService;
 import microservice.service.UserService;
 import microservice.service.event.UserInputCommandEvent;
 import microservice.service.user.state.UserStateService;
 import microservice.service.user.state.UserStateType;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class AddResultForExerciseResultCommand extends Command {
+
+  public AddResultForExerciseResultCommand(
+      KafkaTemplate<Long, BotApiMethodInterface> kafkaTemplate,
+      KafkaExerciseService kafkaExerciseService, UserService userService,
+      ExerciseResultService exerciseResultService, UserStateService userStateService) {
+    super(kafkaTemplate, kafkaExerciseService);
+    this.userService = userService;
+    this.exerciseResultService = exerciseResultService;
+    this.userStateService = userStateService;
+  }
 
   private final UserService userService;
   private final ExerciseResultService exerciseResultService;

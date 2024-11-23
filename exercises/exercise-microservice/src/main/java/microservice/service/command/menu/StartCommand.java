@@ -2,20 +2,26 @@ package microservice.service.command.menu;
 
 import com.vdurmont.emoji.EmojiParser;
 import kvansipto.exercise.dto.UserDto;
+import kvansipto.exercise.wrapper.BotApiMethodInterface;
 import kvansipto.exercise.wrapper.SendMessageWrapper;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import microservice.service.KafkaExerciseService;
 import microservice.service.UserService;
 import microservice.service.event.UserInputCommandEvent;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
-@Component
-@CommandName("/start")
 @Slf4j
-@RequiredArgsConstructor
+@Component("/start")
 public class StartCommand extends MainMenuCommand {
 
-//  @Autowired
+  public StartCommand(
+      KafkaTemplate<Long, BotApiMethodInterface> kafkaTemplate,
+      KafkaExerciseService kafkaExerciseService, UserService userService) {
+    super(kafkaTemplate, kafkaExerciseService);
+    this.userService = userService;
+  }
+
   private final UserService userService;
 
   @Override

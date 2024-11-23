@@ -7,16 +7,14 @@ import kvansipto.exercise.dto.UserDto;
 import kvansipto.exercise.wrapper.BotApiMethodInterface;
 import kvansipto.telegram.microservice.config.BotConfig;
 import kvansipto.telegram.microservice.services.dto.TelegramActionEvent;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
-import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
-import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -24,22 +22,22 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
 @Component
 @Slf4j
-@RequiredArgsConstructor
-public class TelegramBot extends TelegramLongPollingBot {
+//@RequiredArgsConstructor
+public class TelegramBot extends TelegramLongPollingBot implements TelegramBotInterface {
 
   private final BotConfig config;
   private final KafkaTelegramService kafkaTelegramService;
 
-//  @Autowired
-//  public TelegramBot(BotConfig config,
-//      KafkaTelegramService kafkaTelegramService) {
-//    super(config.getBotToken());
-//    this.config = config;
-//    this.kafkaTelegramService = kafkaTelegramService;
-//  }
+  @Autowired
+  public TelegramBot(BotConfig config,
+      KafkaTelegramService kafkaTelegramService) {
+    super(config.getBotToken());
+    this.config = config;
+    this.kafkaTelegramService = kafkaTelegramService;
+  }
 
-  @EventListener
   @Async
+  @EventListener
   public void handleSetMyCommandEvent(SetMyCommands event) {
     try {
       this.execute(event);
@@ -50,7 +48,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
   @PostConstruct
   public void init() throws TelegramApiException {
-    TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
+    var telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
     try {
       telegramBotsApi.registerBot(this);
     } catch (TelegramApiException e) {
@@ -66,23 +64,23 @@ public class TelegramBot extends TelegramLongPollingBot {
   @Override
   public void onUpdateReceived(Update update) {
     log.info("Update received: {}", update);
-    boolean isMessage = update.hasMessage() && update.getMessage().hasText();
+    var isMessage = update.hasMessage() && update.getMessage().hasText();
     Long chatId;
     User user;
 
     if (isMessage) {
-      Message message = update.getMessage();
+      var message = update.getMessage();
       chatId = message.getChatId();
       user = message.getFrom();
     } else if (update.hasCallbackQuery()) {
-      CallbackQuery callbackQuery = update.getCallbackQuery();
+      var callbackQuery = update.getCallbackQuery();
       chatId = callbackQuery.getMessage().getChatId();
       user = callbackQuery.getFrom();
     } else {
       return;
     }
 
-    final UserDto userDto = UserDto.builder()
+    final var userDto = UserDto.builder()
         .id(chatId)
         .userName(user.getUserName())
         .firstName(user.getFirstName())
@@ -98,8 +96,8 @@ public class TelegramBot extends TelegramLongPollingBot {
     kafkaTelegramService.sendUpdateDto(chatId, updateDto.build()).subscribe();
   }
 
-  @EventListener
   @Async
+  @EventListener
   public void handleTelegramActionEvent(TelegramActionEvent event) {
     executeTelegramAction(event.action());
   }

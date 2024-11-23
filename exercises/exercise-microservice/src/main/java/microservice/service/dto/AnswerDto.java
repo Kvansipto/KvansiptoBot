@@ -1,13 +1,11 @@
 package microservice.service.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class AnswerDto {
-  private String buttonText;  // Текст на кнопке
-  private String buttonCode;  // Код для идентификации действия
+public record AnswerDto(
+    @Getter
+    String buttonText,
+    @Getter
+    String buttonCode) {
+
 }

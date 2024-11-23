@@ -13,19 +13,19 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 public class KeyboardMarkupUtil {
 
   public InlineKeyboardMarkup createRows(List<AnswerDto> answers, int columns) {
-    InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
+    var markupInline = new InlineKeyboardMarkup();
     List<List<InlineKeyboardButton>> rows = new ArrayList<>();
 
-    int numRows = (int) Math.ceil((double) answers.size() / columns);
+    var numRows = (int) Math.ceil((double) answers.size() / columns);
 
     for (int row = 0; row < numRows; row++) {
-      int start = row * columns;
-      int end = Math.min(start + columns, answers.size());
+      var start = row * columns;
+      var end = Math.min(start + columns, answers.size());
 
       List<InlineKeyboardButton> currentRow = new ArrayList<>();
       for (int j = start; j < end; j++) {
-        AnswerDto answer = answers.get(j);
-        InlineKeyboardButton button = InlineKeyboardButton.builder()
+        var answer = answers.get(j);
+        var button = InlineKeyboardButton.builder()
             .text(answer.getButtonText())
             .callbackData(AnswerData.serialize(answer))
             .build();

@@ -3,20 +3,28 @@ package microservice.service.command;
 import java.time.LocalDate;
 import java.time.MonthDay;
 import java.time.format.DateTimeFormatter;
+import kvansipto.exercise.wrapper.BotApiMethodInterface;
 import kvansipto.exercise.wrapper.EditMessageWrapper;
+import microservice.service.KafkaExerciseService;
 import microservice.service.dto.AnswerData;
 import microservice.service.event.UserInputCommandEvent;
 import microservice.service.user.state.UserState;
 import microservice.service.user.state.UserStateService;
 import microservice.service.user.state.UserStateType;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
 public class AddExerciseResultCommand extends Command {
 
-  @Autowired
-  private UserStateService userStateService;
+  public AddExerciseResultCommand(
+      KafkaTemplate<Long, BotApiMethodInterface> kafkaTemplate,
+      KafkaExerciseService kafkaExerciseService, UserStateService userStateService) {
+    super(kafkaTemplate, kafkaExerciseService);
+    this.userStateService = userStateService;
+  }
+
+  private final UserStateService userStateService;
 
   private static final String ADD_EXERCISE_RESULT_TEXT =
       "Введите результат в формате:\n[(Вес в кг) (количество подходов) (количество повторений)]\n\nПример сообщения: 12.5 8 15";

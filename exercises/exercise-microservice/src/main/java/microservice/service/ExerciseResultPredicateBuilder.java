@@ -13,7 +13,7 @@ public class ExerciseResultPredicateBuilder {
   private final QExerciseResult root = QExerciseResult.exerciseResult;
 
   public Predicate apply(ExerciseResultFilter search) {
-    BooleanBuilder builder = new BooleanBuilder();
+    var builder = new BooleanBuilder();
 
     if (search.getUserChatId() != null) {
       builder.and(root.user.id.eq(search.getUserChatId()));

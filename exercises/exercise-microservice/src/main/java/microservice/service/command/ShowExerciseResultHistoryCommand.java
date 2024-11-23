@@ -5,21 +5,22 @@ import java.util.Base64;
 import java.util.List;
 import kvansipto.exercise.dto.ExerciseResultDto;
 import kvansipto.exercise.filter.ExerciseResultFilter;
+import kvansipto.exercise.wrapper.BotApiMethodInterface;
 import kvansipto.exercise.wrapper.BotApiMethodWrapper;
 import kvansipto.exercise.wrapper.EditMessageWrapper;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import microservice.service.ExerciseResultService;
+import microservice.service.KafkaExerciseService;
 import microservice.service.TableImageService;
 import microservice.service.dto.AnswerData;
 import microservice.service.event.UserInputCommandEvent;
 import microservice.service.user.state.UserStateService;
 import microservice.service.user.state.UserStateType;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class ShowExerciseResultHistoryCommand extends Command {
 
   private static final String EMPTY_LIST_EXERCISE_RESULT_TEXT = "Результаты по упражнению отсутствуют";
@@ -29,6 +30,16 @@ public class ShowExerciseResultHistoryCommand extends Command {
   private final TableImageService tableImageService;
   private final UserStateService userStateService;
   private final ExerciseResultService exerciseResultService;
+
+  public ShowExerciseResultHistoryCommand(
+      KafkaTemplate<Long, BotApiMethodInterface> kafkaTemplate,
+      KafkaExerciseService kafkaExerciseService, TableImageService tableImageService,
+      UserStateService userStateService, ExerciseResultService exerciseResultService) {
+    super(kafkaTemplate, kafkaExerciseService);
+    this.tableImageService = tableImageService;
+    this.userStateService = userStateService;
+    this.exerciseResultService = exerciseResultService;
+  }
 
   @Override
   public boolean supports(UserInputCommandEvent event) {
@@ -55,7 +66,6 @@ public class ShowExerciseResultHistoryCommand extends Command {
     List<ExerciseResultDto> exerciseResults = exerciseResultService.findExerciseResults(exerciseResultFilter);
 
     var botApiMethodWrapper = new BotApiMethodWrapper();
-
     if (exerciseResults.isEmpty()) {
       botApiMethodWrapper.addAction(
           EditMessageWrapper.newBuilder()
@@ -76,6 +86,7 @@ public class ShowExerciseResultHistoryCommand extends Command {
             exerciseResult.getComment()
         };
       }
+      // TODO Асинхронно генерировать таблицу и отправлять, когда она будет готова
       byte[] imageBytes = tableImageService.drawTableImage(HEADERS, data);
       kafkaExerciseService.sendMedia(chatId, Base64.getEncoder().encodeToString(imageBytes)).subscribe();
 
@@ -84,8 +95,8 @@ public class ShowExerciseResultHistoryCommand extends Command {
           .text(String.format(EXERCISE_RESULT_TEXT, exercise.getName()))
           .messageId(event.update().getMessageId())
           .build());
-      kafkaExerciseService.sendBotApiMethod(chatId, botApiMethodWrapper).subscribe();
     }
+    kafkaExerciseService.sendBotApiMethod(chatId, botApiMethodWrapper).subscribe();
     userStateService.removeUserState(chatId);
   }
 }

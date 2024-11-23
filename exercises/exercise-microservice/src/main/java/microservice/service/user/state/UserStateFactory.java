@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 public class UserStateFactory {
 
   public UserState createUserSession(Long chatId) {
-    UserState userState = new UserState();
+    var userState = new UserState();
     userState.setChatId(chatId);
     return userState;
   }

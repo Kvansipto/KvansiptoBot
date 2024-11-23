@@ -16,7 +16,7 @@ public class UserService extends
 
   @Override
   public UserDto create(UserDto userDto) {
-    User user = mapper.toEntity(userDto);
+    var user = mapper.toEntity(userDto);
     return mapper.toDto(repository.save(user));
   }
 }

@@ -1,10 +1,11 @@
 package microservice.service.command;
 
 import java.util.List;
+import kvansipto.exercise.wrapper.BotApiMethodInterface;
 import kvansipto.exercise.wrapper.EditMessageWrapper;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import microservice.service.ExerciseService;
+import microservice.service.KafkaExerciseService;
 import microservice.service.KeyboardMarkupUtil;
 import microservice.service.dto.AnswerData;
 import microservice.service.dto.AnswerDto;
@@ -12,18 +13,26 @@ import microservice.service.event.UserInputCommandEvent;
 import microservice.service.user.state.UserState;
 import microservice.service.user.state.UserStateService;
 import microservice.service.user.state.UserStateType;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class MuscleCommand extends Command {
 
   private final ExerciseService exerciseService;
   private final UserStateService userStateService;
 
   private static final String MUSCLE_COMMAND_TEXT = "Выберите упражнение";
+
+  public MuscleCommand(
+      KafkaTemplate<Long, BotApiMethodInterface> kafkaTemplate,
+      KafkaExerciseService kafkaExerciseService, ExerciseService exerciseService,
+      UserStateService userStateService) {
+    super(kafkaTemplate, kafkaExerciseService);
+    this.exerciseService = exerciseService;
+    this.userStateService = userStateService;
+  }
 
   @Override
   public boolean supports(UserInputCommandEvent event) {

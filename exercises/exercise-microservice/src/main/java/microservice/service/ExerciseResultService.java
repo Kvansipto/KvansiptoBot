@@ -1,6 +1,5 @@
 package microservice.service;
 
-import com.querydsl.core.types.Predicate;
 import java.util.List;
 import kvansipto.exercise.dto.ExerciseResultDto;
 import kvansipto.exercise.filter.ExerciseResultFilter;
@@ -10,7 +9,6 @@ import microservice.mapper.ExerciseResultMapper;
 import microservice.repository.ExerciseResultRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -26,8 +24,8 @@ public class ExerciseResultService extends
   }
 
   public List<ExerciseResultDto> findExerciseResults(ExerciseResultFilter filter) {
-    Pageable pageable = PageRequest.of(0, 20);
-    Predicate predicate = predicateBuilder.apply(filter);
+    var pageable = PageRequest.of(0, 20);
+    var predicate = predicateBuilder.apply(filter);
     return repository.findAll(predicate, pageable).stream().map(mapper::toDto).toList();
   }
 }

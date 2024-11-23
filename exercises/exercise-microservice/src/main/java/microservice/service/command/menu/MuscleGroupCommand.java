@@ -2,33 +2,39 @@ package microservice.service.command.menu;
 
 import java.util.Arrays;
 import java.util.List;
+import kvansipto.exercise.wrapper.BotApiMethodInterface;
 import kvansipto.exercise.wrapper.SendMessageWrapper;
 import microservice.entity.MuscleGroup;
+import microservice.service.KafkaExerciseService;
 import microservice.service.KeyboardMarkupUtil;
 import microservice.service.dto.AnswerDto;
 import microservice.service.event.UserInputCommandEvent;
-import microservice.service.user.state.UserState;
 import microservice.service.user.state.UserStateFactory;
 import microservice.service.user.state.UserStateService;
 import microservice.service.user.state.UserStateType;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
-@Component
-@CommandName("/exercise_info")
+@Component("/exercise_info")
 public class MuscleGroupCommand extends MainMenuCommand {
 
-  @Autowired
-  private UserStateService userStateService;
+  private final UserStateService userStateService;
+  private final UserStateFactory userStateFactory;
 
-  @Autowired
-  private UserStateFactory userStateFactory;
+  public MuscleGroupCommand(
+      KafkaTemplate<Long, BotApiMethodInterface> kafkaTemplate,
+      KafkaExerciseService kafkaExerciseService, UserStateService userStateService,
+      UserStateFactory userStateFactory) {
+    super(kafkaTemplate, kafkaExerciseService);
+    this.userStateService = userStateService;
+    this.userStateFactory = userStateFactory;
+  }
 
   @Override
   public void process(UserInputCommandEvent event) {
-    Long chatId = event.chatId();
+    var chatId = event.chatId();
 
-    UserState userState = userStateService.getCurrentState(chatId)
+    var userState = userStateService.getCurrentState(chatId)
         .orElseGet(() -> userStateFactory.createUserSession(chatId));
 
     userState.setUserStateType(UserStateType.CHOOSING_MUSCLE_GROUP);

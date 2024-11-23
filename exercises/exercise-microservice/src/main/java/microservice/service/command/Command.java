@@ -1,22 +1,20 @@
 package microservice.service.command;
 
 import kvansipto.exercise.wrapper.BotApiMethodInterface;
+import lombok.RequiredArgsConstructor;
 import microservice.service.KafkaExerciseService;
 import microservice.service.event.UserInputCommandEvent;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public abstract class Command {
 
-  @Autowired
-  protected KafkaTemplate<Long, BotApiMethodInterface> kafkaTemplate;
-
-  @Autowired
-  protected KafkaExerciseService kafkaExerciseService;
+  protected final KafkaTemplate<Long, BotApiMethodInterface> kafkaTemplate;
+  protected final KafkaExerciseService kafkaExerciseService;
 
   public abstract boolean supports(UserInputCommandEvent update);
 

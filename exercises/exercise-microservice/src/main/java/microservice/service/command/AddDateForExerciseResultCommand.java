@@ -5,8 +5,9 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import kvansipto.exercise.wrapper.BotApiMethodInterface;
 import kvansipto.exercise.wrapper.EditMessageWrapper;
-import lombok.RequiredArgsConstructor;
+import microservice.service.KafkaExerciseService;
 import microservice.service.KeyboardMarkupUtil;
 import microservice.service.dto.AnswerData;
 import microservice.service.dto.AnswerDto;
@@ -14,11 +15,18 @@ import microservice.service.event.UserInputCommandEvent;
 import microservice.service.user.state.UserState;
 import microservice.service.user.state.UserStateService;
 import microservice.service.user.state.UserStateType;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
-@RequiredArgsConstructor
 public class AddDateForExerciseResultCommand extends Command {
+
+  public AddDateForExerciseResultCommand(
+      KafkaTemplate<Long, BotApiMethodInterface> kafkaTemplate,
+      KafkaExerciseService kafkaExerciseService, UserStateService userStateService) {
+    super(kafkaTemplate, kafkaExerciseService);
+    this.userStateService = userStateService;
+  }
 
   private final UserStateService userStateService;
 

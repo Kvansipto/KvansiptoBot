@@ -1,8 +1,6 @@
 package microservice.service;
 
 import java.awt.Color;
-import java.awt.FontMetrics;
-import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -16,34 +14,34 @@ public class TableImageService {
 
   //TODO CompletableFuture ?
   public byte[] drawTableImage(String[] headers, String[][] data) {
-    int rowHeight = 30;
-    int colWidth = 100;
-    int commentColumnWidth = 300;
-    int width = (headers.length - 1) * colWidth + commentColumnWidth;
-    int height = (data.length + 1) * rowHeight;
+    var rowHeight = 30;
+    var colWidth = 100;
+    var commentColumnWidth = 300;
+    var width = (headers.length - 1) * colWidth + commentColumnWidth;
+    var height = (data.length + 1) * rowHeight;
 
-    BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-    Graphics2D g2d = image.createGraphics();
+    var image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+    var g2d = image.createGraphics();
     g2d.setColor(Color.WHITE);
     g2d.fillRect(0, 0, width, height);
     g2d.setColor(Color.BLACK);
 
     // Получение FontMetrics для центрирования текста
-    FontMetrics metrics = g2d.getFontMetrics();
+    var metrics = g2d.getFontMetrics();
 
     // Рисуем текст в ячейках
     for (int row = 0; row <= data.length; row++) {
       for (int col = 0; col < headers.length; col++) {
-        String text = row == 0 ? headers[col] : data[row - 1][col];
+        var text = row == 0 ? headers[col] : data[row - 1][col];
         if (text == null) {
           text = "";
         }
-        int textWidth = metrics.stringWidth(text);
-        int x = col * colWidth + (colWidth - textWidth) / 2;
+        var textWidth = metrics.stringWidth(text);
+        var x = col * colWidth + (colWidth - textWidth) / 2;
         if (col == headers.length - 1) {
           x = (headers.length - 1) * colWidth + (commentColumnWidth - textWidth) / 2;
         }
-        int y = row * rowHeight + (rowHeight - metrics.getHeight()) / 2 + metrics.getAscent();
+        var y = row * rowHeight + (rowHeight - metrics.getHeight()) / 2 + metrics.getAscent();
         g2d.drawString(text, x, y);
       }
     }
@@ -55,13 +53,13 @@ public class TableImageService {
 
     // Рисуем вертикальные линии
     for (int col = 0; col <= headers.length; col++) {
-      int x = col == headers.length ? (headers.length - 1) * colWidth + commentColumnWidth : col * colWidth;
+      var x = col == headers.length ? (headers.length - 1) * colWidth + commentColumnWidth : col * colWidth;
       g2d.drawLine(x, 0, x, (data.length + 1) * rowHeight);
     }
 
     g2d.dispose();
 
-    try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+    try (var baos = new ByteArrayOutputStream()) {
       ImageIO.write(image, "PNG", baos);
       return baos.toByteArray();
     } catch (IOException e) {
