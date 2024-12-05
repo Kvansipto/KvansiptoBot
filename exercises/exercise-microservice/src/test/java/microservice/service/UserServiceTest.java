@@ -8,16 +8,16 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.UUID;
 import kvansipto.exercise.dto.UserDto;
 import microservice.entity.User;
+import microservice.service.postgre.AbstractPostgreTestContainerTestBase;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-class UserServiceTest {
+class UserServiceTest extends AbstractPostgreTestContainerTestBase {
 
   @Autowired
   UserService service;
@@ -34,7 +34,7 @@ class UserServiceTest {
 
   @Test
   void testCreateUser() {
-    Long userID = new Random(10).nextLong();
+    Long userID = Math.abs(new Random().nextLong());
 
     UserDto expected = UserDto.builder()
         .id(userID)
@@ -58,7 +58,7 @@ class UserServiceTest {
 
   @Test
   void toDto() {
-    Long userID = new Random(10).nextLong();
+    Long userID = Math.abs(new Random().nextLong());
     User expected = User.builder()
         .id(userID)
         .userName("John Doe Test")
@@ -79,7 +79,7 @@ class UserServiceTest {
 
   @Test
   void toEntity() {
-    Long userID = new Random(10).nextLong();
+    Long userID = Math.abs(new Random().nextLong());
     UserDto expected = UserDto.builder()
         .id(userID)
         .userName("John Doe Test")
@@ -102,7 +102,7 @@ class UserServiceTest {
   void getAll() {
     List<User> expected = new ArrayList<>();
     User user1 = User.builder()
-        .id(new Random(10).nextLong())
+        .id(Math.abs(new Random().nextLong()))
         .userName("John Doe Test")
         .firstName("John")
         .lastName("Doe")
@@ -110,7 +110,7 @@ class UserServiceTest {
         .build();
 
     User user2 = User.builder()
-        .id(new Random(10).nextLong())
+        .id(Math.abs(new Random().nextLong()))
         .userName("Jane White Test")
         .firstName("Jane")
         .lastName("White")
@@ -126,13 +126,15 @@ class UserServiceTest {
 
     List<User> actual = (List<User>) service.getAll();
 
-    assertThat(actual).containsAll(expected);
+    assertThat(actual)
+        .usingRecursiveFieldByFieldElementComparator()
+        .containsAll(expected);
   }
 
   @Test
   void getAllAsDto() {
     UserDto userDto1 = UserDto.builder()
-        .id(new Random(10).nextLong())
+        .id(Math.abs(new Random().nextLong()))
         .userName("John Doe Test")
         .firstName("John")
         .lastName("Doe")
@@ -140,7 +142,7 @@ class UserServiceTest {
         .build();
 
     UserDto userDto2 = UserDto.builder()
-        .id(new Random(10).nextLong())
+        .id(Math.abs(new Random().nextLong()))
         .userName("Jane White Test")
         .firstName("Jane")
         .lastName("White")
@@ -157,12 +159,14 @@ class UserServiceTest {
 
     List<UserDto> actual = service.getAllAsDto();
 
-    assertThat(actual).containsAll(expected);
+    assertThat(actual)
+        .usingRecursiveFieldByFieldElementComparator()
+        .containsAll(expected);
   }
 
   @Test
   void update() {
-    Long userID = new Random(10).nextLong();
+    Long userID = Math.abs(new Random().nextLong());
     User user = User.builder()
         .id(userID)
         .userName("userName")
@@ -195,7 +199,7 @@ class UserServiceTest {
 
   @Test
   void exists() {
-    Long userID = new Random(10).nextLong();
+    Long userID = Math.abs(new Random().nextLong());
     User user = User.builder()
         .id(userID)
         .userName("userName")
@@ -213,7 +217,7 @@ class UserServiceTest {
 
   @Test
   void delete() {
-    Long userID = new Random(10).nextLong();
+    Long userID = Math.abs(new Random().nextLong());
     User user = User.builder()
         .id(userID)
         .userName("userName")
