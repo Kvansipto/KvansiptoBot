@@ -56,6 +56,6 @@ public class MuscleGroupCommand extends MainMenuCommand {
 
   @Override
   public String explanation() {
-    return "to show muscle groups";
+    return "to show muscle groups and add exercise results";
   }
 }

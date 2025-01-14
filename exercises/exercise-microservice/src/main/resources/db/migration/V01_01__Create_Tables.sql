@@ -1,39 +1,32 @@
-create table if not exists public.users
+CREATE TABLE IF NOT EXISTS users
 (
-    id            varchar(255) not null
-        primary key,
-    first_name    varchar(255),
-    last_name     varchar(255),
-    registered_at timestamp(6) without time zone,
-    user_name     varchar(255)
+    id            BIGINT PRIMARY KEY,
+    user_name     VARCHAR(255),
+    first_name    VARCHAR(255),
+    last_name     VARCHAR(255),
+    registered_at TIMESTAMP
 );
 
-create table if not exists public.exercise
+CREATE TABLE IF NOT EXISTS exercise
 (
-    id           varchar(255) not null
-        primary key,
-    description  varchar(255),
-    image_url    varchar(255),
-    muscle_group varchar(255) not null
-        constraint exercise_muscle_group_check
-            check ((muscle_group)::text = ANY
-        ((ARRAY ['CHEST'::character varying, 'BACK'::character varying, 'LEGS'::character varying, 'ARMS'::character varying, 'SHOULDERS'::character varying, 'CORE'::character varying])::text[])),
-    name         varchar(255) not null
-        constraint uk_r1ox34byx8pj01qd39plfobsj
-            unique,
-    video_url    varchar(255)
+    id           BIGSERIAL PRIMARY KEY,
+    name         VARCHAR(255) NOT NULL UNIQUE,
+    description  TEXT,
+    video_url    VARCHAR(255),
+    image_url    VARCHAR(255),
+    muscle_group VARCHAR(50)  NOT NULL
 );
 
-create table if not exists public.exercise_result (
-                                        id character varying(255) primary key not null,
-                                        date date,
-                                        number_of_repetitions smallint,
-                                        number_of_sets smallint,
-                                        weight double precision not null,
-                                        exercise_id character varying(255),
-                                        user_id character varying(255),
-                                        foreign key (exercise_id) references public.exercise (id)
-                                            match simple on update no action on delete no action,
-                                        foreign key (user_id) references public.users (id)
-                                            match simple on update no action on delete no action
+CREATE TABLE IF NOT EXISTS exercise_result
+(
+    id                    BIGSERIAL PRIMARY KEY,
+    exercise_id           BIGINT NOT NULL,
+    weight                DOUBLE PRECISION,
+    number_of_sets        SMALLINT,
+    number_of_repetitions SMALLINT,
+    comment               TEXT,
+    date                  DATE,
+    user_id               BIGINT NOT NULL,
+    CONSTRAINT fk_exercise FOREIGN KEY (exercise_id) REFERENCES exercise (id) ON DELETE CASCADE,
+    CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );

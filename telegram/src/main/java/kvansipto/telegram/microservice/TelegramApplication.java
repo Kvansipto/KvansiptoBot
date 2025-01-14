@@ -12,9 +12,4 @@ public class TelegramApplication {
     SpringApplication.run(TelegramApplication.class, args);
   }
 
-  //TODO уже не помню почему поставил todo
-  @Bean
-  public RestTemplate getRestTemplate() {
-    return new RestTemplate();
-  }
 }
