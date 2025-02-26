@@ -29,7 +29,7 @@ There are three ways to run the application depending on your setup.
 Before proceeding with any of the options below, clone the repository:
 
 ```bash
-git clone https://github.com/yourusername/KvansiptoBot.git
+git clone https://github.com/Kvansipto/KvansiptoBot.git
 cd KvansiptoBot
 ```
 
